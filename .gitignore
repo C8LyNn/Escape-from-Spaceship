@@ -1,0 +1,32 @@
+# Unreal Engine – pliki generowane lokalnie (nie trafiają do repozytorium)
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+.vs/
+.vscode/
+.idea/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.xcodeproj
+*.xcworkspace
+
+# Cache i dane sesyjne
+**/webcache*/
+*.log
+*.dmp
+*.tmp
+*.bak
+
+# Źródłowe paczki modeli pobrane z sieci (do repo trafiają tylko zaimportowane assety)
+SourceAssets/_downloads/
+
+# System
+Thumbs.db
+desktop.ini
+.DS_Store
