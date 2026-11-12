@@ -1,0 +1,76 @@
+﻿Kategoria,Model lub typ elementu,Odnośniki z dokumentu (ID),"Istniejący model w projekcie (wg nazwy, niezweryfikowany wizualnie)",Stan,Status w scenie,Uwagi
+Oświetlenie,Lampy awaryjne,SRC-06,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Oświetlenie,lampy sufitowe,SRC-01,/Game/StarterContent/Props/SM_Lamp_Ceiling; /Game/Polar/Meshes/Props/SM_Light,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Oświetlenie,latarka,SRC-03; SRC-04; SRC-05,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,W projekcie latarka jest komponentem BPC_Flashlight bez modelu 3D
+Oświetlenie,baterie,SRC-02,/Game/Props/Meshes/Battery,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Oświetlenie,włączniki światła,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,BP_Interaction_LightSwitch istnieje jako mechanika; brak dedykowanego modelu w dokumencie
+Oświetlenie,uszkodzone lampy,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,"BP_FlickeringLight to efekt, nie model"
+Oświetlenie,panele oświetleniowe,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Oświetlenie,lampy techniczne,,/Game/StarterContent/Props/SM_Lamp_Wall,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,"Kandydat zastepczy, nie model z dokumentu"
+Oświetlenie,sygnalizatory stanu,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Oświetlenie,obrotowe sygnalizatory ostrzegawcze,SRC-06,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,SRC-06 jako kandydat
+Oświetlenie,wskaźniki sygnałowe,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,Ściany,SRC-23,/Game/Polar/Meshes/Architecture/SM_Wall_Flat; SM_Wall_Transition,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,podłogi,SRC-23; SRC-24,/Game/Polar/Meshes/Architecture/SM_Floor_01; SM_Floor_01_Opeque; SM_Floor_02; SM_Floor_Transition_01; SM_Floor_Transition_02,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,sufity,SRC-23,/Game/Polar/Meshes/Architecture/SM_Ceiling; SM_Ceiling_Closed_Stat; SM_Ceiling_Transition_01; SM_Ceiling_Transition_01_Open; SM_Ceiling_Transition_02,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,narożniki,SRC-23,/Game/Polar/Meshes/Architecture/SM_Pillar; /Game/StarterContent/Props/SM_CornerFrame,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,Sklad SRC-23 do zinwentaryzowania
+Konstrukcja statku,szyby,,/Game/StarterContent/Props/SM_GlassWindow; /Game/Polar/Meshes/Architecture/SM_Ceiling_Transition_01_Glass,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,rury,,/Game/Polar/Meshes/Props/SM_Pipe_Curve; SM_Pipe_Straight; SM_Pipes_Multi,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,przewody,SRC-29,/Game/Polar/Meshes/Props/SM_Wires_01; SM_Wires_02; SM_Wires_03; SM_Wires_Floor,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,kratki wentylacyjne,SRC-22 (SRC-20 i SRC-21 zablokowane),/Game/Polar/Meshes/Props/SM_Grid,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,SM_Grid jako kandydat
+Konstrukcja statku,znaki ewakuacyjne,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,"SRC-41 to znaki ostrzegawcze laboratorium, nie ewakuacyjne"
+Konstrukcja statku,ściany panelowe,SRC-23,/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Closed; SM_Wall_Tubes_Open,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,podłogi oznakowane,SRC-24,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,Do potwierdzenia po pobraniu SRC-24
+Konstrukcja statku,korytka kablowe,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,narożniki korytek kablowych,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,wiązki przewodów,SRC-29,/Game/Polar/Meshes/Props/SM_Wires_01; SM_Wires_02; SM_Wires_03,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Konstrukcja statku,rozdzielacze chłodziwa,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,Kandydat zastepczy: /Game/Polar/Meshes/Props/SM_Tank
+Konstrukcja statku,rampy techniczne,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,W projekcie sa tylko schody (SM_Stairs)
+Konstrukcja statku,barierki,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Drzwi i interakcje,Drzwi zwykłe,,/Game/StarterContent/Props/SM_Door; SM_DoorFrame,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,Uzywane przez BP_Interaction_Door
+Drzwi i interakcje,drzwi przesuwne,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,Mozliwe w pakiecie SRC-23 - do sprawdzenia po pobraniu
+Drzwi i interakcje,drzwi na kod,SRC-19,/Game/Props/Meshes/Lock (SkeletalMesh); LockDial,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,"W bazie jest zamek szyfrowy BP_Lock, nie klawiatura"
+Drzwi i interakcje,klucze,SRC-18,/Game/Props/Meshes/DoorKey,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Drzwi i interakcje,klawiatury numeryczne,SRC-19,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Drzwi i interakcje,przyciski,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Drzwi i interakcje,dźwignie,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Drzwi i interakcje,bezpieczniki,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,Mozliwe jako czesc SRC-14 - do sprawdzenia
+Drzwi i interakcje,proste terminale,SRC-13; SRC-39,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Drzwi i interakcje,czytniki dostępu,SRC-17,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Drzwi i interakcje,konsole sterowania,SRC-16; SRC-12,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Drzwi i interakcje,stanowiska operatora,SRC-12; SRC-16,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,Kandydaci
+Drzwi i interakcje,panele interaktywne,SRC-19,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Drzwi i interakcje,panele bezpieczników,SRC-14,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Zagrożenia i zniszczenia,Dziury w podłodze,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,"Element geometrii poziomu, nie model"
+Zagrożenia i zniszczenia,przepaście,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,"Element geometrii poziomu, nie model"
+Zagrożenia i zniszczenia,mechanizmy zgniatające,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Zagrożenia i zniszczenia,przewody pod napięciem,,/Game/Polar/Meshes/Props/SM_Wires_Broken,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,Kandydat
+Zagrożenia i zniszczenia,plamy krwi,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,Wymaga decala; M_BloodScreen to efekt ekranowy
+Zagrożenia i zniszczenia,ślady pazurów,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Zagrożenia i zniszczenia,rozbite szkło,,/Game/Polar/Meshes/Props/SM_Ground_Glass,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,Kandydat
+Zagrożenia i zniszczenia,przewrócone przedmioty,,/Game/Polar/Meshes/Props/SM_Tank_Broken; /Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Rubble,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,Kandydaci
+Wyposażenie statku,Łóżka,SRC-11,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Wyposażenie statku,szafki,SRC-07; SRC-45; SRC-46,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Wyposażenie statku,stoły,SRC-08,/Game/StarterContent/Props/SM_TableRound,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Wyposażenie statku,krzesła,SRC-09; SRC-10,/Game/StarterContent/Props/SM_Chair,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Wyposażenie statku,półki,SRC-42; SRC-43; SRC-44,/Game/StarterContent/Props/SM_Shelf,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Wyposażenie statku,skrzynie,,/Game/Polar/Meshes/Props/SM_Crate_01; SM_Crate_02; /Game/Props/Meshes/Box; BoxTop,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Wyposażenie statku,beczki,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,Kandydat zastepczy: /Game/Polar/Meshes/Props/SM_Tank
+Wyposażenie statku,kontenery,,/Game/Polar/Meshes/Props/SM_Crate_Stacked_Cloth,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,Kandydat
+Wyposażenie statku,proste biurka,SRC-09,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,Pakiet SRC-09 zawiera stoly - do sprawdzenia
+Wyposażenie statku,monitory,SRC-39; SRC-16,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,Kandydaci
+Wyposażenie statku,wózki transportowe,SRC-42,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Wyposażenie statku,skrzynki narzędziowe,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Wyposażenie statku,ławki,SRC-09,/Game/StarterContent/Props/SM_Couch,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,Pakiet SRC-09 zawiera lawki
+Wyposażenie statku,łóżka diagnostyczne,SRC-08; SRC-10,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Wyposażenie statku,umywalki,SRC-40,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,SRC-40 prawdopodobnie 'Sink' - do potwierdzenia
+Wyposażenie statku,szafy serwisowe,SRC-14; SRC-45,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,Kandydaci
+Przedmioty i dekoracje,Kubki,SRC-30; SRC-31; SRC-32; SRC-33,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Przedmioty i dekoracje,butelki,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Przedmioty i dekoracje,dokumenty,SRC-35; SRC-37; SRC-38,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Przedmioty i dekoracje,notatniki,SRC-36,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Przedmioty i dekoracje,zdjęcia załogi,,,BRAK MODELU,BRAK W SCENIE - scena nie istnieje,
+Przedmioty i dekoracje,pudełka,SRC-25,/Game/Props/Meshes/Box; BoxTop,JEST W PROJEKCIE - do ponownego użycia,BRAK W SCENIE - scena nie istnieje,
+Przedmioty i dekoracje,narzędzia,SRC-26,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,Oscyloskop jako jedyne narzedzie w dokumencie
+Przedmioty i dekoracje,porozrzucane przedmioty,SRC-34,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
+Przedmioty i dekoracje,tabliczki informacyjne,SRC-41; SRC-27,,TYLKO ODNOŚNIK - model niepobrany,BRAK W SCENIE - scena nie istnieje,
