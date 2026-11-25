@@ -47,6 +47,7 @@ public:
     UFUNCTION(BlueprintCallable) void Escape();
     UFUNCTION(BlueprintCallable) void SetWelding(bool bActive);
     UFUNCTION(BlueprintPure) bool BeamReaches(const FVector& Point) const;
+    bool BeamReachesTarget(const FVector& Point, const AActor* Receiver) const;
     UFUNCTION(BlueprintPure) float GetLampDrainPerSecond() const;
     UFUNCTION(BlueprintPure) FVector ViewOrigin() const;
     UFUNCTION(BlueprintPure) FVector ViewDirection() const;

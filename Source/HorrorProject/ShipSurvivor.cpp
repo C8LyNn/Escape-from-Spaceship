@@ -279,6 +279,11 @@ void AShipSurvivor::RefreshFocus()
 
 bool AShipSurvivor::BeamReaches(const FVector& Point) const
 {
+    return BeamReachesTarget(Point, nullptr);
+}
+
+bool AShipSurvivor::BeamReachesTarget(const FVector& Point, const AActor* Receiver) const
+{
     if (!bKitEnabled || !bLampOn || !bHasBattery || Charge <= 0.f || bDead || bEscaped || !GetWorld() || !TrackedPawn.IsValid()) return false;
     const FVector Start = ViewOrigin();
     const FVector Delta = Point - Start;
@@ -289,7 +294,7 @@ bool AShipSurvivor::BeamReaches(const FVector& Point) const
     Params.AddIgnoredActor(this);
     if (!GetWorld()->LineTraceSingleByChannel(Hit, Start, Point, ECC_Visibility, Params)) return true;
     // The receiving ink has no collision. Permit only numerical contact at the endpoint.
-    return FVector::DistSquared(Hit.ImpactPoint, Point) <= FMath::Square(.5f);
+    return (Receiver && Hit.GetActor() == Receiver) || FVector::DistSquared(Hit.ImpactPoint, Point) <= FMath::Square(.5f);
 }
 
 void AShipSurvivor::StartUse()
@@ -621,7 +626,7 @@ void AShipSurvivor::Tick(float DeltaSeconds)
         if (UActorComponent* Stats = MovementStats.Get())
             if (const FNumericProperty* Property = FindFProperty<FNumericProperty>(Stats->GetClass(),TEXT("CurrentStamina")))
                 if (Property->IsFloatingPoint()) Stamina = Property->GetFloatingPointPropertyValue(Property->ContainerPtrToValuePtr<void>(Stats));
-        const float Drain = bWelding ? 3.5f : bLampOn ? GetLampDrainPerSecond() : 0.f;
+        const float Drain = bLampOn ? GetLampDrainPerSecond() : 0.f;
         Charge = FMath::Clamp(Charge - Drain * DeltaSeconds, 0.f, 100.f);
         if (Drain > 0.f && Charge <= 0.f) Notify(TEXT("Bateria rozładowana. Wróć do ładowarki w kajucie."));
         UpdateBeam();

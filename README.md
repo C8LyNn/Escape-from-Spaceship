@@ -46,6 +46,25 @@ Przy pozostałych stanowiskach możesz sprawdzić naprawę drzwi, zamek szyfrowy
 
 W testach rozgrywki w UE 5.8.4 przeszło 58 sprawdzeń mechanik, 5 sprawdzeń zakończenia i restartu oraz wszystkie 14 stanowisk bazowych. Zmierzony pobór latarki wyniósł od 0,16% do 1,46% pełnej baterii na sekundę, zależnie od ustawień. [Cztery kolory na tej samej tablicy w grze](Docs/StudentShowcase/Kolory-latarki.jpg).
 
+## Opcjonalne mechaniki światła
+
+Za stołem z wyposażeniem idź za drogowskazem **Stanowiska optyczne**. Zabierz obie latarki i baterię. Stanowiska możesz wypróbować w dowolnej kolejności.
+
+| Stanowisko | Próba |
+| --- | --- |
+| Zatrzask świetlny | Utrzymaj czerwone światło o mocy co najmniej 3/5 przez 1,6 s. Przerwanie wiązki zeruje postęp. Po otwarciu użyj **E**, żeby powtórzyć próbę. |
+| Migawka | Niebieska wiązka trzyma przejście otwarte. Po odwróceniu latarki masz jeszcze 1,2 s na przejście. |
+| Zamek sekwencyjny | Oświetl odbiornik kolejno na czerwono, niebiesko i fioletowo. Między krokami masz 6 s. Możesz odwrócić lub zgasić latarkę na czas zmiany koloru. |
+| Farba z poświatą | Fioletowy (UV) ujawnia napis. Po zabraniu wiązki pozostaje czytelny i stopniowo gaśnie przez 5 s. |
+| Czujnik ciemności | Podejdź i zostaw czujnik w ciemności przez 2 s. Skierowanie na niego światła dowolnej barwy albo odejście zamyka przejście. |
+| Przełącznik dwukolorowy | Zielony otwiera drzwi, czerwony je zamyka. Drzwi pamiętają położenie po zabraniu światła. |
+| Alarm światła i ruchu | Z bliska skieruj na czujnik dowolny kolor o mocy co najmniej 4/5 albo przebiegnij obok. Alarm zamknie drzwi. Po 3 s bez bodźca znów je otworzy. |
+| Dynamo awaryjne | Przytrzymaj **E**, żeby ręcznie doładować nawet pustą baterię do 35%. Zielone światło na 5 s zwiększa tempo ładowania z 2% do 8% na sekundę. Możesz wtedy zgasić latarkę i kręcić dalej. |
+
+**Własna konfiguracja.** Każda próba ma osobny folder w Outlinerze pod `Mechaniki LDD/Optyka opcjonalna`. Możesz skopiować wybrane stanowisko, pominąć je albo wyłączyć odbiornik w Details przez **Station Enabled**. Przy kopiowaniu ustaw nową, jednakową wartość **Channel** na odbiorniku i jego drzwiach. Do samodzielnego stanowiska dodaj aktora **Ship Light Station**, wybierz **Mode** i ustaw kolor lub czasy reakcji. Obsługę latarek zapewnia **Ship Survivor** obecny na scenie. Żaden z tych kanałów nie jest wymagany przez wyjście.
+
+Testy rozgrywki w UE 5.8.4 objęły 76 sprawdzeń nowych stanowisk i ich współpracy z dotychczasową sceną. Sprawdzono m.in. przejście przez pierwotne wyjście przed rozwiązaniem zagadek optycznych, fizyczny ruch drzwi, zanikanie napisu i tempo ładowania po puszczeniu klawisza.
+
 ## Dokumentacja sceny pokazowej
 
 Wyniki testów PIE, zrzuty ekranu i wykaz braków zawiera [raport](Docs/StudentShowcase/RESULTS.md). Autorów i licencje pobranych modeli podają [atrybucje](Docs/StudentShowcase/CREDITS.md).

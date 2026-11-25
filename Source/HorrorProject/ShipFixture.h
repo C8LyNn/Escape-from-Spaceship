@@ -54,15 +54,19 @@ public:
     UPROPERTY(BlueprintReadOnly, Category="Fixture|State") float Progress = 0.f;
     UPROPERTY(BlueprintReadOnly, Category="Fixture|State") int32 ScareStage = 0;
 
-    UFUNCTION(BlueprintPure, Category="Fixture") FString Prompt(AShipSurvivor* Survivor) const;
-    UFUNCTION(BlueprintCallable, Category="Fixture") void Use(AShipSurvivor* Survivor);
-    UFUNCTION(BlueprintCallable, Category="Fixture") void HeldUse(AShipSurvivor* Survivor, float DeltaSeconds);
+    UFUNCTION(BlueprintPure, Category="Fixture") virtual FString Prompt(AShipSurvivor* Survivor) const;
+    UFUNCTION(BlueprintCallable, Category="Fixture") virtual void Use(AShipSurvivor* Survivor);
+    UFUNCTION(BlueprintCallable, Category="Fixture") virtual void HeldUse(AShipSurvivor* Survivor, float DeltaSeconds);
     UFUNCTION(BlueprintCallable, Category="Fixture") void StopUse(AShipSurvivor* Survivor);
     UFUNCTION(BlueprintCallable, Category="Fixture") void SubmitCode(AShipSurvivor* Survivor, const FString& Code);
 
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
+    void SetIndicator(bool bLit, FLinearColor Color);
+    void BroadcastDoors(bool bShouldOpen, bool bLockClosed = false);
+    void PlayCue(float Volume = 1.f, float Pitch = 1.f, USoundBase* Override = nullptr);
+    AShipSurvivor* FindSurvivor();
 
 private:
     TWeakObjectPtr<AShipSurvivor> SurvivorManager;
@@ -78,17 +82,13 @@ private:
     double NextScareSound = 0.0;
 
     void Configure();
-    void SetIndicator(bool bLit, FLinearColor Color);
     void ChangeDoor(bool bShouldOpen);
-    void BroadcastDoors(bool bShouldOpen, bool bLockClosed = false);
     void EnterPlate(AShipSurvivor* Survivor);
     void CompletePlates(const TArray<AShipFixture*>& Plates, AShipSurvivor* Survivor);
     void BeginScare(AShipSurvivor* Survivor);
     void ActivateExit(AShipSurvivor* Survivor);
     void CheckVolume(AShipSurvivor* Survivor);
-    void PlayCue(float Volume = 1.f, float Pitch = 1.f, USoundBase* Override = nullptr);
     bool VolumeOccupied(bool bAllowCrates) const;
     bool HasBridgeAuthorization() const;
     bool CanWeld(const AShipSurvivor* Survivor) const;
-    AShipSurvivor* FindSurvivor();
 };

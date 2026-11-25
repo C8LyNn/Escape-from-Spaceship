@@ -360,6 +360,12 @@ void AShipFixture::CheckVolume(AShipSurvivor* S)
 {
     if (!CanAct(S)) return;
     const bool bInside = VolumeOccupied(Kind == Plate);
+    if (Kind == ExitKind && bActive)
+    {
+        bOccupied = bInside;
+        if (!bInside) bSolved = bActive = false;
+        return;
+    }
     if (bInside == bOccupied) return;
     bOccupied = bInside;
     if (Kind == Plate)
@@ -434,8 +440,9 @@ void AShipFixture::Tick(float DeltaSeconds)
         bSolved = ScareStage == 4;
     }
     if (Kind == Plate && bSolved) return;
-    if ((Kind == Scare || Kind == Roar || Kind == ExitKind) && bActive) return;
-    CheckVolume(S);
+    if ((Kind == Scare || Kind == Roar) && bActive) return;
+    if (Kind == Plate || Kind == Scare || Kind == Roar || Kind == ExitKind || Kind == Hazard)
+        CheckVolume(S);
 }
 
 FString AShipFixture::Prompt(AShipSurvivor* S) const
@@ -527,7 +534,23 @@ void AShipFixture::HeldUse(AShipSurvivor* S, float DeltaSeconds)
     if (Kind != RepairDoor || bSolved || !S || RepairUser.Get() != S) return;
     if (!CanWeld(S)) { StopUse(S); return; }
     S->SetWelding(true);
-    Progress = FMath::Clamp(Progress + FMath::Max(0.f,DeltaSeconds)/FMath::Max(.25f,RepairTime),0.f,1.f);
+    constexpr float ChargePerSecond = 3.5f;
+    const float Duration = FMath::Max(.25f, RepairTime);
+    const float NextProgress = FMath::Min(1.f, Progress + FMath::Max(0.f, DeltaSeconds) / Duration);
+    // Price only the work up to the end of the weld, including its final partial frame.
+    const float FullCost = Duration * ChargePerSecond;
+    const float RemainingCost = (1.f - Progress) * FullCost;
+    const float NextRemainingCost = (1.f - NextProgress) * FullCost;
+    const double FrameCost = static_cast<double>(RemainingCost) - NextRemainingCost;
+    const double Balance = S->Charge - FrameCost;
+    S->Charge = static_cast<float>(FMath::Max(0., Balance));
+    if (Balance < 0. || (S->Charge == 0.f && NextProgress < 1.f))
+    {
+        StopUse(S);
+        S->Notify(TEXT("Bateria rozładowana. Naładuj ją przed kolejną próbą naprawy."));
+        return;
+    }
+    Progress = NextProgress;
     if (Progress < 1.f) return;
     bSolved = bActive = true;
     S->SetWelding(false);
