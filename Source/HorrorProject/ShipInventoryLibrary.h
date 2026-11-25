@@ -24,6 +24,7 @@ public:
     static bool SwapWithHand(AActor* Player, int32 Index, TSubclassOf<AActor>& Hand, int32& Amount);
     static bool StorePackItem(AActor* Player, UClass* Item, int32 PreferredIndex);
     static int32 SlotCount(AActor* Player);
+    static UClass* ItemAt(AActor* Player, int32 Index);
     static bool ExpandBackpack(APlayerController* PC, int32 Capacity);
     static int32 FindSlot(AActor* Player, UClass* Item);
     static bool IsDoorKey(UClass* Item);

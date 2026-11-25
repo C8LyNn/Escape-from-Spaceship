@@ -38,7 +38,7 @@ namespace
     constexpr int32 MiddleSetting = 3;
     constexpr int32 MaxSetting = 5;
     float PowerMultiplier(int32 Level) { return 1.f + .30f * (Level - MiddleSetting); }
-    const FName Filters[] = {TEXT("Red"), TEXT("Green"), TEXT("Blue"), TEXT("UV")};
+    const FName Filters[] = {TEXT("Red"), TEXT("Green"), TEXT("Blue"), TEXT("UV"), TEXT("White")};
     const FKey Digits[] = {EKeys::Zero, EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine};
     const FKey KeypadDigits[] = {EKeys::NumPadZero, EKeys::NumPadOne, EKeys::NumPadTwo, EKeys::NumPadThree, EKeys::NumPadFour, EKeys::NumPadFive, EKeys::NumPadSix, EKeys::NumPadSeven, EKeys::NumPadEight, EKeys::NumPadNine};
     int32 DigitFor(const FKey& Key)
@@ -166,6 +166,7 @@ void AShipSurvivor::SyncPawn()
     if (Pawn) ShipBackpackGrid::ShowPage(LocalPC.Get(), BackpackPage);
     UpdateHandMesh();
     OriginalLight.Reset();
+    StockPower.Reset();
     MovementStats.Reset();
     if (!Pawn) return;
     OriginalLight = Pawn->FindComponentByClass<USpotLightComponent>();
@@ -176,7 +177,11 @@ void AShipSurvivor::SyncPawn()
     }
     TInlineComponentArray<UActorComponent*> Components(Pawn);
     for (UActorComponent* Component : Components)
-        if (Component->GetClass()->FindPropertyByName(TEXT("CurrentStamina"))) { MovementStats = Component; break; }
+    {
+        if (Component->GetClass()->FindPropertyByName(TEXT("CurrentStamina"))) MovementStats = Component;
+        if (Component->GetClass()->FindPropertyByName(TEXT("CurrentBatteryLevel"))) StockPower = Component;
+    }
+    ApplyBeamSettings();
 }
 
 void AShipSurvivor::EndPlay(const EEndPlayReason::Type Reason)
@@ -366,7 +371,7 @@ bool AShipSurvivor::BeamReaches(const FVector& Point) const
 
 bool AShipSurvivor::BeamReachesTarget(const FVector& Point, const AActor* Receiver) const
 {
-    if (!bKitEnabled || !bLampOn || !bHasBattery || Charge <= 0.f || bDead || bEscaped || !GetWorld() || !HasPlayerView()) return false;
+    if (!bKitEnabled || !bLampOn || Equipped != TEXT("ColorLamp") || PuzzleCharge <= 0.f || bDead || bEscaped || !GetWorld() || !HasPlayerView()) return false;
     const FVector Start = ViewOrigin();
     const FVector Delta = Point - Start;
     const float Distance = Delta.Size();
@@ -560,7 +565,7 @@ void AShipSurvivor::ToggleLamp()
     if (IsBaseMenuActive() || !bKitEnabled || bReadingNote || IsKeypadOpen() || bDead || bEscaped) return;
     if (Equipped == TEXT("Welder")) { Notify(TEXT("Przyłóż spawarkę do stanowiska i przytrzymaj E.")); return; }
     if (!CanAdjustLamp()) { Notify(TEXT("Wybierz latarkę w plecaku pod Tab.")); return; }
-    if (!bHasBattery || Charge <= 0.f) { Notify(bHasBattery ? TEXT("Bateria jest pusta. Naładuj ją w kajucie.") : TEXT("Brak baterii. Poszukaj jej na stanowisku.")); return; }
+    if (PuzzleCharge <= 0.f) { Notify(TEXT("Bateria latarki zagadkowej jest pusta. Podejdź z nią do ładowarki.")); return; }
     bLampOn = !bLampOn;
     UpdateBeam();
     Beep(bLampOn ? 1.12f : .72f);
@@ -584,15 +589,17 @@ void AShipSurvivor::ChangeFilter(int32 Step)
     if (!bHasColorLamp) { if (Step > 0) Notify(TEXT("Podnieś latarkę z kolorami, aby zmienić kolor.")); return; }
     if (Equipped != TEXT("ColorLamp")) return;
     int32 Index = 0;
-    while (Index < 4 && Filters[Index] != LastFilter) ++Index;
-    LastFilter = Filters[(Index + Step + 4) % 4];
+    constexpr int32 Count = UE_ARRAY_COUNT(Filters);
+    while (Index < Count && Filters[Index] != LastFilter) ++Index;
+    Index = (Index + Step + Count) % Count;
+    LastFilter = Filters[Index];
     UpdateBeam();
-    Beep(.9f + .08f * ((Index + Step + 4) % 4));
+    Beep(.9f + .08f * Index);
 }
 bool AShipSurvivor::CanAdjustLamp() const
 {
-    return bKitEnabled && !bReadingNote && !IsKeypadOpen() && !bDead && !bEscaped && !IsBaseMenuActive()
-        && ((Equipped == TEXT("White") && bHasWhite) || (Equipped == TEXT("ColorLamp") && bHasColorLamp));
+    return !bReadingNote && !IsKeypadOpen() && !bDead && !bEscaped && !IsBaseMenuActive()
+        && (IsWalkingLamp() || (Equipped == TEXT("ColorLamp") && bHasColorLamp));
 }
 void AShipSurvivor::AdjustLamp(FKey Key)
 {
@@ -614,6 +621,7 @@ void AShipSurvivor::ApplyBeamSettings()
     Beam->SetAttenuationRadius(1600.f + 300.f * RadiusOffset);
     Beam->SetInnerConeAngle(HalfAngle * .5f);
     Beam->SetOuterConeAngle(HalfAngle);
+    if (IsWalkingLamp()) ApplyWalkingBeamSettings();
 }
 float AShipSurvivor::GetLampDrainPerSecond() const
 {
@@ -640,8 +648,9 @@ FString AShipSurvivor::GetFilterLabel() const
 void AShipSurvivor::UpdateBeam()
 {
     Filter = Equipped == TEXT("ColorLamp") ? LastFilter : FName(TEXT("White"));
-    if (!bKitEnabled || !bHasBattery || Charge <= 0.f || bDead || bEscaped) { bWelding = false; bLampOn = false; }
-    if ((Equipped != TEXT("White") || !bHasWhite) && (Equipped != TEXT("ColorLamp") || !bHasColorLamp)) bLampOn = false;
+    if (!bKitEnabled || bDead || bEscaped) { bWelding = false; bLampOn = false; }
+    if (!bHasBattery || Charge <= 0.f) bWelding = false;
+    if (Equipped != TEXT("ColorLamp") || !bHasColorLamp || PuzzleCharge <= 0.f) bLampOn = false;
     const bool bVisible = HasPlayerView() && (bLampOn || bWelding);
     if (Beam->IsVisible() != bVisible) Beam->SetVisibility(bVisible);
     if (bVisible)
@@ -870,13 +879,13 @@ void AShipSurvivor::TickEquipment(float DeltaSeconds)
         if (const FNumericProperty* Property = FindFProperty<FNumericProperty>(Stats->GetClass(),TEXT("CurrentStamina")))
             if (Property->IsFloatingPoint()) Stamina = Property->GetFloatingPointPropertyValue(Property->ContainerPtrToValuePtr<void>(Stats));
     const float Drain = bLampOn && HasPlayerView() ? GetLampDrainPerSecond() : 0.f;
-    Charge = FMath::Clamp(Charge - Drain * DeltaSeconds, 0.f, 100.f);
-    if (Charge > 20.f) bWarnedLowCharge = false;
-    if (!bWarnedLowCharge && Charge > 0.f && Charge <= 15.f && (Drain > 0.f || bWelding))
+    if (Drain > 0.f) PuzzleCharge = FMath::Max(0.f, PuzzleCharge - Drain * DeltaSeconds);
+    if (PuzzleCharge > 20.f) bWarnedLowCharge = false;
+    if (!bWarnedLowCharge && PuzzleCharge > 0.f && PuzzleCharge <= 15.f && Drain > 0.f)
     {
         bWarnedLowCharge = true;
         Notify(TEXT("Niski poziom baterii · Z zmniejsza moc, C zwęża wiązkę."));
     }
-    if (Drain > 0.f && Charge <= 0.f) Notify(TEXT("Bateria rozładowana. Wróć do ładowarki w kajucie."));
+    if (Drain > 0.f && PuzzleCharge <= 0.f) Notify(TEXT("Latarka zagadkowa rozładowana. Zwykła latarka ma własną baterię."));
     UpdateBeam();
 }

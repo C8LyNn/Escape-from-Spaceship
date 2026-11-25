@@ -68,33 +68,35 @@ def cases(world, check):
         c = battery_bar.get_editor_property('fill_color_and_opacity')
         return (c.r, c.g, c.b)
     palette = {'Red': (1, .016, .008), 'Green': (.025, 1, .055),
-               'Blue': (.025, .12, 1), 'UV': (.43, .035, 1)}
+               'Blue': (.025, .12, 1), 'UV': (.43, .035, 1), 'White': (1, .94, .83)}
     def check_filter(label, color):
         value = tint()
         check(label, str(prop(kit, 'Filter')) == color and
               all(abs(a-b) < .015 for a,b in zip(value, palette[color])), value)
     yield from tap('Two')  # Take the collected color lamp out of its backpack slot.
-    starting_charge = kit.charge
-    kit.set_editor_property('Charge', 63.5)
-    check('bottom battery bar reads the equipped shared cell',
+    starting_charge = prop(kit, 'PuzzleCharge')
+    kit.set_editor_property('PuzzleCharge', 63.5)
+    check('bottom battery bar reads the equipped puzzle lamp cell',
           abs(bars.call_method('Get_BatteryBar_Percent') - .635) < .001)
     yield from tap('G')
+    walking_battery = next(c for c in pawn.get_components_by_class(ue.ActorComponent)
+                          if c.get_class().get_name() == 'BPC_Flashlight_C')
+    walking_fraction = prop(walking_battery, 'CurrentBatteryLevel') / prop(walking_battery, 'MaxBatteryLevel')
     check('stock battery readout returns after holstering the kit',
-          abs(bars.call_method('Get_BatteryBar_Percent') - .635) > .01)
+          abs(bars.call_method('Get_BatteryBar_Percent') - walking_fraction) < .001)
     check('holstering restores the neutral lower battery bar', min(tint()) > .85, tint())
     yield from tap('G')
-    kit.set_editor_property('Charge', starting_charge)
+    kit.set_editor_property('PuzzleCharge', starting_charge)
     check_filter('equipping the color flashlight tints the lower bar', 'Red')
     yield from tap('MouseScrollUp')
     check_filter('wheel forward selects green on the light and lower bar', 'Green')
     yield from tap('MouseScrollDown')
     check_filter('wheel back selects red on the light and lower bar', 'Red')
-    kit.set_editor_property('bLampOn', False)
-    yield .15
+    if prop(kit, 'bLampOn'):
+        yield from tap('F')
     check_filter('turning the light off preserves selected battery tint', 'Red')
     # Set a known emission state for the render comparison.
-    kit.set_editor_property('bLampOn', True)
-    yield .15
+    yield from tap('F')
     for _ in range(4):
         yield from tap('C')
     glyph = next(f for f in fixtures if f.actor_has_tag('LAB-GLYPH-RED'))
@@ -136,7 +138,7 @@ def cases(world, check):
 
     try:
         def optics():
-            return {name:str(prop(kit,name)) for name in ('bHasBattery','bHasColorLamp','bLampOn','RadiusLevel','PowerLevel','bDead','bEscaped','Filter','Charge')}
+            return {name:str(prop(kit,name)) for name in ('bHasColorLamp','bLampOn','RadiusLevel','PowerLevel','bDead','bEscaped','Filter','PuzzleCharge')}
         check('tested red ink with a powered narrow lamp', prop(kit,'bLampOn') and str(prop(kit,'Filter'))=='Red' and prop(kit,'RadiusLevel')==1, optics())
         pc.set_control_rotation(ue.MathLibrary.find_look_at_rotation(camera.get_world_location(), center))
         for _ in range(4):
@@ -239,6 +241,9 @@ def cases(world, check):
             check(color + ' reveals only the illuminated side', str(prop(kit,'Filter')) == color
                   and max(a,b)>20 and max(c,d)>20 and ((a>3*b and d>3*c) or (b>3*a and c>3*d)), samples)
             yield from tap('Q')
+        check_filter('UV cycles to white on the same lamp and battery bar', 'White')
+        yield from tap('Q')
+        check_filter('white cycles back to red on the same lamp and battery bar', 'Red')
         cap.clear_show_only_components()
         cap.show_only_component(text)
         capture.set_actor_location(center+normal*150,False,True)

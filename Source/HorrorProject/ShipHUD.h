@@ -34,8 +34,11 @@ class HORRORPROJECT_API UShipNumberedSlot : public UUserWidget
 {
     GENERATED_BODY()
 protected:
+    virtual void NativeConstruct() override;
     virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& Geometry, const FSlateRect& Clip,
         FSlateWindowElementList& List, int32 Layer, const FWidgetStyle& Style, bool bEnabled) const override;
+private:
+    TWeakObjectPtr<AShipSurvivor> Kit;
 };
 
 /** Hit-test transparent overlay for the existing player HUD. */

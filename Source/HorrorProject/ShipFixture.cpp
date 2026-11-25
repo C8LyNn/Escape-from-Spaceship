@@ -34,8 +34,8 @@ namespace
 
     FString PickupName(FName K)
     {
-        if (K == White) return TEXT("latarkę");
-        if (K == ColorLamp) return TEXT("latarkę z kolorami");
+        if (K == White) return TEXT("zapasową baterię do zwykłej latarki");
+        if (K == ColorLamp) return TEXT("latarkę zagadkową");
         if (K == Welder) return TEXT("spawarkę");
         if (K == Battery) return TEXT("baterię");
         if (K == Note) return TEXT("notatkę");
@@ -537,7 +537,7 @@ FString AShipFixture::Prompt(AShipSurvivor* S) const
     }
     else if (IsPickup(Kind)) Action = TEXT("E — podnieś ") + PickupName(Kind);
 
-    else if (Kind == Charger) Action = S->bHasBattery ? TEXT("E — naładuj baterię") : TEXT("E — sprawdź ładowarkę · potrzebna bateria");
+    else if (Kind == Charger) Action = S->SelectedBatteryPercent() >= 0.f ? TEXT("E — naładuj trzymany sprzęt") : TEXT("E — sprawdź ładowarkę · weź sprzęt do ręki");
     else if (Kind == Crate) Action = TEXT("Przytrzymaj E — przesuń skrzynię");
     else if (Kind == Plate)
     {
@@ -577,8 +577,8 @@ void AShipFixture::Use(AShipSurvivor* S)
     }
     if (Kind == Charger)
     {
-        if (!S->bHasBattery) { S->Notify(TEXT("Najpierw podnieś baterię.")); return; }
-        S->Charge = 100.f;
+        if (S->SelectedBatteryPercent() < 0.f) { S->Notify(TEXT("Weź do ręki latarkę lub akumulator spawarki.")); return; }
+        S->SetSelectedBatteryPercent(100.f);
         bActive = true;
         Progress = 1.f;
         SetIndicator(true,Green);

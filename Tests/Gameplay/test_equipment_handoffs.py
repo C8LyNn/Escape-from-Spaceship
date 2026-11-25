@@ -64,16 +64,37 @@ def run():
         yield .25
 
     def collect(kind):
-        mesh = fixture(kind).get_editor_property('Mesh')
-        point = ue.SystemLibrary.get_component_bounds(mesh)[0]
-        yield from approach(point, ue.Vector(0, 100, 0))
-        yield from tap('E')
+        actor = fixture(kind)
+        point = ue.SystemLibrary.get_component_bounds(actor.get_editor_property('Trigger'))[0]
+        for offset in (ue.Vector(0,100,0), ue.Vector(0,-100,0), ue.Vector(100,0,0), ue.Vector(-100,0,0)):
+            yield from approach(point, offset)
+            if player.call_method('LineTrace', (350.,)) == actor and kit.get_prompt() == actor.prompt(kit):
+                yield from tap('E')
+                return
+        raise AssertionError(f'Could not aim at {kind}: {kit.get_prompt()}')
 
     def stock_charge():
         return float(battery.get_editor_property('CurrentBatteryLevel'))
 
     def charge():
-        return float(kit.get_editor_property('Charge'))
+        return float(kit.get_editor_property('PuzzleCharge'))
+
+    def check_adjustments(light, name):
+        def values():
+            return (light.intensity, light.outer_cone_angle)
+        original = values()
+        yield from tap('Z')
+        dim = values()
+        yield from tap('C')
+        narrow = values()
+        yield from tap('X')
+        bright = values()
+        yield from tap('V')
+        check(name + ' responds to independent power and width controls',
+              dim[0] < original[0] and dim[1] == original[1] and narrow[0] == dim[0]
+              and narrow[1] < dim[1] and bright[0] > narrow[0] and bright[1] == narrow[1]
+              and all(abs(v - w) < .01 for v, w in zip(values(), original)),
+              original=original, dim=dim, narrow=narrow, bright=bright, restored=values())
 
     def near_ray():
         return kit.view_origin() + kit.view_direction() * 3
@@ -85,20 +106,39 @@ def run():
         value = stock_charge()
         yield interval * 2 + .25
         check('Stock flashlight consumes its own battery', stock_light.is_visible() and stock_charge() < value)
+        yield from check_adjustments(stock_light, 'Walking flashlight')
         yield from collect('White')
-        yield from collect('Battery')
+        yield from tap('One')
+        before = stock_charge()
+        was_spare = str(kit.get_editor_property('Equipped')) == 'FlashlightBattery'
+        yield from tap('LeftMouseButton')
+        check('Using the showroom spare cell refills only the walking flashlight and consumes the cell',
+              was_spare and str(kit.get_editor_property('Equipped')) == 'None' and stock_charge() > before
+              and charge() == 0 and kit.get_editor_property('Charge') == 0,
+              before=before, after=stock_charge())
+        yield from tap('One')
         yield from collect('ColorLamp')
         yield from tap('Two')
         yield from tap('F')
         yield .25
+        check('Newly collected puzzle flashlight works without a welder battery',
+              str(kit.get_editor_property('Equipped')) == 'ColorLamp' and beam.is_visible() and charge() > 0
+              and not kit.get_editor_property('bHasBattery') and kit.get_editor_property('Charge') == 0)
+        yield from check_adjustments(beam, 'Puzzle flashlight')
         value = stock_charge()
+        puzzle_before = charge()
         yield interval * 2 + .35
-        check('Stored stock flashlight keeps its battery', not stock_light.is_visible() and stock_charge() == value,
-              before=value, after=stock_charge(), projected=beam.is_visible())
+        check('Lit puzzle flashlight drains its own cell while the stored walking flashlight keeps its charge',
+              beam.is_visible() and charge() < puzzle_before and not stock_light.is_visible() and stock_charge() == value,
+              before=value, after=stock_charge(), puzzle_before=puzzle_before, puzzle_after=charge())
         yield from tap('G')
         value = stock_charge()
         yield interval * 2 + .25
-        check('Returning to the lit stock flashlight resumes drain', stock_light.is_visible() and stock_charge() < value)
+        check('Drawing the previously lit walking flashlight leaves it off and keeps its remaining charge',
+              not stock_light.is_visible() and stock_charge() == value)
+        yield from tap('F')
+        yield interval * 2 + .25
+        check('F restarts walking illumination and resumes its own drain', stock_light.is_visible() and stock_charge() < value)
         yield from tap('F')
         yield from tap('G')
         yield from tap('G')
@@ -164,11 +204,25 @@ def run():
               controller.get_view_target() == player and beam.is_visible() and kit.beam_reaches(near_ray())
               and str(kit.get_editor_property('Filter')) == selected and charge() < value)
         yield from tap('Tab')
-        kit.set_editor_property('Charge', .18)
+        kit.set_editor_property('PuzzleCharge', .18)
         yield .8
         check('An empty battery extinguishes the beam inside the backpack',
               charge() == 0 and not beam.is_visible() and not kit.get_editor_property('bLampOn'))
         yield from tap('Tab')
+        yield from collect('Battery')
+        check('Picking up the welder battery leaves the depleted puzzle flashlight empty',
+              kit.get_editor_property('bHasBattery') and kit.get_editor_property('Charge') == 100 and charge() == 0)
+        yield from tap('G')
+        if not stock_light.is_visible():
+            yield from tap('F')
+        check('Walking flashlight still emits with the puzzle battery empty',
+              stock_light.is_visible() and not beam.is_visible() and charge() == 0)
+        yield from tap('G')
+        before = stock_charge()
+        yield from collect('Charger')
+        check('Showroom charger restores the held puzzle lamp while walking charge stays unchanged',
+              charge() == 100 and stock_charge() == before and str(kit.get_editor_property('Equipped')) == 'ColorLamp',
+              walking_before=before, walking_after=stock_charge(), puzzle_after=charge())
 
         ladder = fixture('Ladder')
         point = ladder.get_actor_location() + ue.Vector(0, 0, 120)

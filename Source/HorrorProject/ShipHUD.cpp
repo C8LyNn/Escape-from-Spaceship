@@ -121,21 +121,24 @@ namespace
             if (P->IsStockInventoryVisible())
             {
                 const bool bHasPages = P->BackpackPageCount() > 1;
-                const float X = (C.W-840.f)*.5f, Y = C.H-(bHasPages ? 111.f : 80.f);
-                C.Rect(X,Y,840.f,bHasPages ? 100.f : 69.f,Panel);
+                const float X = (C.W-840.f)*.5f, Y = C.H-(bHasPages ? 138.f : 107.f);
+                C.Rect(X,Y,840.f,bHasPages ? 127.f : 96.f,Panel);
                 if (bHasPages)
                 {
                     const FString Bag = FString::Printf(TEXT("%s plecak · %s   |   Strona %d/%d"),
                         P->BackpackCapacity == 16 ? TEXT("Mały") : TEXT("Duży"), *ShipBackpackGrid::CapacityLabel(P->BackpackCapacity),
                         P->BackpackPage+1, P->BackpackPageCount());
-                    C.Text(Bag,X+16.f,Y+69.f,16.f,Accent,true);
-                    C.Text(TEXT("Kółko myszy lub PgUp / PgDn   ·   Zmień stronę"),X+395.f,Y+69.f,15.f,Soft);
+                    C.Text(Bag,X+16.f,Y+96.f,16.f,Accent,true);
+                    C.Text(TEXT("Kółko myszy lub PgUp / PgDn   ·   Zmień stronę"),X+395.f,Y+96.f,15.f,Soft);
                 }
                 C.Text(TEXT("W ręce: ") + P->GetToolLabel(),X+16.f,Y+6.f,18.f,Ink,true);
-                if (P->bHasBattery)
-                    C.Text(FString::Printf(TEXT("Akumulator %d%%    Pobór %.2f%%/s"),
-                        FMath::RoundToInt(P->Charge),P->bLampOn ? P->GetLampDrainPerSecond() : 0.f),X+515.f,Y+8.f,15.f,Soft);
-                C.Text(TEXT("Kliknij przedmiot lub naciśnij 1–8, aby zamienić go z ręką.   Shift + klik: opcje przedmiotu."),X+16.f,Y+38.f,15.f,Soft);
+                if (P->bLampOn || P->IsWalkingLampOn())
+                    C.Text(FString::Printf(TEXT("Pobór %.2f%%/s"),P->GetLampDrainPerSecond()),X+625.f,Y+8.f,15.f,Soft);
+                FString Cells = FString::Printf(TEXT("Zwykła %d%%"),FMath::RoundToInt(P->WalkingLampPercent()));
+                if (P->bHasColorLamp) Cells += FString::Printf(TEXT("     Zagadkowa %d%%"),FMath::RoundToInt(P->PuzzleCharge));
+                if (P->bHasBattery) Cells += FString::Printf(TEXT("     Spawarka %d%%"),FMath::RoundToInt(P->Charge));
+                C.Text(Cells,X+16.f,Y+37.f,16.f,Accent);
+                C.Text(TEXT("Kliknij przedmiot lub naciśnij 1–8, aby zamienić go z ręką.   Shift + klik: opcje przedmiotu."),X+16.f,Y+64.f,15.f,Soft);
                 return C.TopLayer();
             }
             if (P->IsBaseMenuActive()) return Layer;
@@ -143,7 +146,7 @@ namespace
             if (P->bDead || P->bEscaped) Ending(C,*P);
             else if (P->IsKeypadOpen()) Keypad(C,*P);
             else if (P->IsReadingNote()) NoteReader(C,*P);
-            else if (P->bKitEnabled) Play(C,*P,Prompt);
+            else if (P->bKitEnabled || P->IsWalkingLamp()) Play(C,*P,Prompt);
             else
             {
                 FString Controls = TEXT("Tab  Plecak   ·   1–8  Wybór przedmiotu");
@@ -162,7 +165,7 @@ namespace
         TWeakObjectPtr<AShipSurvivor> Player;
         static void Play(FShipCanvas& C,AShipSurvivor& P,const FString& Prompt)
         {
-            const bool bLamp = P.Equipped == TEXT("White") || P.Equipped == TEXT("ColorLamp");
+            const bool bLamp = P.IsWalkingLamp() || P.Equipped == TEXT("ColorLamp");
             const float Height = bLamp ? 97.f : 69.f;
             const float X=24.f, Y=85.f;
             C.Rect(X,Y,365.f,Height,Strip);
@@ -174,7 +177,7 @@ namespace
             else
             {
                 C.Rect(X+16.f,Y+45.f,10.f,10.f,P.GetFilterColor());
-                C.Text(FString::Printf(TEXT("%s  /  %s"),*P.GetFilterLabel(),P.bLampOn?TEXT("światło włączone"):TEXT("światło wyłączone")),X+34.f,Y+39.f,14.f,Soft);
+                C.Text(FString::Printf(TEXT("%s  /  %s"),*P.GetFilterLabel(),(P.bLampOn || P.IsWalkingLampOn())?TEXT("światło włączone"):TEXT("światło wyłączone")),X+34.f,Y+39.f,14.f,Soft);
                 if (bLamp)
                 {
                     C.Text(FString::Printf(TEXT("Z/X  Moc %d/5      C/V  Promień %d/5"),P.PowerLevel,P.RadiusLevel),X+16.f,Y+65.f,14.f,Ink);
@@ -224,6 +227,12 @@ namespace
     };
 }
 
+void UShipNumberedSlot::NativeConstruct()
+{
+    Super::NativeConstruct();
+    Kit = Cast<AShipSurvivor>(UGameplayStatics::GetActorOfClass(this,AShipSurvivor::StaticClass()));
+}
+
 int32 UShipNumberedSlot::NativePaint(const FPaintArgs& Args, const FGeometry& Geometry, const FSlateRect& Clip,
     FSlateWindowElementList& List, int32 Layer, const FWidgetStyle& Style, bool bEnabled) const
 {
@@ -236,6 +245,15 @@ int32 UShipNumberedSlot::NativePaint(const FPaintArgs& Args, const FGeometry& Ge
     FSlateDrawElement::MakeBox(List,++Layer,Badge,FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")),ESlateDrawEffect::None,Panel);
     FSlateDrawElement::MakeText(List,++Layer,Geometry.ToPaintGeometry(FVector2f(20,20),FSlateLayoutTransform(FVector2f(9,4))),
         FString::FromInt(Index % ShipBackpackGrid::PageSize + 1),FCoreStyle::GetDefaultFontStyle(TEXT("Bold"),12),ESlateDrawEffect::None,Ink);
+    if (const TCHAR* Label = Kit.IsValid() ? Kit->LampSlotLabel(Index) : nullptr)
+    {
+        const FVector2f Size(Geometry.GetLocalSize());
+        const FVector2f Origin(4.f, Size.Y - 23.f);
+        const auto Band = Geometry.ToPaintGeometry(FVector2f(Size.X-8.f,20.f), FSlateLayoutTransform(Origin));
+        FSlateDrawElement::MakeBox(List,++Layer,Band,FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")),ESlateDrawEffect::None,Panel);
+        FSlateDrawElement::MakeText(List,++Layer,Geometry.ToPaintGeometry(FVector2f(Size.X-12.f,20.f),FSlateLayoutTransform(Origin+FVector2f(3.f,0.f))),
+            FString(Label),FCoreStyle::GetDefaultFontStyle(TEXT("Bold"),12),ESlateDrawEffect::None,Ink);
+    }
     return Layer;
 }
 
@@ -255,7 +273,7 @@ float UShipVitalsWidget::DisplayedBatteryPercent(float StockPercent) const
 {
     const AShipSurvivor* Equipment = Kit.Get();
     if (!Equipment || !Equipment->bKitEnabled) return StockPercent;
-    return Equipment->bHasBattery ? FMath::Clamp(Equipment->Charge / 100.f, 0.f, 1.f) : 0.f;
+    return FMath::Clamp(Equipment->SelectedBatteryPercent() / 100.f, 0.f, 1.f);
 }
 
 void UShipVitalsWidget::NativeTick(const FGeometry& Geometry, float DeltaTime)

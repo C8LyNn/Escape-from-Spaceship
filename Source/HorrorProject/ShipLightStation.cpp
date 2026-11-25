@@ -241,8 +241,8 @@ FString AShipLightStation::Prompt(AShipSurvivor* S) const
             if (bActive) Help += FString::Printf(TEXT(" · do wyciszenia %d s"),SecondsRemaining());
             break;
         case ELightStationMode::Dynamo:
-            if (!S->bHasBattery) Help = TEXT("Potrzebna bateria");
-            else if (S->Charge >= ReserveLimit) Help = TEXT("Rezerwa pełna · limit dynama 35%");
+            if (S->SelectedBatteryPercent() < 0.f) Help = TEXT("Weź do ręki latarkę lub akumulator spawarki");
+            else if (S->SelectedBatteryPercent() >= ReserveLimit) Help = TEXT("Rezerwa pełna · limit dynama 35%");
             else Help = FString::Printf(TEXT("Przytrzymaj E · ładowanie %d%%/s do 35%%"), bActive ? 8 : 2);
             if (bActive) Help += FString::Printf(TEXT(" · premia %d s"),SecondsRemaining());
             break;
@@ -269,7 +269,9 @@ void AShipLightStation::Use(AShipSurvivor* S)
 
 void AShipLightStation::HeldUse(AShipSurvivor* S, float DeltaSeconds)
 {
-    if (!bStationEnabled || Mode != ELightStationMode::Dynamo || !S || !S->bHasBattery || S->bDead || S->bEscaped || S->Charge >= ReserveLimit) return;
+    if (!bStationEnabled || Mode != ELightStationMode::Dynamo || !S || S->bDead || S->bEscaped) return;
+    const float Charge = S->SelectedBatteryPercent();
+    if (Charge < 0.f || Charge >= ReserveLimit) return;
     const float Rate = bActive ? 8.f : 2.f;
-    S->Charge = FMath::Min(ReserveLimit, S->Charge + Rate * FMath::Max(0.f, DeltaSeconds));
+    S->SetSelectedBatteryPercent(FMath::Min(ReserveLimit, Charge + Rate * FMath::Max(0.f, DeltaSeconds)));
 }

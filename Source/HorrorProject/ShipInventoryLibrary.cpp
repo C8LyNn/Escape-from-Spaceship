@@ -290,6 +290,12 @@ int32 UShipInventoryLibrary::SlotCount(AActor* Player)
     return FInventorySlots(PlayerInventory(Player)).Num();
 }
 
+UClass* UShipInventoryLibrary::ItemAt(AActor* Player, int32 Index)
+{
+    FInventorySlots Slots(PlayerInventory(Player));
+    return Index >= 0 && Index < Slots.Num() ? Slots.Item(Index) : nullptr;
+}
+
 bool UShipInventoryLibrary::ExpandBackpack(APlayerController* PC, int32 Capacity)
 {
     FInventorySlots Slots(PlayerInventory(PC ? PC->GetPawn() : nullptr));

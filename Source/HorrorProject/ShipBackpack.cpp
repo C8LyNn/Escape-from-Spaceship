@@ -18,8 +18,8 @@ namespace
 {
     const TCHAR* const PackKinds[] = {TEXT("White"), TEXT("ColorLamp"), TEXT("Welder"), TEXT("Battery"),
         TEXT("Card"), TEXT("Note"), TEXT("Glowstick"), TEXT("StockLamp")};
-    const TCHAR* const PackLabels[] = {TEXT("Latarka biała"), TEXT("Latarka z kolorami"), TEXT("Spawarka WD01"),
-        TEXT("Akumulator narzędzi"), TEXT("Karta mostka"), TEXT("Notatki serwisowe"), TEXT("Glowsticki"), TEXT("Latarka osobista")};
+    const TCHAR* const PackLabels[] = {TEXT("Latarka zwykła"), TEXT("Latarka zagadkowa"), TEXT("Spawarka WD01"),
+        TEXT("Akumulator spawarki"), TEXT("Karta mostka"), TEXT("Notatki serwisowe"), TEXT("Glowsticki"), TEXT("Latarka zwykła")};
     const TCHAR* const StockKinds[] = {TEXT("Bandage"), TEXT("FlashlightBattery"), TEXT("DoorKey")};
     const TCHAR* const StockMeshes[] = {TEXT("Bandage"), TEXT("Battery"), TEXT("DoorKey")};
     constexpr double RefillSeconds = 12.;
@@ -80,6 +80,16 @@ bool AShipSurvivor::CollectItem(AShipFixture* Fixture)
         return true;
     }
     const FName Kind = Fixture->Kind;
+    if (Kind == TEXT("White"))
+    {
+        if (!UShipInventoryLibrary::StorePackItem(TrackedPawn.Get(), PackClasses.FindRef(TEXT("FlashlightBattery")).Get(), 0))
+        {
+            Notify(TEXT("Plecak pełny. Zwolnij pole na zapasową baterię."));
+            return false;
+        }
+        Notify(TEXT("Zapasowa bateria w plecaku. Weź ją do ręki i użyj LPM, aby doładować zwykłą latarkę."));
+        return true;
+    }
     UClass* Item = PackClasses.FindRef(Kind).Get();
     if (!Item) return false;
     // Notes are kept as individual pages of one carried notebook.
@@ -95,8 +105,7 @@ bool AShipSurvivor::CollectItem(AShipFixture* Fixture)
     }
     if (Kind != TEXT("Glowstick") && Fixture->Mesh->GetStaticMesh())
         PackMeshes.Add(Kind, Fixture->Mesh->GetStaticMesh());
-    if (Kind == TEXT("White")) bHasWhite = true;
-    if (Kind == TEXT("ColorLamp")) bHasColorLamp = true;
+    if (Kind == TEXT("ColorLamp") && !bHasColorLamp) { bHasColorLamp = true; PuzzleCharge = 100.f; }
     if (Kind == TEXT("Welder")) bHasWelder = true;
     if (Kind == TEXT("Card")) bHasCard = true;
     if (Kind == TEXT("Battery")) { bHasBattery = true; Charge = 100.f; }
@@ -152,7 +161,9 @@ bool AShipSurvivor::EquipSlot(int32 Index)
     Equipped = Kind.ToString();
     if (Kind == TEXT("StockLamp")) LastStockSlot = Index;
     bLampOn = false;
-    SetKit(Kind != TEXT("StockLamp"));
+    SetKit(!IsWalkingLamp());
+    // Stowing switches the light off. Drawing it again does not start draining its cell.
+    if (bKitEnabled) bOriginalLightVisible = false;
     if (IsStockInventoryVisible()) CloseStockInventory();
     ApplyBeamSettings();
     UpdateBeam();
@@ -160,6 +171,15 @@ bool AShipSurvivor::EquipSlot(int32 Index)
     UpdateInputRouting();
     Notify(FString::Printf(TEXT("W ręce: %s"), *GetToolLabel()));
     return true;
+}
+
+const TCHAR* AShipSurvivor::LampSlotLabel(int32 Index) const
+{
+    const UClass* Item = UShipInventoryLibrary::ItemAt(TrackedPawn.Get(), Index);
+    if (!Item) return nullptr;
+    if (Item == PackClasses.FindRef(TEXT("ColorLamp")).Get()) return TEXT("Zagadkowa");
+    if (Item == PackClasses.FindRef(TEXT("StockLamp")).Get() || Item == PackClasses.FindRef(TEXT("White")).Get()) return TEXT("Zwykła");
+    return nullptr;
 }
 
 FString AShipSurvivor::GetToolLabel() const
@@ -185,7 +205,7 @@ FString AShipSurvivor::HandHint() const
     if (Equipped == TEXT("Welder")) return TEXT("Przytrzymaj E przy spoinie");
     if (Equipped == TEXT("Bandage") || Equipped == TEXT("FlashlightBattery")) return TEXT("LPM  Użyj przedmiotu");
     if (Equipped == TEXT("Card") || Equipped == TEXT("DoorKey")) return TEXT("E  Użyj przy zamku");
-    if (Equipped == TEXT("Battery")) return TEXT("Zasila narzędzia także z plecaka");
+    if (Equipped == TEXT("Battery")) return TEXT("Zasila spawarkę także z plecaka");
     if (Equipped == TEXT("StockLamp")) return TEXT("F  Włącz / zgaś");
     return TEXT("Tab  Wybierz przedmiot");
 }

@@ -40,23 +40,31 @@ Otwórz `HorrorProject.uproject` w Unreal Engine 5.8.4 i naciśnij **Play**. Map
 
 Ruch obsługują WASD i mysz. Shift służy do sprintu, Ctrl do kucania, E do interakcji, F do latarki, a Tab do ekwipunku. Przy drzwiach fizycznych przytrzymaj lewy przycisk myszy i przesuń mysz. Kod do stanowiska z zamkiem to **9516**.
 
+## Moduły sterowane światłem
+
+W scenie testowej przy trzech sąsiednich panelach wybierz latarkę zagadkową. Czerwonym filtrem wysuniesz blok, a po odsunięciu wiązki możesz zaświecić drugi raz, aby go cofnąć. **C** zwęża wiązkę do jednego panelu, **V** pozwala objąć kilka z tego samego miejsca.
+
+- **Zielony** mocuje skrzynię dotykającą przodu modułu. Możesz stanąć na skrzyni, a **biały filtr** ją odczepia.
+- **Fioletowy** obraca moduł o ćwierć obrotu przy każdym kolejnym naświetleniu. Na prowadnicy zmienia kierunek, w którym potoczy się kula.
+- **Niebieski** zmienia oświetlony panel w odskocznię. Podłoga wybija do góry, a ściana odpycha gracza lub luźny obiekt w bok.
+
 ## Stanowiska mechanik z LDD
 
-Od startu idź za tablicą **STANOWISKA LDD** do stołu. Zabierz **E** latarkę z filtrami i akumulator. Otwórz plecak pod **Tab** i kliknij latarkę, następnie włącz ją klawiszem **F**. Na tablicy **CZTERY FILTRY** każdy kolor odsłania pozycję i cyfrę. Przesuwaj wiązkę po napisie, **Q** przechodź do następnego koloru. Wpisz cyfry od pozycji 1 do 4 na pobliskim terminalu i naciśnij **Enter**.
+Zaczynasz ze **zwykłą latarką** do oświetlania drogi. Za tablicą **STANOWISKA LDD** znajdziesz stół z **latarką zagadkową**. Podnieś ją klawiszem **E**, wybierz pod **Tab** i włącz klawiszem **F**. Na tablicy **CZTERY FILTRY** czerwony, zielony, niebieski i fioletowy ujawniają po jednej cyfrze. Przesuwaj wiązkę po napisie i zmieniaj filtr klawiszem **Q**. Wpisz cyfry w kolejności pozycji I–IV na pobliskim terminalu i naciśnij **Enter**.
 
 | Klawisz | Działanie |
 | --- | --- |
 | **Tab / 1–8** | Otwórz plecak i kliknij przedmiot lub wybierz numer pola na bieżącej stronie. Wybrany przedmiot trafi do ręki, a poprzedni zajmie zwolnione pole. Numer pustego pola chowa trzymany przedmiot. |
 | **Kółko myszy / PgUp / PgDn** | W otwartym małym lub dużym plecaku przejdź do poprzedniej albo następnej strony. |
 | **F** | Włącz lub zgaś latarkę. |
-| **Q / kółko myszy** | Q wybiera kolejny kolor. Kółkiem możesz przechodzić w obie strony między czerwonym, zielonym, niebieskim i fioletowym. |
+| **Q / kółko myszy** | Na latarce zagadkowej wybierz czerwony, zielony, niebieski, fioletowy lub biały filtr. Kółko przełącza filtry w obie strony. |
 | **Z / X** | Zmniejsz lub zwiększ moc światła. |
 | **C / V** | Zmniejsz lub zwiększ promień. Zmienia się szerokość stożka i jego zasięg. |
 | **E** | Podnieś narzędzie lub notatkę, użyj ładowarki albo terminala. Ze spawarką WD01 w ręce przytrzymaj E przy spoinie. |
 | **LPM** | Rzuć trzymany glowstick, przeczytaj trzymaną notatkę lub użyj bandaża albo zapasowej baterii osobistej. Skrzynię możesz zawsze chwycić, przytrzymując E. |
 | **Shift + klik w plecaku** | Otwórz opcje przedmiotu z paczki, np. użycie lub odłożenie stosu na podłogę. |
 
-Moc i promień mają po pięć ustawień. Obie latarki zachowują wybrane ustawienia przy zmianie koloru lub narzędzia. Większa moc i większy promień niezależnie przyspieszają rozładowanie baterii. Plecak pod **Tab** pokazuje bieżący pobór. Zgaszona latarka nie pobiera energii.
+Każda latarka ma własną baterię. Schowanie latarki gasi ją i zachowuje poziom naładowania. Pod **Tab** widać osobno stan obu ogniw. Zapasowa bateria osobista doładowuje zwykłą latarkę. Przy ładowarce weź do ręki sprzęt, który chcesz naładować, i naciśnij **E**. Spawarka korzysta z oddzielnego akumulatora. Moc i promień mają po pięć ustawień. Większa moc i szersza wiązka zwiększają pobór energii.
 
 Na początku masz osiem pól na sprzęt, notatki, przedmioty z paczki i pojemnik na glowsticki. Przy stole ze sprzętem znajdziesz mały plecak na 16 pól i duży na 24. Wyceluj w wybrany plecak i naciśnij **E**. Możesz od razu założyć duży plecak, także gdy wszystkie pola są zajęte. Każda strona mieści osiem przedmiotów.
 
@@ -80,7 +88,7 @@ W testach rozgrywki w UE 5.8.4 przeszło 58 sprawdzeń mechanik, 5 sprawdzeń za
 
 ## Opcjonalne mechaniki światła
 
-Za stołem z wyposażeniem idź za drogowskazem **Stanowiska optyczne**. Zabierz obie latarki i baterię. Stanowiska możesz wypróbować w dowolnej kolejności.
+Za stołem z wyposażeniem idź za drogowskazem **Stanowiska optyczne**. Zabierz latarkę zagadkową. Stanowiska możesz wypróbować w dowolnej kolejności.
 
 | Stanowisko | Próba |
 | --- | --- |

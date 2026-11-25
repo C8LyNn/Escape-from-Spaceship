@@ -25,7 +25,7 @@ public:
     AShipSurvivor();
     virtual void Tick(float DeltaSeconds) override;
 
-    UPROPERTY(BlueprintReadOnly, Category="Ship|Inventory") bool bHasWhite = false;
+    UPROPERTY(BlueprintReadOnly, Category="Ship|Inventory") bool bHasWhite = true;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Inventory") bool bHasColorLamp = false;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Inventory") bool bHasWelder = false;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Inventory") bool bHasBattery = false;
@@ -48,7 +48,15 @@ public:
     void ConsumeOneInHand();
     bool IsStockInventoryVisible() const;
     UFUNCTION(BlueprintPure, Category="Ship|Equipment") FString HandHint() const;
+    // Charge belongs to the welder pack. The walking lamp is backed by BPC_Flashlight on the pawn.
     UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") float Charge = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") float PuzzleCharge = 0.f;
+    UFUNCTION(BlueprintPure, Category="Ship|Equipment") float WalkingLampPercent() const;
+    float SelectedBatteryPercent() const;
+    void SetSelectedBatteryPercent(float Percent);
+    bool IsWalkingLamp() const;
+    bool IsWalkingLampOn() const;
+    const TCHAR* LampSlotLabel(int32 Index) const;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Player") float Stamina = 100.f;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Player") bool bDead = false;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Player") bool bEscaped = false;
@@ -119,6 +127,7 @@ private:
     TWeakObjectPtr<APawn> TrackedPawn;
     TWeakObjectPtr<UActorComponent> MovementStats;
     TWeakObjectPtr<USpotLightComponent> OriginalLight;
+    TWeakObjectPtr<UActorComponent> StockPower;
     TWeakObjectPtr<AShipFixture> Focus;
     TWeakObjectPtr<AShipFixture> HeldFixture;
     TWeakObjectPtr<AShipFixture> Keypad;
@@ -169,6 +178,7 @@ private:
     void CloseStockInventory();
     void TickEquipment(float DeltaSeconds);
     void ApplyBeamSettings();
+    void ApplyWalkingBeamSettings();
     void UpdateBeam();
 
     void PressDigit(FKey Key);

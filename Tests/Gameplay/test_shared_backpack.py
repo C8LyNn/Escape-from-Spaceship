@@ -36,6 +36,8 @@ def cases(world, check):
         return result
 
     def pack(kind):
+        if kind == 'FlashlightBattery':
+            return 'BP_InventoryItem_FlashlightBattery_C'
         return 'BP_Pack_' + kind + '_C'
 
     def index_of(name):
@@ -147,12 +149,13 @@ def cases(world, check):
             inv.call_method('RemoveItem', (i,))
         for kind in ('White', 'ColorLamp', 'Welder', 'Battery', 'Card', 'Glowstick', 'Note'):
             actor = fixture(kind)
+            item = 'FlashlightBattery' if kind == 'White' else kind
             before = rows()
-            yield from operate(actor, lambda: (pack(kind), 1) in rows(), 'Collect ' + kind)
+            yield from operate(actor, lambda: (pack(item), 1) in rows(), 'Collect ' + item)
             after = rows()
             changed = [i for i, pair in enumerate(zip(before, after)) if pair[0] != pair[1]]
-            check(kind + ' enters one original slot and leaves the world',
-                  len(changed) == 1 and before[changed[0]][1] == 0 and after[changed[0]] == (pack(kind), 1)
+            check(item + ' enters one original slot and leaves the world',
+                  len(changed) == 1 and before[changed[0]][1] == 0 and after[changed[0]] == (pack(item), 1)
                   and in_hand() == 'StockLamp' and bool(prop(actor, 'hidden')) and not actor.get_actor_enable_collision(),
                   {'hand': in_hand(), 'changed': changed, 'slots': after})
             if pc.is_move_input_ignored() and not menu.is_visible():
@@ -165,7 +168,7 @@ def cases(world, check):
         inv.call_method('AddItem', (bandage, 1))
         check('Original consumable shares the last available slot with the lab equipment',
               sum(count > 0 for _, count in rows()) == 8 and (bandage.get_name(), 1) in rows(), rows())
-        yield from equip('White', click=True)
+        yield from equip('FlashlightBattery', click=True)
         yield from equip('Welder', menu_digit=True)
         yield from equip('Battery', click=True)
         yield from equip('Card')
@@ -214,6 +217,7 @@ def cases(world, check):
             raise AssertionError('Could not aim at the repairable door')
         duration = float(prop(door, 'RepairTime'))
         charge = float(prop(kit, 'Charge'))
+        puzzle_charge = float(prop(kit, 'PuzzleCharge'))
         ue.SystemLibrary.execute_console_command(world, 'Input.+key E', pc)
         try:
             yield duration * .35
@@ -226,8 +230,9 @@ def cases(world, check):
         yield .25
         check('Completed WD01 repair opens the actual leaf and uses the backpack battery',
               prop(door, 'bSolved') and prop(door, 'bOpen') and not prop(kit, 'bWelding')
-              and prop(kit, 'Charge') < charge and (pack('Battery'), 1) in rows(),
-              {'before': charge, 'after': prop(kit, 'Charge')})
+              and prop(kit, 'Charge') < charge and (pack('Battery'), 1) in rows()
+              and prop(kit, 'PuzzleCharge') == puzzle_charge,
+              {'before': charge, 'after': prop(kit, 'Charge'), 'puzzle_charge': prop(kit, 'PuzzleCharge')})
 
     def carried_bandage():
         place(home)
