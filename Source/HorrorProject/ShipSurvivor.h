@@ -5,6 +5,7 @@
 #include "ShipSurvivor.generated.h"
 
 class AShipFixture;
+class AShipLadder;
 class IInputProcessor;
 class UAudioComponent;
 class UPhysicsHandleComponent;
@@ -51,9 +52,10 @@ public:
     UFUNCTION(BlueprintPure) float GetLampDrainPerSecond() const;
     UFUNCTION(BlueprintPure) FVector ViewOrigin() const;
     UFUNCTION(BlueprintPure) FVector ViewDirection() const;
+    UFUNCTION(BlueprintPure) bool IsOnLadder() const;
 
     bool IsInventoryOpen() const { return bInventoryOpen; }
-    bool IsKeypadOpen() const { return Keypad.IsValid(); }
+    UFUNCTION(BlueprintPure, Category="Ship|Keypad") bool IsKeypadOpen() const { return Keypad.IsValid(); }
     bool IsDragging() const;
     bool IsBaseMenuActive() const;
     bool HandleModalShortcut(FKey Key, bool bRepeat);
@@ -61,8 +63,9 @@ public:
     int32 NoteScroll() const { return ScrollLines; }
     void ClampNoteScroll(int32 Maximum);
     const FString& GetCode() const { return EnteredCode; }
+    UFUNCTION(BlueprintPure, Category="Ship|Keypad") int32 GetCodeLength() const;
     FString GetPrompt() const;
-    FString GetNotice() const;
+    UFUNCTION(BlueprintPure, Category="Ship|Feedback") FString GetNotice() const;
     FString GetFilterLabel() const;
     FString GetToolLabel() const;
     FLinearColor GetFilterColor() const;
@@ -84,6 +87,7 @@ private:
     TWeakObjectPtr<AShipFixture> Focus;
     TWeakObjectPtr<AShipFixture> HeldFixture;
     TWeakObjectPtr<AShipFixture> Keypad;
+    TWeakObjectPtr<AShipLadder> MountedLadder;
     TWeakObjectPtr<UPrimitiveComponent> FocusCrate;
     FVector FocusHit = FVector::ZeroVector;
     FName LastFilter = TEXT("Red");
@@ -94,6 +98,8 @@ private:
     float GrabHeight = 0.f;
     bool bOriginalLightVisible = false;
     bool bOwnUse = false;
+    bool bLadderUseDown = false;
+    bool bWarnedLowCharge = false;
     bool bOwnDrag = false;
     bool bInventoryOpen = false;
     bool bLockedControls = false;
@@ -108,13 +114,16 @@ private:
     void SetKit(bool bEnable);
     void RefreshFocus();
     void EndUse();
+    void ReleaseInteraction();
+    void LeaveLadder();
+    void JumpFromLadder();
     void StartUse();
     void StartDrag();
     void EndDrag();
     void UpdateDrag();
     void ToggleLamp();
     void CycleFilter();
-    void PreviousFilter();
+    void ScrollEquipment(FKey Key);
     void ChangeFilter(int32 Step);
     void AdjustLamp(FKey Key);
     bool CanAdjustLamp() const;

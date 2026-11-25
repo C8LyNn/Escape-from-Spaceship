@@ -2,6 +2,10 @@
 
 #include "ShipFixture.h"
 #include "ShipHUD.h"
+#include "ShipLadder.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/OverlapResult.h"
+#include "GameFramework/Character.h"
 #include "CollisionQueryParams.h"
 #include "Components/AudioComponent.h"
 #include "Components/InputComponent.h"
@@ -130,6 +134,7 @@ void AShipSurvivor::SyncPawn()
 {
     APawn* Pawn = LocalPC.IsValid() ? LocalPC->GetPawn() : nullptr;
     if (TrackedPawn.Get() == Pawn) return;
+    LeaveLadder();
     if (OriginalLight.IsValid() && bKitEnabled) OriginalLight->SetVisibility(bOriginalLightVisible);
     EndUse();
     EndDrag();
@@ -153,6 +158,7 @@ void AShipSurvivor::EndPlay(const EEndPlayReason::Type Reason)
 {
     if (ModalShortcuts && FSlateApplication::IsInitialized()) FSlateApplication::Get().UnregisterInputPreProcessor(ModalShortcuts);
     ModalShortcuts.Reset();
+    LeaveLadder();
     ClosePanel();
     EndUse();
     EndDrag();
@@ -173,12 +179,14 @@ void AShipSurvivor::ConfigureInput()
     };
     Bind(EKeys::G, IE_Pressed, &AShipSurvivor::ToggleKit);
     Bind(EKeys::E, IE_Pressed, &AShipSurvivor::StartUse);
-    Bind(EKeys::E, IE_Released, &AShipSurvivor::EndUse);
+    Bind(EKeys::E, IE_Released, &AShipSurvivor::ReleaseInteraction);
+    Bind(EKeys::SpaceBar, IE_Pressed, &AShipSurvivor::JumpFromLadder);
     Bind(EKeys::LeftMouseButton, IE_Pressed, &AShipSurvivor::StartDrag);
     Bind(EKeys::LeftMouseButton, IE_Released, &AShipSurvivor::EndDrag);
     Bind(EKeys::F, IE_Pressed, &AShipSurvivor::ToggleLamp);
     Bind(EKeys::Q, IE_Pressed, &AShipSurvivor::CycleFilter);
-    Bind(EKeys::MouseScrollDown, IE_Pressed, &AShipSurvivor::PreviousFilter);
+    for (const FKey& Key : {EKeys::MouseScrollDown, EKeys::MouseScrollUp})
+        InputComponent->BindKey(Key, IE_Pressed, this, &AShipSurvivor::ScrollEquipment);
     for (const FKey& Key : {EKeys::Z, EKeys::X, EKeys::C, EKeys::V})
         InputComponent->BindKey(Key, IE_Pressed, this, &AShipSurvivor::AdjustLamp);
     Bind(EKeys::I, IE_Pressed, &AShipSurvivor::ToggleInventory);
@@ -209,10 +217,11 @@ void AShipSurvivor::UpdateInputRouting()
         const FKey& K = Binding.Chord.Key;
         bool bOwn = false;
         if (K == EKeys::G) bOwn = true;
-        else if (K == EKeys::E) bOwn = Focus.IsValid() || bOwnUse || bModal;
+        else if (K == EKeys::E) bOwn = Focus.IsValid() || bOwnUse || bModal || IsOnLadder() || bLadderUseDown;
+        else if (K == EKeys::SpaceBar) bOwn = IsOnLadder() || bModal;
         else if (K == EKeys::LeftMouseButton) bOwn = FocusCrate.IsValid() || bOwnDrag || bModal;
         else if (K == EKeys::F || K == EKeys::Q || K == EKeys::I) bOwn = bKitEnabled;
-        else if (K == EKeys::MouseScrollDown) bOwn = bKitEnabled && bHasColorLamp && !bModal;
+        else if (K == EKeys::MouseScrollDown || K == EKeys::MouseScrollUp) bOwn = !bModal && (IsDragging() || (bKitEnabled && bHasColorLamp));
         else if (K == EKeys::Z || K == EKeys::X || K == EKeys::C || K == EKeys::V) bOwn = CanAdjustLamp();
         else if (K == EKeys::R) bOwn = bDead || bEscaped;
         else if (K == EKeys::Left || K == EKeys::Right || K == EKeys::PageUp || K == EKeys::PageDown) bOwn = bInventoryOpen;
@@ -265,16 +274,32 @@ void AShipSurvivor::RefreshFocus()
 {
     Focus.Reset();
     FocusCrate.Reset();
-    if (!TrackedPawn.IsValid() || bDead || bEscaped || IsKeypadOpen() || bInventoryOpen) return;
+    if (!TrackedPawn.IsValid() || IsOnLadder() || bDead || bEscaped || IsKeypadOpen() || bInventoryOpen) return;
     FHitResult Hit;
     FCollisionQueryParams Params(SCENE_QUERY_STAT(ShipInteraction), false, TrackedPawn.Get());
     Params.AddIgnoredActor(this);
     const FVector Start = ViewOrigin();
-    if (!GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + ViewDirection() * UseRange, ECC_Visibility, Params)) return;
-    Focus = Cast<AShipFixture>(Hit.GetActor());
-    FocusHit = Hit.ImpactPoint;
-    if (Hit.GetActor() && Hit.GetActor()->ActorHasTag(TEXT("PushCrate")) && Hit.GetComponent() && Hit.GetComponent()->IsSimulatingPhysics())
-        FocusCrate = Hit.GetComponent();
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + ViewDirection() * UseRange, ECC_Visibility, Params))
+    {
+        Focus = Cast<AShipFixture>(Hit.GetActor());
+        FocusHit = Hit.ImpactPoint;
+        if (Hit.GetActor() && Hit.GetActor()->ActorHasTag(TEXT("PushCrate")) && Hit.GetComponent() && Hit.GetComponent()->IsSimulatingPhysics())
+            FocusCrate = Hit.GetComponent();
+    }
+    if (Focus.IsValid() || FocusCrate.IsValid()) return;
+    // From the upper landing, the deck can hide the rungs from the player's view.
+    const ACharacter* Character = Cast<ACharacter>(TrackedPawn.Get());
+    if (!Character) return;
+    const FVector Feet = Character->GetActorLocation() - FVector::UpVector * Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+    TArray<FOverlapResult> Nearby;
+    GetWorld()->OverlapMultiByObjectType(Nearby, Feet, FQuat::Identity, FCollisionObjectQueryParams(ECC_WorldDynamic),
+        FCollisionShape::MakeSphere(105.f), Params);
+    for (const FOverlapResult& Item : Nearby)
+        if (AShipLadder* Ladder = Cast<AShipLadder>(Item.GetActor()); Ladder && Ladder->IsAtLanding(Character))
+        {
+            Focus = Ladder;
+            break;
+        }
 }
 
 bool AShipSurvivor::BeamReaches(const FVector& Point) const
@@ -299,10 +324,27 @@ bool AShipSurvivor::BeamReachesTarget(const FVector& Point, const AActor* Receiv
 
 void AShipSurvivor::StartUse()
 {
-    if (IsBaseMenuActive() || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
+    if (IsBaseMenuActive() || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped || bLadderUseDown) return;
+    if (IsOnLadder())
+    {
+        bLadderUseDown = true;
+        LeaveLadder();
+        return;
+    }
     RefreshFocus();
     AShipFixture* Fixture = Focus.Get();
     if (!Fixture || IsDragging() || bOwnUse) return;
+    if (AShipLadder* Ladder = Cast<AShipLadder>(Fixture))
+    {
+        if (Ladder->TryMount(Cast<ACharacter>(TrackedPawn.Get())))
+        {
+            MountedLadder = Ladder;
+            bLadderUseDown = true;
+            SetKit(true);
+            UpdateInputRouting();
+        }
+        return;
+    }
     SetKit(true);
     bOwnUse = true;
     HeldFixture = Fixture;
@@ -317,10 +359,25 @@ void AShipSurvivor::EndUse()
     SetWelding(false);
 }
 
+void AShipSurvivor::ReleaseInteraction() { bLadderUseDown = false; EndUse(); }
+bool AShipSurvivor::IsOnLadder() const { return MountedLadder.IsValid() && MountedLadder->HasRider(); }
+void AShipSurvivor::LeaveLadder()
+{
+    if (MountedLadder.IsValid()) MountedLadder->Release();
+    MountedLadder.Reset();
+}
+void AShipSurvivor::JumpFromLadder()
+{
+    if (IsOnLadder() && !IsBaseMenuActive() && !bInventoryOpen && !IsKeypadOpen() && !bDead && !bEscaped)
+    {
+        MountedLadder->Release(true);
+        MountedLadder.Reset();
+    }
+}
 bool AShipSurvivor::IsDragging() const { return Grabber->GetGrabbedComponent() != nullptr; }
 void AShipSurvivor::StartDrag()
 {
-    if (IsBaseMenuActive() || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
+    if (IsDragging() || IsBaseMenuActive() || IsOnLadder() || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
     RefreshFocus();
     UPrimitiveComponent* Crate = FocusCrate.Get();
     if (!Crate || !TrackedPawn.IsValid()) return;
@@ -362,7 +419,7 @@ void AShipSurvivor::SetKit(bool bEnable)
         if (bEnable) bOriginalLightVisible = OriginalLight->IsVisible();
         OriginalLight->SetVisibility(bEnable ? false : bOriginalLightVisible);
     }
-    if (!bEnable) { ClosePanel(); EndUse(); EndDrag(); bLampOn = false; }
+    if (!bEnable) { LeaveLadder(); ClosePanel(); EndUse(); EndDrag(); bLampOn = false; }
     UpdateBeam();
     UpdateInputRouting();
 }
@@ -396,7 +453,13 @@ void AShipSurvivor::ToggleLamp()
     Beep(bLampOn ? 1.12f : .72f);
 }
 void AShipSurvivor::CycleFilter() { ChangeFilter(1); }
-void AShipSurvivor::PreviousFilter() { ChangeFilter(-1); }
+void AShipSurvivor::ScrollEquipment(FKey Key)
+{
+    if (IsBaseMenuActive() || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
+    const int32 Step = Key == EKeys::MouseScrollUp ? 1 : -1;
+    if (IsDragging()) GrabDistance = FMath::Clamp(GrabDistance + Step * 24.f, 78.f, UseRange);
+    else ChangeFilter(Step);
+}
 void AShipSurvivor::ChangeFilter(int32 Step)
 {
     if (IsBaseMenuActive() || !bKitEnabled || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
@@ -502,7 +565,8 @@ FString AShipSurvivor::GetNotice() const
 }
 FString AShipSurvivor::GetPrompt() const
 {
-    if (IsDragging()) return TEXT("Puść LPM, aby odstawić skrzynię.");
+    if (IsOnLadder()) return MountedLadder->Prompt(const_cast<AShipSurvivor*>(this));
+    if (IsDragging()) return TEXT("Kółko myszy — przybliż lub odsuń skrzynię · Puść LPM, aby ją odstawić.");
     if (FocusCrate.IsValid()) return TEXT("Przytrzymaj LPM i porusz się, aby przesunąć skrzynię.");
     if (const AShipFixture* Fixture = Focus.Get()) return Fixture->Prompt(const_cast<AShipSurvivor*>(this));
     return {};
@@ -536,7 +600,7 @@ void AShipSurvivor::PressDigit(FKey Key)
     if (IsBaseMenuActive() || Digit == INDEX_NONE || bDead || bEscaped) return;
     if (IsKeypadOpen())
     {
-        if (EnteredCode.Len() < 12) { EnteredCode.AppendChar(TCHAR('0' + Digit)); Beep(1.f + .035f * Digit); }
+        if (EnteredCode.Len() < GetCodeLength()) { EnteredCode.AppendChar(TCHAR('0' + Digit)); Beep(1.f + .035f * Digit); }
         return;
     }
     if (!bKitEnabled || bInventoryOpen) return;
@@ -548,14 +612,19 @@ void AShipSurvivor::DeleteDigit()
 {
     if (IsKeypadOpen() && !EnteredCode.IsEmpty()) { EnteredCode.LeftChopInline(1); Beep(.8f); }
 }
+int32 AShipSurvivor::GetCodeLength() const
+{
+    const AShipFixture* Fixture = Keypad.Get();
+    return Fixture && !Fixture->Value.IsEmpty() ? Fixture->Value.TrimStartAndEnd().Len() : 4;
+}
 void AShipSurvivor::ConfirmCode()
 {
     AShipFixture* Fixture = Keypad.Get();
     if (!Fixture) return;
-    if (EnteredCode.IsEmpty()) { Notify(TEXT("Wpisz kod przed zatwierdzeniem.")); return; }
-    const FString Code = EnteredCode;
-    ClosePanel();
-    Fixture->SubmitCode(this, Code);
+    if (EnteredCode.Len() != GetCodeLength()) { Notify(TEXT("Uzupełnij wszystkie cyfry przed zatwierdzeniem.")); return; }
+    Fixture->SubmitCode(this, EnteredCode);
+    if (Fixture->bSolved) ClosePanel();
+    else EnteredCode.Reset();
 }
 void AShipSurvivor::ReadNote(const FString& Text)
 {
@@ -580,11 +649,13 @@ void AShipSurvivor::ClampNoteScroll(int32 Maximum) { ScrollLines = FMath::Clamp(
 void AShipSurvivor::Die()
 {
     if (bDead || bEscaped) return;
+    LeaveLadder();
     SetKit(true); bDead = true; ClosePanel(); EndUse(); EndDrag(); UpdateBeam(); Beep(.48f);
 }
 void AShipSurvivor::Escape()
 {
     if (bDead || bEscaped) return;
+    LeaveLadder();
     SetKit(true); bEscaped = true; ClosePanel(); EndUse(); EndDrag(); UpdateBeam(); Beep(1.5f);
 }
 void AShipSurvivor::Restart()
@@ -609,6 +680,11 @@ void AShipSurvivor::Tick(float DeltaSeconds)
         return;
     }
     if (bLockedControls && !bInventoryOpen && !IsKeypadOpen() && !bEscaped && !bDead) LockControls(false);
+    if (IsOnLadder() && !bInventoryOpen && !IsKeypadOpen())
+    {
+        const float Axis = float(LocalPC->IsInputKeyDown(EKeys::W)) - float(LocalPC->IsInputKeyDown(EKeys::S));
+        MountedLadder->Climb(Axis, DeltaSeconds);
+    }
     RefreshFocus();
     if (bOwnUse)
     {
@@ -628,6 +704,12 @@ void AShipSurvivor::Tick(float DeltaSeconds)
                 if (Property->IsFloatingPoint()) Stamina = Property->GetFloatingPointPropertyValue(Property->ContainerPtrToValuePtr<void>(Stats));
         const float Drain = bLampOn ? GetLampDrainPerSecond() : 0.f;
         Charge = FMath::Clamp(Charge - Drain * DeltaSeconds, 0.f, 100.f);
+        if (Charge > 20.f) bWarnedLowCharge = false;
+        if (!bWarnedLowCharge && Charge > 0.f && Charge <= 15.f && (bLampOn || bWelding))
+        {
+            bWarnedLowCharge = true;
+            Notify(TEXT("Niski poziom baterii · Z zmniejsza moc, C zwęża wiązkę."));
+        }
         if (Drain > 0.f && Charge <= 0.f) Notify(TEXT("Bateria rozładowana. Wróć do ładowarki w kajucie."));
         UpdateBeam();
     }

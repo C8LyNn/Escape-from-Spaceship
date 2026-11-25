@@ -49,6 +49,8 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Fixture|Door", meta=(ClampMin="0.25", Units="s")) float RepairTime = 3.f;
 
     UPROPERTY(BlueprintReadOnly, Category="Fixture|State") bool bOpen = false;
+    /** The close command is still pending while a pawn or movable crate occupies the leaf's path. */
+    UPROPERTY(BlueprintReadOnly, Category="Fixture|State") bool bDoorObstructed = false;
     UPROPERTY(BlueprintReadOnly, Category="Fixture|State") bool bActive = false;
     UPROPERTY(BlueprintReadOnly, Category="Fixture|State") bool bSolved = false;
     UPROPERTY(BlueprintReadOnly, Category="Fixture|State") float Progress = 0.f;
@@ -66,6 +68,7 @@ protected:
     void SetIndicator(bool bLit, FLinearColor Color);
     void BroadcastDoors(bool bShouldOpen, bool bLockClosed = false);
     void PlayCue(float Volume = 1.f, float Pitch = 1.f, USoundBase* Override = nullptr);
+    void PlayFeedback(float Volume, float Pitch);
     AShipSurvivor* FindSurvivor();
 
 private:
@@ -73,9 +76,11 @@ private:
     TWeakObjectPtr<AShipSurvivor> CodeUser;
     TWeakObjectPtr<AShipSurvivor> RepairUser;
     UPROPERTY(Transient) TObjectPtr<USoundAttenuation> LocalAttenuation;
+    UPROPERTY() TObjectPtr<USoundBase> FeedbackTone;
     FVector ClosedLocation = FVector::ZeroVector;
     FVector DoorOffset = FVector::ZeroVector;
     float DoorFraction = 0.f;
+    int32 PlateGroupSize = 1;
     bool bOccupied = false;
     bool bStepComplete = false;
     bool bInterlockClosed = false;
@@ -83,6 +88,10 @@ private:
 
     void Configure();
     void ChangeDoor(bool bShouldOpen);
+    bool ClosingPathOccupied(const FVector& Step) const;
+    void SetDoorObstructed(bool bObstructed);
+    TArray<AShipFixture*> PlateGroup() const;
+    int32 UpdatePlateProgress(const TArray<AShipFixture*>& Plates);
     void EnterPlate(AShipSurvivor* Survivor);
     void CompletePlates(const TArray<AShipFixture*>& Plates, AShipSurvivor* Survivor);
     void BeginScare(AShipSurvivor* Survivor);

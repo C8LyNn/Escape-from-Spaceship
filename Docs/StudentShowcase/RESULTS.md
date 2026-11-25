@@ -2,6 +2,8 @@
 
 **Unreal Engine 5.8.4 · 561 eksponatów · 14 z 14 mechanik z wynikiem PASS.** W maszynowej kontroli odczytano z zapisanej mapy 114 modeli z projektu wykładowcy i 447 modeli lub wariantów z 42 źródeł. Każda ścieżka siatki ma w galerii osobny egzemplarz i podpis. Testy wykonano 25 listopada 2026 r. w kompilacji 58902052.
 
+Poniższe obserwacje i CSV dokumentują historyczną gałąź `showcase/ue-5.8`. Na gałęzi `gameplay/ldd-ue-5.8` poprawiono m.in. `DropItem`. Upuszczony przedmiot pojawia się na podłodze i można go ponownie podnieść. Drzwi pobierają jeden klucz przy pierwszym otwarciu. [Sterowanie i mechaniki aktualnej wersji](../../README.md#stanowiska-mechanik-z-ldd)
+
 ## Uruchomienie i trasa zwiedzania
 
 Otwórz `HorrorProject.uproject` z gałęzi `showcase/ue-5.8` i wybierz **Play**. Startowa mapa to `/Game/StudentShowcase/Maps/L_ModelsAndMechanics_Showcase`. Przed graczem jest turkusowa aleja sześciu działów, za nim hala czternastu stanowisk. Dział konstrukcji ma poszerzone skrzydło na zestaw modułów statku. Podesty oznaczono identyfikatorem BASE lub SRC. Tablice **BRAK MODELU** odnoszą się do pozycji SRC i typów LDD.

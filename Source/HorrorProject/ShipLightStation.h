@@ -43,6 +43,7 @@ private:
 
     FName PrimaryColor() const;
     FName ClosingColor() const;
+    int32 SecondsRemaining() const;
     void SetSignal(bool bOn);
     void SetDisplay(const FString& Text);
     void ReadSequence(FName Incident, double Now);

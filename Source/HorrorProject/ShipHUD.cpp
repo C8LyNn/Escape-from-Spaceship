@@ -157,6 +157,11 @@ namespace
             }
             const FLinearColor MeterColor=P.Charge<18.f?Warning:Accent;
             C.Meter(X+16.f,Y+Height-41.f,330.f,P.bHasBattery?TEXT("Wspólna bateria"):TEXT("Brak baterii"),P.Charge,MeterColor);
+            if (P.Stamina < 99.f)
+            {
+                C.Rect(X,Y-47.f,205.f,40.f,Strip);
+                C.Meter(X+12.f,Y-44.f,180.f,TEXT("Wytrzymałość"),P.Stamina,P.Stamina < 20.f ? Warning : Accent);
+            }
             C.Text(TEXT("I  Wyposażenie i sterowanie     G  Wyłącz zestaw"),C.W-365.f,C.H-41.f,13.f,Soft);
             if (!Prompt.IsEmpty()) C.Banner((C.W-650.f)*.5f,C.H*.66f,650.f,Prompt,Accent);
         }
@@ -204,7 +209,7 @@ namespace
             C.Rect(0,0,C.W,C.H,FLinearColor(0.f,.008f,.013f,.66f));
             C.Rect(X,Y,W,H,Panel); C.Rect(X,Y,W,3.f,Accent);
             C.Text(TEXT("Terminal dostępu"),X+30.f,Y+20.f,25.f,Ink,true);
-            C.Text(TEXT("Wpisz kod za pomocą klawiszy numerycznych."),X+30.f,Y+71.f,16.f,Soft);
+            C.Text(FString::Printf(TEXT("Wpisane cyfry   %d / %d"),P.GetCode().Len(),P.GetCodeLength()),X+30.f,Y+71.f,16.f,Soft);
             C.Rect(X+30.f,Y+116.f,W-60.f,60.f,Rule);
             C.Text(P.GetCode().IsEmpty()?TEXT("—"):P.GetCode(),X+48.f,Y+124.f,26.f,Accent,true);
             C.Text(TEXT("Enter  Zatwierdź       Backspace  Usuń cyfrę       Esc / Tab  Anuluj"),X+30.f,Y+209.f,14.f,Ink);

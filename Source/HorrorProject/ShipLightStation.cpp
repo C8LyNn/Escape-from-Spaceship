@@ -79,6 +79,11 @@ void AShipLightStation::SetDisplay(const FString& Text)
     GlyphText->SetText(FText::FromString(Text));
 }
 
+int32 AShipLightStation::SecondsRemaining() const
+{
+    return FMath::Max(0, FMath::CeilToInt32(ActiveUntil - GetWorld()->GetTimeSeconds()));
+}
+
 void AShipLightStation::SetSignal(bool bOn)
 {
     if (bInitializedSignal && bActive == bOn) return;
@@ -89,7 +94,8 @@ void AShipLightStation::SetSignal(bool bOn)
     SetIndicator(true, bAlarm ? (bOn ? Alert : Ready) : (bOn ? Ready : Idle));
     if (Mode != ELightStationMode::Dynamo && Mode != ELightStationMode::Memory)
         BroadcastDoors(bAlarm ? !bOn : bOn);
-    if (bChanged && bOn) PlayCue(bAlarm ? .9f : .45f);
+    if (bChanged && bOn) PlayFeedback(bAlarm ? .9f : .25f,1.f);
+    else if (bChanged && bAlarm) PlayFeedback(.28f,1.32f);
 }
 
 bool AShipLightStation::AccumulateExposure(bool bExposed, float DeltaSeconds)
@@ -101,18 +107,30 @@ bool AShipLightStation::AccumulateExposure(bool bExposed, float DeltaSeconds)
 void AShipLightStation::ReadSequence(FName Incident, double Now)
 {
     if (bSolved || ColorSequence.IsEmpty()) return;
-    if (NextColor > 0 && Now >= ActiveUntil) NextColor = 0;
+    if (NextColor > 0 && Now >= ActiveUntil)
+    {
+        NextColor = 0;
+        SetIndicator(true, Idle);
+        PlayFeedback(.19f,.72f);
+    }
     if (!Incident.IsNone() && Incident != LastIncidentColor)
     {
-        if (Incident == ColorSequence[NextColor]) ++NextColor;
+        const bool bCorrect = Incident == ColorSequence[NextColor];
+        if (bCorrect) ++NextColor;
         else NextColor = Incident == ColorSequence[0] ? 1 : 0;
         ActiveUntil = Now + HoldSeconds;
+        if (NextColor < ColorSequence.Num())
+        {
+            SetIndicator(true, bCorrect ? Ready : Alert);
+            PlayFeedback(.23f,bCorrect ? 1.f + .12f*NextColor : .58f);
+        }
     }
     LastIncidentColor = Incident;
     Progress = float(NextColor) / ColorSequence.Num();
     bSolved = NextColor == ColorSequence.Num();
     SetSignal(bSolved);
-    SetDisplay(FString::Printf(TEXT("%d / %d"), NextColor, ColorSequence.Num()));
+    const FString Counter = FString::Printf(TEXT("%d / %d"), NextColor, ColorSequence.Num());
+    SetDisplay(NextColor && !bSolved ? FString::Printf(TEXT("%s · %d s"),*Counter,SecondsRemaining()) : Counter);
 }
 
 void AShipLightStation::Tick(float DeltaSeconds)
@@ -136,7 +154,8 @@ void AShipLightStation::Tick(float DeltaSeconds)
         case ELightStationMode::Shutter:
             if (bMatches) ActiveUntil = Now + HoldSeconds;
             SetSignal(Now < ActiveUntil);
-            SetDisplay(bActive ? TEXT("OTWARTE") : TEXT("ZAMKNIETE"));
+            SetDisplay(!bActive ? TEXT("ZAMKNIETE") : bMatches ? TEXT("OTWARTE")
+                : FString::Printf(TEXT("ZAMKNIE ZA %d s"),SecondsRemaining()));
             break;
         case ELightStationMode::Sequence:
             ReadSequence(Incident, Now);
@@ -160,14 +179,15 @@ void AShipLightStation::Tick(float DeltaSeconds)
             if (Mode == ELightStationMode::Dark)
             {
                 SetSignal(AccumulateExposure(bNearby && !bLit, DeltaSeconds));
-                SetDisplay(!bNearby ? TEXT("CZUWANIE") : bActive ? TEXT("OTWARTE") : bLit ? TEXT("SWIATLO") : TEXT("ADAPTACJA"));
+                SetDisplay(!bNearby ? TEXT("CZUWANIE") : bActive ? TEXT("OTWARTE") : bLit ? TEXT("SWIATLO")
+                    : FString::Printf(TEXT("ADAPTACJA %d%%"),FMath::RoundToInt(Progress*100.f)));
             }
             else
             {
                 if (bNearby && ((bLit && S->PowerLevel >= MinimumPower) || Pawn->GetVelocity().SizeSquared2D() > FMath::Square(SprintThreshold)))
                     ActiveUntil = Now + HoldSeconds;
                 SetSignal(Now < ActiveUntil);
-                SetDisplay(bActive ? TEXT("ALARM") : TEXT("CISZA"));
+                SetDisplay(bActive ? FString::Printf(TEXT("ALARM · %d s"),SecondsRemaining()) : TEXT("CISZA"));
             }
             break;
         }
@@ -180,7 +200,7 @@ void AShipLightStation::Tick(float DeltaSeconds)
         case ELightStationMode::Dynamo:
             if (bMatches) ActiveUntil = Now + HoldSeconds;
             SetSignal(Now < ActiveUntil);
-            SetDisplay(bActive ? TEXT("DYNAMO x4") : TEXT("DYNAMO x1"));
+            SetDisplay(bActive ? FString::Printf(TEXT("DYNAMO x4 · %d s"),SecondsRemaining()) : TEXT("DYNAMO x1"));
             break;
     }
 }
@@ -196,12 +216,16 @@ FString AShipLightStation::Prompt(AShipSurvivor* S) const
             break;
         case ELightStationMode::Shutter:
             Help = FString::Printf(TEXT("Kolor %s podtrzymuje otwarcie przegrody"), *ColorName(PrimaryColor()));
+            if (bActive) Help += FString::Printf(TEXT(" · zapas %d s"),SecondsRemaining());
             break;
         case ELightStationMode::Sequence:
             Help = bSolved ? TEXT("E — powtórz sekwencję") : FString::Printf(TEXT("Pamięć kolorów · %d z %d"), NextColor, ColorSequence.Num());
+            if (!bSolved && NextColor > 0)
+                Help += FString::Printf(TEXT(" · pozostało %d s · E — zacznij od nowa"),SecondsRemaining());
             break;
         case ELightStationMode::Memory:
             Help = FString::Printf(TEXT("Naświetl napis · kolor %s"), *ColorName(PrimaryColor()));
+            if (bActive) Help += FString::Printf(TEXT(" · widoczność %d s"),SecondsRemaining());
             break;
         case ELightStationMode::Dark:
             Help = TEXT("Podejdź i odsuń światło od czujnika");
@@ -211,11 +235,13 @@ FString AShipLightStation::Prompt(AShipSurvivor* S) const
             break;
         case ELightStationMode::Alarm:
             Help = FString::Printf(TEXT("Przejdź powoli. Wiązka o mocy %d/5 lub większej uruchomi alarm"), MinimumPower);
+            if (bActive) Help += FString::Printf(TEXT(" · do wyciszenia %d s"),SecondsRemaining());
             break;
         case ELightStationMode::Dynamo:
             if (!S->bHasBattery) Help = TEXT("Potrzebna bateria");
             else if (S->Charge >= ReserveLimit) Help = TEXT("Rezerwa pełna · limit dynama 35%");
             else Help = FString::Printf(TEXT("Przytrzymaj E · ładowanie %d%%/s do 35%%"), bActive ? 8 : 2);
+            if (bActive) Help += FString::Printf(TEXT(" · premia %d s"),SecondsRemaining());
             break;
     }
     return Caption.IsEmpty() ? Help : Caption + TEXT(" · ") + Help;
@@ -224,7 +250,7 @@ FString AShipLightStation::Prompt(AShipSurvivor* S) const
 void AShipLightStation::Use(AShipSurvivor* S)
 {
     if (!bStationEnabled || !S || S->bDead || S->bEscaped) return;
-    if (bSolved && (Mode == ELightStationMode::Latch || Mode == ELightStationMode::Sequence))
+    if ((Mode == ELightStationMode::Latch && bSolved) || (Mode == ELightStationMode::Sequence && NextColor > 0))
     {
         bSolved = false;
         Progress = 0.f;
@@ -232,6 +258,9 @@ void AShipLightStation::Use(AShipSurvivor* S)
         LastIncidentColor = S->bLampOn ? S->Filter : NAME_None;
         ActiveUntil = -1.;
         SetSignal(false);
+        SetIndicator(true, Idle);
+        PlayFeedback(.22f,.76f);
+        S->Notify(Mode == ELightStationMode::Sequence ? TEXT("Pamięć wyczyszczona. Zacznij od pierwszego koloru.") : TEXT("Zatrzask zresetowany."));
     }
 }
 

@@ -1,11 +1,13 @@
 #include "ShipFixture.h"
 #include "ShipSurvivor.h"
 
+#include "CollisionShape.h"
 #include "Components/BoxComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Engine/CollisionProfile.h"
+#include "Engine/HitResult.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
@@ -66,6 +68,8 @@ AShipFixture::AShipFixture()
     Mesh->SetMobility(EComponentMobility::Movable);
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
     if (Cube.Succeeded()) Mesh->SetStaticMesh(Cube.Object);
+    static ConstructorHelpers::FObjectFinder<USoundBase> Tone(TEXT("/Engine/EngineSounds/1kSineTonePing.1kSineTonePing"));
+    FeedbackTone = Tone.Object;
 
     Trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionBounds"));
     Trigger->SetupAttachment(Mesh);
@@ -179,6 +183,7 @@ void AShipFixture::BeginPlay()
     Configure();
     ClosedLocation = GetActorLocation();
     DoorOffset = GetActorRightVector() * SlideDistance;
+    if (Kind == Plate) PlateGroupSize = FMath::Max(1, PlateGroup().Num());
     if (Kind == Crate)
     {
         Mesh->SetSimulatePhysics(true);
@@ -237,7 +242,48 @@ void AShipFixture::ChangeDoor(bool bShouldOpen)
 {
     if (bOpen == bShouldOpen) return;
     bOpen = bShouldOpen;
+    if (bOpen) SetDoorObstructed(false);
     PlayCue(.7f, bOpen ? 1.f : .84f);
+}
+
+void AShipFixture::PlayFeedback(float Volume, float Pitch)
+{
+    PlayCue(Volume, Pitch, Cue ? Cue.Get() : FeedbackTone.Get());
+}
+
+bool AShipFixture::ClosingPathOccupied(const FVector& Step) const
+{
+    if (Step.IsNearlyZero()) return false;
+    FCollisionObjectQueryParams Objects;
+    Objects.AddObjectTypesToQuery(ECC_Pawn);
+    Objects.AddObjectTypesToQuery(ECC_PhysicsBody);
+    Objects.AddObjectTypesToQuery(ECC_WorldDynamic);
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(ShipDoorSafety), false, this);
+    Params.bFindInitialOverlaps = true;
+    const FVector Center = Trigger->GetComponentLocation();
+    const FVector Direction = Step.GetSafeNormal();
+    TArray<FHitResult> Hits;
+    // Configure sizes this oriented box from the door mesh's local bounds, including its pivot offset.
+    GetWorld()->SweepMultiByObjectType(Hits, Center, Center + Step + Direction * 1.5f,
+        Trigger->GetComponentQuat(), Objects, FCollisionShape::MakeBox(Trigger->GetScaledBoxExtent()), Params);
+    for (const FHitResult& Hit : Hits)
+    {
+        const AActor* Other = Hit.GetActor();
+        if (!Other || (!Other->IsA<APawn>() && !Other->ActorHasTag(PushCrate))) continue;
+        // An initial contact on the trailing side is separating as the leaf closes.
+        const UPrimitiveComponent* Part = Hit.GetComponent();
+        if (Hit.bStartPenetrating && Part && FVector::DotProduct(Part->Bounds.Origin - Center, Direction) < 0.) continue;
+        return true;
+    }
+    return false;
+}
+
+void AShipFixture::SetDoorObstructed(bool bObstructed)
+{
+    if (bDoorObstructed == bObstructed) return;
+    bDoorObstructed = bObstructed;
+    SetIndicator(bObstructed, Amber);
+    PlayFeedback(bObstructed ? .30f : .18f, bObstructed ? .62f : 1.20f);
 }
 
 void AShipFixture::BroadcastDoors(bool bShouldOpen, bool bLockClosed)
@@ -282,17 +328,34 @@ void AShipFixture::CompletePlates(const TArray<AShipFixture*>& Plates, AShipSurv
         P->SetIndicator(true, Green);
     }
     BroadcastDoors(true);
-    PlayCue(.8f,1.15f);
+    PlayFeedback(.45f,1.15f);
     if (Survivor) Survivor->Notify(TEXT("Układ płyt odblokowany."));
+}
+
+TArray<AShipFixture*> AShipFixture::PlateGroup() const
+{
+    TArray<AShipFixture*> Group;
+    for (TActorIterator<AShipFixture> It(GetWorld()); It; ++It)
+        if (It->Kind == Plate && (Channel.IsNone() ? *It == this : It->Channel == Channel)) Group.Add(*It);
+    return Group;
+}
+
+int32 AShipFixture::UpdatePlateProgress(const TArray<AShipFixture*>& Plates)
+{
+    int32 Done = 0;
+    for (const AShipFixture* P : Plates)
+        if (P->Order > 0 ? P->bStepComplete : P->VolumeOccupied(true)) ++Done;
+    for (AShipFixture* P : Plates)
+    {
+        P->PlateGroupSize = Plates.Num();
+        P->Progress = float(Done) / Plates.Num();
+    }
+    return Done;
 }
 
 void AShipFixture::EnterPlate(AShipSurvivor* Survivor)
 {
-    TArray<AShipFixture*> Group;
-    if (Channel.IsNone()) Group.Add(this);
-    else for (TActorIterator<AShipFixture> It(GetWorld()); It; ++It)
-        if (It->Kind == Plate && It->Channel == Channel) Group.Add(*It);
-
+    const TArray<AShipFixture*> Group = PlateGroup();
     if (Order > 0)
     {
         int32 Next = MAX_int32;
@@ -306,19 +369,20 @@ void AShipFixture::EnterPlate(AShipSurvivor* Survivor)
                 P->Progress = 0.f;
                 P->SetIndicator(true, Amber);
             }
-            PlayCue(.65f,.55f);
+            PlayFeedback(.40f,.55f);
             if (Survivor) Survivor->Notify(TEXT("Błędna kolejność. Zacznij od pierwszej płyty."));
             return;
         }
         bStepComplete = true;
         SetIndicator(true, Blue);
     }
-    int32 Done = 0;
-    for (const AShipFixture* P : Group)
-        if (P->Order > 0 ? P->bStepComplete : P->VolumeOccupied(true)) ++Done;
-    for (AShipFixture* P : Group) P->Progress = float(Done) / Group.Num();
+    const int32 Done = UpdatePlateProgress(Group);
     if (Done == Group.Num()) CompletePlates(Group, Survivor);
-    else PlayCue(.45f,1.f);
+    else
+    {
+        PlayFeedback(.28f,.85f + .35f*Progress);
+        if (Survivor) Survivor->Notify(FString::Printf(TEXT("%s · %d z %d."),Order > 0 ? TEXT("Kolejność płyt") : TEXT("Obciążone płyty"),Done,Group.Num()));
+    }
 }
 
 bool AShipFixture::HasBridgeAuthorization() const
@@ -377,16 +441,7 @@ void AShipFixture::CheckVolume(AShipSurvivor* S)
         else if (Order == 0)
         {
             // A simultaneous group loses partial progress as soon as a weight is removed.
-            int32 Total=0, Done=0;
-            for (TActorIterator<AShipFixture> It(GetWorld()); It; ++It)
-                if (It->Kind == Plate && It->Channel == Channel && (!Channel.IsNone() || *It == this))
-                {
-                    ++Total;
-                    if (It->Order > 0 ? It->bStepComplete : It->VolumeOccupied(true)) ++Done;
-                }
-            for (TActorIterator<AShipFixture> It(GetWorld()); It; ++It)
-                if (It->Kind == Plate && It->Channel == Channel && (!Channel.IsNone() || *It == this))
-                    It->Progress = Total ? float(Done)/Total : 0.f;
+            UpdatePlateProgress(PlateGroup());
         }
     }
     else if (bOccupied)
@@ -412,9 +467,15 @@ void AShipFixture::Tick(float DeltaSeconds)
         const float Target = bOpen ? 1.f : 0.f;
         if (DoorFraction != Target)
         {
-            DoorFraction = FMath::FInterpConstantTo(DoorFraction, Target, DeltaSeconds, 1.f/FMath::Max(.1f,TravelTime));
-            const float Smooth = FMath::SmoothStep(0.f,1.f,DoorFraction);
-            SetActorLocation(ClosedLocation + DoorOffset*Smooth);
+            const float NextFraction = FMath::FInterpConstantTo(DoorFraction, Target, DeltaSeconds, 1.f/FMath::Max(.1f,TravelTime));
+            const FVector NextLocation = ClosedLocation + DoorOffset*FMath::SmoothStep(0.f,1.f,NextFraction);
+            const bool bBlocked = IsDoor(Kind) && !bOpen && ClosingPathOccupied(NextLocation - GetActorLocation());
+            SetDoorObstructed(bBlocked);
+            if (!bBlocked)
+            {
+                DoorFraction = NextFraction;
+                SetActorLocation(NextLocation);
+            }
         }
         if (IsDoor(Kind)) return;
     }
@@ -458,12 +519,16 @@ FString AShipFixture::Prompt(AShipSurvivor* S) const
         if (bSolved) Action = TEXT("Układ odblokowany");
         else if (Order > 0) Action = FString::Printf(TEXT("Płyta %d — wejdź w odpowiedniej kolejności"),Order);
         else Action = Value.Equals(TEXT("CrateOnly"), ESearchCase::IgnoreCase) ? TEXT("Postaw skrzynię na płycie") : TEXT("Obciąż płytę sobą lub skrzynią");
+        Action += FString::Printf(TEXT(" · %d/%d"), FMath::RoundToInt(Progress*PlateGroupSize), PlateGroupSize);
     }
+    else if (IsDoor(Kind) && bDoorObstructed)
+        Action = TEXT("Zamykanie wstrzymane. Zwolnij przejście lub odsuń skrzynię.");
     else if (Kind == Door)
         Action = Channel.IsNone() && !bInterlockClosed ? (bOpen ? TEXT("E — zamknij drzwi") : TEXT("E — otwórz drzwi")) : (bOpen ? TEXT("Przejście otwarte") : TEXT("Drzwi zablokowane przez sterownik"));
     else if (Kind == RepairDoor)
         Action = bSolved ? (bOpen ? TEXT("E — zamknij naprawione drzwi") : TEXT("E — otwórz naprawione drzwi"))
-            : (CanWeld(S) ? FString::Printf(TEXT("Przytrzymaj E — spawanie %d%%"),FMath::RoundToInt(Progress*100.f)) : TEXT("Wybierz spawarkę z naładowaną baterią"));
+            : (CanWeld(S) ? FString::Printf(TEXT("Przytrzymaj E — spawanie %d%% · pozostało %.1f s"),FMath::RoundToInt(Progress*100.f),
+                       (1.f-Progress)*FMath::Max(.25f,RepairTime)) : TEXT("Wybierz spawarkę z naładowaną baterią"));
     else if (Kind == Keypad || Kind == BridgePad)
         Action = bSolved ? TEXT("Dostęp przyznany") : (Kind == BridgePad && !S->bHasCard ? TEXT("Panel wymaga karty dostępu") : TEXT("E — wpisz kod"));
     else if (Kind == Scare) Action = bActive ? TEXT("Nasłuchuj przy drzwiach") : TEXT("E — sprawdź, co słychać za drzwiami");

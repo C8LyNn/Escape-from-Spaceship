@@ -33,16 +33,26 @@ Od miejsca startu idź w lewo za tablicą **STANOWISKA LDD** do stołu ze sprzę
 | --- | --- |
 | **1 / 2 / 3** | Wybierz białą latarkę, latarkę z kolorami lub spawarkę. |
 | **F** | Włącz lub zgaś latarkę. |
-| **Q** | Przełącz kolor w pętli czerwony → zielony → niebieski → fioletowy (UV). |
+| **Q / kółko myszy** | Q wybiera kolejny kolor. Kółkiem możesz przechodzić w obie strony między czerwonym, zielonym, niebieskim i fioletowym. |
 | **Z / X** | Zmniejsz lub zwiększ moc światła. |
 | **C / V** | Zmniejsz lub zwiększ promień. Zmienia się szerokość stożka i jego zasięg. |
 | **E** | Podnieś przedmiot, przeczytaj notatkę, użyj ładowarki lub terminala. Przytrzymaj przy uszkodzonych drzwiach z wybraną spawarką. |
-| **LPM** | Przytrzymaj, by chwycić skrzynię. Puść, by odstawić ją na płytę. |
+| **LPM** | Przytrzymaj, by chwycić skrzynię. Kółko przybliża lub odsuwa trzymaną skrzynię. Puść LPM, by odstawić ją na płytę. |
 | **I / G** | Otwórz wyposażenie i dziennik / przełącz zestaw testowy. |
 
 Moc i promień mają po pięć ustawień. Obie latarki zachowują wybrane ustawienia przy zmianie koloru lub narzędzia. Większa moc i większy promień niezależnie przyspieszają rozładowanie baterii. Panel pokazuje bieżący pobór. Zgaszona latarka nie pobiera energii.
 
 Przy pozostałych stanowiskach możesz sprawdzić naprawę drzwi, zamek szyfrowy, dwie płyty obciążane skrzyniami, sekwencje trzech i czterech płyt, dźwięki za drzwiami, śmiertelną pułapkę oraz wyjście odblokowywane kartą i kodem z notatki. **R** po śmierci lub udanej próbie uruchamia scenę od nowa.
+
+**Drabina serwisowa** stoi przy stanowisku wyposażenia. Podejdź do dolnych szczebli i naciśnij **E**. Przytrzymaj **W**, aby wejść na podest na wysokości 2,8 m. Przy krawędzi podestu **E** pozwala ponownie chwycić drabinę, a **S** zejść. W połowie drogi możesz puścić klawisz ruchu, rozejrzeć się, użyć latarki, puścić drabinę przez **E** albo odskoczyć **Spacją**. Zajęty podest wstrzymuje wejście na górę. Do kolejnego stanowiska możesz skopiować aktora **Ship Ladder**, ustawić wysokość i prędkość wspinania i umieścić podest za jego górną krawędzią.
+
+**Podczas gry** panel wyposażenia ostrzega przy 15% baterii i pokazuje wytrzymałość podczas wysiłku oraz regeneracji. Klawiatura numeryczna pokazuje liczbę wpisanych cyfr. Krótki kod można dokończyć, a po błędnym pełnym kodzie można od razu wpisać następny. Przy spawaniu widać pozostały czas, a przy płytach liczbę zaliczonych stanowisk w grupie. Zamykające się drzwi przesuwne zatrzymują się przed graczem lub skrzynią i ruszają dalej po zwolnieniu przejścia.
+
+**Ekwipunek z paczki prowadzącego.** W menu pod **Tab** można odłożyć bandaż, baterię lub klucz na podłogę i ponownie podnieść przedmiot przez **E**. Stos zachowuje liczbę sztuk. Gdy zabraknie miejsca w plecaku, reszta zostaje na podłodze. Drzwi na klucz pobierają jedną sztukę przy pierwszym odblokowaniu. Można je potem zamykać i otwierać, zachowując pozostałe klucze.
+
+**Zdrowie postaci.** W bezpiecznym miejscu stan zdrowia jest stały. Pole obrażeń na stanowisku **MECH-11** pozwala sprawdzić obrażenia i leczenie bandażem. Jeśli chcecie wykorzystać odliczanie zdrowia w innym prototypie, w ustawieniach postaci **L1_Character** włączcie **Enable Overtime Damage**. Postać będzie wtedy dodatkowo traciła 0,1 punktu zdrowia na sekundę.
+
+**Kłódka z czterema tarczami** na stanowisku **MECH-08** zapamiętuje poprawny kod od razu po ostatnim obrocie. Strzałki znikają, rygiel się wysuwa, a po animacji wraca sterowanie postacią. Podczas wpisywania kodu **Backspace** oddaje kamerę graczowi i pozwala później wrócić do próby.
 
 W testach rozgrywki w UE 5.8.4 przeszło 58 sprawdzeń mechanik, 5 sprawdzeń zakończenia i restartu oraz wszystkie 14 stanowisk bazowych. Zmierzony pobór latarki wyniósł od 0,16% do 1,46% pełnej baterii na sekundę, zależnie od ustawień. [Cztery kolory na tej samej tablicy w grze](Docs/StudentShowcase/Kolory-latarki.jpg).
 
@@ -54,7 +64,7 @@ Za stołem z wyposażeniem idź za drogowskazem **Stanowiska optyczne**. Zabierz
 | --- | --- |
 | Zatrzask świetlny | Utrzymaj czerwone światło o mocy co najmniej 3/5 przez 1,6 s. Przerwanie wiązki zeruje postęp. Po otwarciu użyj **E**, żeby powtórzyć próbę. |
 | Migawka | Niebieska wiązka trzyma przejście otwarte. Po odwróceniu latarki masz jeszcze 1,2 s na przejście. |
-| Zamek sekwencyjny | Oświetl odbiornik kolejno na czerwono, niebiesko i fioletowo. Między krokami masz 6 s. Możesz odwrócić lub zgasić latarkę na czas zmiany koloru. |
+| Zamek sekwencyjny | Oświetl odbiornik kolejno na czerwono, niebiesko i fioletowo. Panel odlicza 6 s między krokami. Możesz odwrócić lub zgasić latarkę na czas zmiany koloru. Przy częściowo wpisanej sekwencji **E** zaczyna próbę od nowa. |
 | Farba z poświatą | Fioletowy (UV) ujawnia napis. Po zabraniu wiązki pozostaje czytelny i stopniowo gaśnie przez 5 s. |
 | Czujnik ciemności | Podejdź i zostaw czujnik w ciemności przez 2 s. Skierowanie na niego światła dowolnej barwy albo odejście zamyka przejście. |
 | Przełącznik dwukolorowy | Zielony otwiera drzwi, czerwony je zamyka. Drzwi pamiętają położenie po zabraniu światła. |
@@ -64,6 +74,8 @@ Za stołem z wyposażeniem idź za drogowskazem **Stanowiska optyczne**. Zabierz
 **Własna konfiguracja.** Każda próba ma osobny folder w Outlinerze pod `Mechaniki LDD/Optyka opcjonalna`. Możesz skopiować wybrane stanowisko, pominąć je albo wyłączyć odbiornik w Details przez **Station Enabled**. Przy kopiowaniu ustaw nową, jednakową wartość **Channel** na odbiorniku i jego drzwiach. Do samodzielnego stanowiska dodaj aktora **Ship Light Station**, wybierz **Mode** i ustaw kolor lub czasy reakcji. Obsługę latarek zapewnia **Ship Survivor** obecny na scenie. Żaden z tych kanałów nie jest wymagany przez wyjście.
 
 Testy rozgrywki w UE 5.8.4 objęły 76 sprawdzeń nowych stanowisk i ich współpracy z dotychczasową sceną. Sprawdzono m.in. przejście przez pierwotne wyjście przed rozwiązaniem zagadek optycznych, fizyczny ruch drzwi, zanikanie napisu i tempo ładowania po puszczeniu klawisza.
+
+W kolejnej serii PIE przeszło 31 prób drabiny, 31 prób podnoszenia, upuszczania i używania kluczy oraz wszystkie 14 stanowisk z paczki prowadzącego. Próby objęły wejście i zejście oryginalną postacią, zablokowany podest, restart, upuszczenie przedmiotu tuż przy stole i ponowne zebranie go przez **E**. Przy pełnym zdrowiu lub naładowaniu oryginalne menu zachowało obie sztuki bandaża lub baterii, a uzupełnienie zasobu zużyło jedną. W teście kłódki uruchomionym w tle naciśnięcia strzałek wywołano przez zdarzenia widocznych przycisków UMG. Sprawdzono obrót tarcz, ruch rygla, blokadę ponownej aktywacji i powrót sterowania.
 
 ## Dokumentacja sceny pokazowej
 
