@@ -65,6 +65,7 @@ public:
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
+    UPROPERTY() TObjectPtr<UMaterialInterface> FilteredTextMaterial;
     void SetIndicator(bool bLit, FLinearColor Color);
     void BroadcastDoors(bool bShouldOpen, bool bLockClosed = false);
     void PlayCue(float Volume = 1.f, float Pitch = 1.f, USoundBase* Override = nullptr);

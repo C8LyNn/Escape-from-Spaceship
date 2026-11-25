@@ -22,6 +22,8 @@
 #include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
 #include "Sound/SoundBase.h"
 #include "UObject/ConstructorHelpers.h"
 #include "UObject/UnrealType.h"
@@ -73,6 +75,12 @@ AShipSurvivor::AShipSurvivor()
     PrimaryActorTick.bCanEverTick = true;
     PrimaryActorTick.bTickEvenWhenPaused = true;
     InputPriority = 90;
+    static ConstructorHelpers::FObjectFinder<UClass> InteractionClass(TEXT("/Game/Blueprints/Interfaces/BPI_Interaction.BPI_Interaction_C"));
+    static ConstructorHelpers::FObjectFinder<UClass> GrabClass(TEXT("/Game/Blueprints/Interfaces/BPI_Grab.BPI_Grab_C"));
+    StockInteraction = InteractionClass.Object;
+    StockGrab = GrabClass.Object;
+    static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> Params(TEXT("/Game/ShipMechanics/Filters/MPC_HandheldBeam.MPC_HandheldBeam"));
+    BeamParameters = Params.Object;
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Kit"));
     Beam = CreateDefaultSubobject<USpotLightComponent>(TEXT("HandheldBeam"));
     Beam->SetupAttachment(RootComponent);
@@ -183,7 +191,7 @@ void AShipSurvivor::ConfigureInput()
     Bind(EKeys::E, IE_Released, &AShipSurvivor::ReleaseInteraction);
     Bind(EKeys::SpaceBar, IE_Pressed, &AShipSurvivor::JumpFromLadder);
     Bind(EKeys::LeftMouseButton, IE_Pressed, &AShipSurvivor::StartDrag);
-    Bind(EKeys::LeftMouseButton, IE_Released, &AShipSurvivor::EndDrag);
+    Bind(EKeys::LeftMouseButton, IE_Released, &AShipSurvivor::ReleaseMouseDrag);
     Bind(EKeys::F, IE_Pressed, &AShipSurvivor::ToggleLamp);
     Bind(EKeys::Q, IE_Pressed, &AShipSurvivor::CycleFilter);
     for (const FKey& Key : {EKeys::MouseScrollDown, EKeys::MouseScrollUp})
@@ -218,7 +226,10 @@ void AShipSurvivor::UpdateInputRouting()
         const FKey& K = Binding.Chord.Key;
         bool bOwn = false;
         if (K == EKeys::G) bOwn = true;
-        else if (K == EKeys::E) bOwn = Focus.IsValid() || bOwnUse || bModal || IsOnLadder() || bLadderUseDown;
+        else if (K == EKeys::E) bOwn = Focus.IsValid() || FocusCrate.IsValid() || CrateGrabKey == EKeys::E
+            || HeldStockObject.IsValid() || (StockTarget.IsValid() && StockGrab && StockTarget->GetClass()->ImplementsInterface(StockGrab)
+                && !StockTarget->GetClass()->ImplementsInterface(StockInteraction))
+            || bOwnUse || bModal || IsOnLadder() || bLadderUseDown;
         else if (K == EKeys::SpaceBar) bOwn = IsOnLadder() || bModal;
         else if (K == EKeys::LeftMouseButton) bOwn = FocusCrate.IsValid() || bOwnDrag || bModal;
         else if (K == EKeys::F || K == EKeys::Q || K == EKeys::I) bOwn = bKitEnabled;
@@ -275,17 +286,29 @@ void AShipSurvivor::RefreshFocus()
 {
     Focus.Reset();
     FocusCrate.Reset();
+    StockTarget.Reset();
     if (!TrackedPawn.IsValid() || IsOnLadder() || bDead || bEscaped || IsKeypadOpen() || bInventoryOpen) return;
     FHitResult Hit;
     FCollisionQueryParams Params(SCENE_QUERY_STAT(ShipInteraction), false, TrackedPawn.Get());
     Params.AddIgnoredActor(this);
     const FVector Start = ViewOrigin();
-    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + ViewDirection() * UseRange, ECC_Visibility, Params))
+    constexpr float StockUseRange = 350.f; // L1_Character uses this distance for Action and LMB.
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + ViewDirection() * StockUseRange, ECC_Visibility, Params))
     {
-        Focus = Cast<AShipFixture>(Hit.GetActor());
-        FocusHit = Hit.ImpactPoint;
-        if (Hit.GetActor() && Hit.GetActor()->ActorHasTag(TEXT("PushCrate")) && Hit.GetComponent() && Hit.GetComponent()->IsSimulatingPhysics())
-            FocusCrate = Hit.GetComponent();
+        AActor* Actor = Hit.GetActor();
+        if (Actor && ((StockInteraction && Actor->GetClass()->ImplementsInterface(StockInteraction))
+            || (StockGrab && Actor->GetClass()->ImplementsInterface(StockGrab))))
+        {
+            StockTarget = Actor;
+            return;
+        }
+        if (Hit.Distance <= UseRange)
+        {
+            Focus = Cast<AShipFixture>(Actor);
+            FocusHit = Hit.ImpactPoint;
+            if (Actor && Actor->ActorHasTag(TEXT("PushCrate")) && Hit.GetComponent() && Hit.GetComponent()->IsSimulatingPhysics())
+                FocusCrate = Hit.GetComponent();
+        }
     }
     if (Focus.IsValid() || FocusCrate.IsValid()) return;
     // From the upper landing, the deck can hide the rungs from the player's view.
@@ -333,15 +356,27 @@ void AShipSurvivor::StartUse()
         return;
     }
     RefreshFocus();
+    if (IsDragging() || bOwnUse || HeldStockObject.IsValid()) return;
+    if (FocusCrate.IsValid()) { GrabFocusedCrate(EKeys::E); return; }
+    if (AActor* Actor = StockTarget.Get())
+    {
+        // Stock Action already dispatches Interact. Only the grab-only interface needs an E alias.
+        if (StockGrab && Actor->GetClass()->ImplementsInterface(StockGrab) && !Actor->GetClass()->ImplementsInterface(StockInteraction))
+            if (UFunction* Grab = Actor->FindFunction(TEXT("GrabObject")); Grab && Grab->NumParms == 0)
+            {
+                HeldStockObject = Actor;
+                Actor->ProcessEvent(Grab, nullptr);
+            }
+        return;
+    }
     AShipFixture* Fixture = Focus.Get();
-    if (!Fixture || IsDragging() || bOwnUse) return;
+    if (!Fixture) return;
     if (AShipLadder* Ladder = Cast<AShipLadder>(Fixture))
     {
         if (Ladder->TryMount(Cast<ACharacter>(TrackedPawn.Get())))
         {
             MountedLadder = Ladder;
             bLadderUseDown = true;
-            SetKit(true);
             UpdateInputRouting();
         }
         return;
@@ -353,6 +388,12 @@ void AShipSurvivor::StartUse()
 }
 void AShipSurvivor::EndUse()
 {
+    if (AActor* Actor = HeldStockObject.Get())
+    {
+        HeldStockObject.Reset();
+        if (UFunction* Release = Actor->FindFunction(TEXT("ReleaseObject")); Release && Release->NumParms == 0)
+            Actor->ProcessEvent(Release, nullptr);
+    }
     AShipFixture* Previous = HeldFixture.Get();
     HeldFixture.Reset();
     bOwnUse = false;
@@ -360,7 +401,12 @@ void AShipSurvivor::EndUse()
     SetWelding(false);
 }
 
-void AShipSurvivor::ReleaseInteraction() { bLadderUseDown = false; EndUse(); }
+void AShipSurvivor::ReleaseInteraction()
+{
+    bLadderUseDown = false;
+    if (CrateGrabKey == EKeys::E) EndDrag();
+    EndUse();
+}
 bool AShipSurvivor::IsOnLadder() const { return MountedLadder.IsValid() && MountedLadder->HasRider(); }
 void AShipSurvivor::LeaveLadder()
 {
@@ -380,19 +426,28 @@ void AShipSurvivor::StartDrag()
 {
     if (IsDragging() || IsBaseMenuActive() || IsOnLadder() || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
     RefreshFocus();
+    GrabFocusedCrate(EKeys::LeftMouseButton);
+}
+void AShipSurvivor::ReleaseMouseDrag()
+{
+    if (CrateGrabKey == EKeys::LeftMouseButton) EndDrag();
+}
+void AShipSurvivor::GrabFocusedCrate(FKey Key)
+{
     UPrimitiveComponent* Crate = FocusCrate.Get();
     if (!Crate || !TrackedPawn.IsValid()) return;
-    SetKit(true);
     EndUse();
     GrabDistance = FMath::Clamp(float((FocusHit - ViewOrigin()).Size2D()), 78.f, UseRange);
     GrabHeight = FocusHit.Z - TrackedPawn->GetActorLocation().Z;
     Grabber->GrabComponentAtLocation(Crate, NAME_None, FocusHit);
     bOwnDrag = IsDragging();
+    CrateGrabKey = bOwnDrag ? Key : FKey();
 }
 void AShipSurvivor::EndDrag()
 {
     if (IsDragging()) Grabber->ReleaseComponent();
     bOwnDrag = false;
+    CrateGrabKey = FKey();
 }
 void AShipSurvivor::UpdateDrag()
 {
@@ -564,6 +619,22 @@ void AShipSurvivor::UpdateBeam()
         const FLinearColor Color = bWelding ? FLinearColor(.40f,.74f,1.f) : GetFilterColor();
         if (!Beam->GetLightColor().Equals(Color,.012f)) Beam->SetLightColor(Color);
     }
+    if (GetWorld() && BeamParameters)
+    {
+        if (UMaterialParameterCollectionInstance* Ink = GetWorld()->GetParameterCollectionInstance(BeamParameters))
+        {
+            const bool bInkLit = bVisible && bLampOn;
+            if (bInkLit)
+            {
+                const FVector Origin = Beam->GetComponentLocation();
+                const FVector Axis = Beam->GetForwardVector();
+                Ink->SetVectorParameterValue(TEXT("OriginRange"), FLinearColor(Origin.X, Origin.Y, Origin.Z, Beam->AttenuationRadius));
+                Ink->SetVectorParameterValue(TEXT("AxisOuter"), FLinearColor(Axis.X, Axis.Y, Axis.Z, FMath::Cos(FMath::DegreesToRadians(Beam->OuterConeAngle))));
+            }
+            Ink->SetVectorParameterValue(TEXT("BeamResponse"), FLinearColor(FMath::Cos(FMath::DegreesToRadians(Beam->InnerConeAngle)),
+                bInkLit ? PowerMultiplier(PowerLevel) : 0.f, 0.f, 0.f));
+        }
+    }
     if (bWelding && WelderAudio->Sound && !WelderAudio->IsPlaying()) WelderAudio->Play();
     if (!bWelding && WelderAudio->IsPlaying()) WelderAudio->Stop();
 }
@@ -593,8 +664,13 @@ FString AShipSurvivor::GetNotice() const
 FString AShipSurvivor::GetPrompt() const
 {
     if (IsOnLadder()) return MountedLadder->Prompt(const_cast<AShipSurvivor*>(this));
-    if (IsDragging()) return TEXT("Kółko myszy — przybliż lub odsuń skrzynię · Puść LPM, aby ją odstawić.");
-    if (FocusCrate.IsValid()) return TEXT("Przytrzymaj LPM i porusz się, aby przesunąć skrzynię.");
+    if (IsDragging()) return CrateGrabKey == EKeys::E ? TEXT("Puść E — odstaw skrzynię · Kółko myszy — odległość")
+        : TEXT("Puść LPM — odstaw skrzynię · Kółko myszy — odległość");
+    if (HeldStockObject.IsValid()) return TEXT("Puść E — puść uchwyt");
+    if (FocusCrate.IsValid()) return TEXT("Przytrzymaj E — przesuń skrzynię");
+    if (const AActor* Actor = StockTarget.Get())
+        return StockInteraction && Actor->GetClass()->ImplementsInterface(StockInteraction)
+            ? TEXT("E — użyj") : TEXT("Przytrzymaj E — chwyć");
     if (const AShipFixture* Fixture = Focus.Get()) return Fixture->Prompt(const_cast<AShipSurvivor*>(this));
     return {};
 }
@@ -712,8 +788,8 @@ void AShipSurvivor::Tick(float DeltaSeconds)
     SyncPawn();
     if (IsBaseMenuActive())
     {
-        Focus.Reset(); FocusCrate.Reset();
-        if (bOwnUse) EndUse();
+        Focus.Reset(); FocusCrate.Reset(); StockTarget.Reset();
+        if (bOwnUse || HeldStockObject.IsValid()) EndUse();
         if (IsDragging()) EndDrag();
         TickEquipment(UGameplayStatics::IsGamePaused(this) ? 0.f : DeltaSeconds);
         UpdateInputRouting();
@@ -733,7 +809,7 @@ void AShipSurvivor::Tick(float DeltaSeconds)
     }
     if (IsDragging())
     {
-        if (LocalPC->IsInputKeyDown(EKeys::LeftMouseButton)) UpdateDrag();
+        if (LocalPC->IsInputKeyDown(CrateGrabKey)) UpdateDrag();
         else EndDrag();
     }
     TickEquipment(DeltaSeconds);

@@ -19,6 +19,21 @@ Różnice względem oryginału w czystej bazie:
 
 ## Uruchomienie
 
+Po zaakceptowaniu zaproszenia do prywatnego repozytorium pobierz gałąź ze sceną testową.
+
+```sh
+git clone --single-branch --branch gameplay/ldd-ue-5.8 https://github.com/C8LyNn/Escape-from-Spaceship.git
+```
+
+Jeśli masz już kopię projektu, przełącz się na gałąź ze sceną w terminalu w folderze tej kopii.
+
+```sh
+git remote set-branches --add origin gameplay/ldd-ue-5.8
+git fetch origin
+git switch gameplay/ldd-ue-5.8
+git pull --ff-only origin gameplay/ldd-ue-5.8
+```
+
 Po pierwszym pobraniu projektu zezwól edytorowi na zbudowanie modułu `HorrorProject`. Na Windows kompilacja wymaga narzędzi C++ dla Unreal Engine w Visual Studio i zestawu Windows SDK.
 
 Otwórz `HorrorProject.uproject` w Unreal Engine 5.8.4 i naciśnij **Play**. Mapa startowa `/Game/StudentShowcase/Maps/L_ModelsAndMechanics_Showcase` ma sześć działów galerii na wprost i czternaście stanowisk testowych za miejscem startu. Turkusowa linia prowadzi przez galerię, bursztynowe oznaczenia prowadzą przez stanowiska. Oryginalną mapę ćwiczeń można otworzyć pod `/Game/Maps/Level1`.
@@ -27,7 +42,7 @@ Ruch obsługują WASD i mysz. Shift służy do sprintu, Ctrl do kucania, E do in
 
 ## Stanowiska mechanik z LDD
 
-Od miejsca startu idź w lewo za tablicą **STANOWISKA LDD** do stołu ze sprzętem. Weź białą latarkę, latarkę z kolorami i wspólną baterię, celując w każdy przedmiot i naciskając **E**. Podejdź do tablicy **CZTERY FILTRY**. Każda z czterech barw odsłania w tym samym miejscu inny znak farby i cyfrę kodu. Ustawienie promienia decyduje także o tym, jak daleko i jak szeroko od środka wiązki można ujawnić ślad.
+Od miejsca startu idź w lewo za tablicą **STANOWISKA LDD** do stołu ze sprzętem. Weź białą latarkę, latarkę z kolorami i wspólną baterię, celując w każdy przedmiot i naciskając **E**. Podejdź do tablicy **CZTERY FILTRY**. Każda z czterech barw odsłania w tym samym miejscu inny znak farby i cyfrę kodu. Ustawienie promienia decyduje także o tym, jak daleko i jak szeroko od środka wiązki można ujawnić ślad. Litery i farba stopniowo zanikają przy brzegu wiązki.
 
 | Klawisz | Działanie |
 | --- | --- |
@@ -40,7 +55,7 @@ Od miejsca startu idź w lewo za tablicą **STANOWISKA LDD** do stołu ze sprzę
 | **LPM** | Przytrzymaj, by chwycić skrzynię. Kółko przybliża lub odsuwa trzymaną skrzynię. Puść LPM, by odstawić ją na płytę. |
 | **I / G** | Otwórz wyposażenie i dziennik / przełącz zestaw testowy. |
 
-Moc i promień mają po pięć ustawień. Obie latarki zachowują wybrane ustawienia przy zmianie koloru lub narzędzia. Większa moc i większy promień niezależnie przyspieszają rozładowanie baterii. Panel pokazuje bieżący pobór. Zgaszona latarka nie pobiera energii.
+Moc i promień mają po pięć ustawień. Obie latarki zachowują wybrane ustawienia przy zmianie koloru lub narzędzia. Większa moc i większy promień niezależnie przyspieszają rozładowanie baterii. Ekran wyposażenia pod **I** pokazuje bieżący pobór. Zgaszona latarka nie pobiera energii.
 
 Plecak pod **Tab** otwiera się w czasie gry. Na drabinie postać trzyma się szczebla, a w powietrzu nadal działa grawitacja. Zapalona latarka zużywa energię także podczas przeglądania plecaka. W zbliżeniu na kłódkę wiązka zestawu gaśnie do chwili powrotu do postaci. Po przełączeniu na zestaw klawiszem **G** bazowa latarka zachowuje stan baterii. Powrót przywraca jej poprzedni stan włączenia. Jeśli postać zginie przy otwartym plecaku, panel ustępuje miejsca ekranowi restartu. [Test przełączania wyposażenia i sterowania w PIE](Tests/Gameplay/test_equipment_handoffs.py)
 
@@ -48,7 +63,7 @@ Przy pozostałych stanowiskach możesz sprawdzić naprawę drzwi, zamek szyfrowy
 
 **Drabina serwisowa** stoi przy stanowisku wyposażenia. Podejdź do dolnych szczebli i naciśnij **E**. Przytrzymaj **W**, aby wejść na podest na wysokości 2,8 m. Przy krawędzi podestu **E** pozwala ponownie chwycić drabinę, a **S** zejść. W połowie drogi możesz puścić klawisz ruchu, rozejrzeć się, użyć latarki, puścić drabinę przez **E** albo odskoczyć **Spacją**. Zajęty podest wstrzymuje wejście na górę. Do kolejnego stanowiska możesz skopiować aktora **Ship Ladder**, ustawić wysokość i prędkość wspinania i umieścić podest za jego górną krawędzią.
 
-**Podczas gry** panel wyposażenia ostrzega przy 15% baterii i pokazuje wytrzymałość podczas wysiłku oraz regeneracji. Klawiatura numeryczna pokazuje liczbę wpisanych cyfr. Krótki kod można dokończyć, a po błędnym pełnym kodzie można od razu wpisać następny. Przy spawaniu widać pozostały czas, a przy płytach liczbę zaliczonych stanowisk w grupie. Zamykające się drzwi przesuwne zatrzymują się przed graczem lub skrzynią i ruszają dalej po zwolnieniu przejścia.
+**Podczas gry** trzy paski w lewym dolnym rogu pokazują zdrowie, wytrzymałość i baterię. Wypełnienie paska baterii ma kolor wybranego filtra, także po zgaszeniu latarki. Długość wypełnienia odpowiada ładunkowi używanego zestawu. Klawiatura numeryczna pokazuje liczbę wpisanych cyfr. Krótki kod można dokończyć, a po błędnym pełnym kodzie można od razu wpisać następny. Przy spawaniu widać pozostały czas, a przy płytach liczbę zaliczonych stanowisk w grupie. Zamykające się drzwi przesuwne zatrzymują się przed graczem lub skrzynią i ruszają dalej po zwolnieniu przejścia.
 
 **Ekwipunek z paczki prowadzącego.** W menu pod **Tab** można odłożyć bandaż, baterię lub klucz na podłogę i ponownie podnieść przedmiot przez **E**. Stos zachowuje liczbę sztuk. Gdy zabraknie miejsca w plecaku, reszta zostaje na podłodze. Drzwi na klucz pobierają jedną sztukę przy pierwszym odblokowaniu. Można je potem zamykać i otwierać, zachowując pozostałe klucze.
 

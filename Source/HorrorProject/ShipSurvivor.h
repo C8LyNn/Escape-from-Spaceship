@@ -8,6 +8,7 @@ class AShipFixture;
 class AShipLadder;
 class IInputProcessor;
 class UAudioComponent;
+class UMaterialParameterCollection;
 class UPhysicsHandleComponent;
 class UPrimitiveComponent;
 class UShipHUDOverlay;
@@ -50,6 +51,7 @@ public:
     UFUNCTION(BlueprintPure) bool BeamReaches(const FVector& Point) const;
     bool BeamReachesTarget(const FVector& Point, const AActor* Receiver) const;
     UFUNCTION(BlueprintPure) float GetLampDrainPerSecond() const;
+
     UFUNCTION(BlueprintPure) FVector ViewOrigin() const;
     UFUNCTION(BlueprintPure) FVector ViewDirection() const;
     UFUNCTION(BlueprintPure) bool IsOnLadder() const;
@@ -64,7 +66,7 @@ public:
     void ClampNoteScroll(int32 Maximum);
     const FString& GetCode() const { return EnteredCode; }
     UFUNCTION(BlueprintPure, Category="Ship|Keypad") int32 GetCodeLength() const;
-    FString GetPrompt() const;
+    UFUNCTION(BlueprintPure, Category="Ship|Feedback") FString GetPrompt() const;
     UFUNCTION(BlueprintPure, Category="Ship|Feedback") FString GetNotice() const;
     FString GetFilterLabel() const;
     FString GetToolLabel() const;
@@ -79,6 +81,12 @@ private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<UPhysicsHandleComponent> Grabber;
     UPROPERTY() TObjectPtr<USoundBase> FeedbackSound;
     UPROPERTY() TObjectPtr<UShipHUDOverlay> Overlay;
+    UPROPERTY() TObjectPtr<UMaterialParameterCollection> BeamParameters;
+    UPROPERTY() TSubclassOf<UInterface> StockInteraction;
+    UPROPERTY() TSubclassOf<UInterface> StockGrab;
+    TWeakObjectPtr<AActor> StockTarget;
+    TWeakObjectPtr<AActor> HeldStockObject;
+    FKey CrateGrabKey;
     TSharedPtr<IInputProcessor> ModalShortcuts;
     TWeakObjectPtr<APlayerController> LocalPC;
     TWeakObjectPtr<APawn> TrackedPawn;
@@ -119,6 +127,8 @@ private:
     void JumpFromLadder();
     void StartUse();
     void StartDrag();
+    void ReleaseMouseDrag();
+    void GrabFocusedCrate(FKey Key);
     void EndDrag();
     void UpdateDrag();
     void ToggleLamp();

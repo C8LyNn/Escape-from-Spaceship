@@ -80,6 +80,8 @@ AShipFixture::AShipFixture()
     GlyphText->SetAbsolute(false, false, true);
     GlyphText->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     GlyphText->SetCastShadow(false);
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> InkFont(TEXT("/Game/ShipMechanics/Filters/M_FilteredInscription.M_FilteredInscription"));
+    FilteredTextMaterial = InkFont.Object;
     GlyphText->SetHorizontalAlignment(EHTA_Center);
     GlyphText->SetVerticalAlignment(EVRTA_TextCenter);
     PaintLayer = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FilteredPaint"));
@@ -183,6 +185,11 @@ void AShipFixture::BeginPlay()
     Configure();
     ClosedLocation = GetActorLocation();
     DoorOffset = GetActorRightVector() * SlideDistance;
+    if (Kind == Glyph)
+    {
+        GlyphText->SetTextMaterial(FilteredTextMaterial);
+        if (AShipSurvivor* Player = FindSurvivor()) AddTickPrerequisiteActor(Player);
+    }
     if (Kind == Plate) PlateGroupSize = FMath::Max(1, PlateGroup().Num());
     if (Kind == Crate)
     {
@@ -208,7 +215,7 @@ void AShipFixture::BeginPlay()
     LocalAttenuation->Attenuation.AttenuationShapeExtents = FVector(160.f);
     LocalAttenuation->Attenuation.FalloffDistance = 1200.f;
     SetActorTickEnabled(IsDoor(Kind) || Kind == Glyph || Kind == Plate || Kind == Roar || Kind == Scare || Kind == Hazard || Kind == ExitKind);
-    SetActorTickInterval(IsDoor(Kind) || Kind == Scare ? 0.f : .05f);
+    SetActorTickInterval(IsDoor(Kind) || Kind == Scare || Kind == Glyph ? 0.f : .05f);
 }
 
 void AShipFixture::EndPlay(const EEndPlayReason::Type Reason)
@@ -483,13 +490,11 @@ void AShipFixture::Tick(float DeltaSeconds)
     if (Kind == Glyph)
     {
         const FName Filter = RequiredFilter.IsNone() ? UV : RequiredFilter;
-        const bool bShown = CanAct(S) && S->Filter == Filter && S->BeamReaches(GetActorLocation());
-        if (bActive != bShown)
-        {
-            bActive = bShown;
-            GlyphText->SetVisibility(bShown && bShowText);
-            PaintLayer->SetVisibility(bShown && PaintMaterial != nullptr);
-        }
+        // The material clips individual pixels. A center trace would discard strokes at the cone edge.
+        const bool bMatching = CanAct(S) && S->bKitEnabled && S->bLampOn && S->Filter == Filter;
+        bActive = bMatching && S->BeamReaches(GetActorLocation());
+        GlyphText->SetVisibility(bMatching && bShowText);
+        PaintLayer->SetVisibility(bMatching && PaintMaterial != nullptr);
         return;
     }
     if (Kind == Scare && bActive && ScareStage < 4 && GetWorld()->GetTimeSeconds() >= NextScareSound)
@@ -512,8 +517,8 @@ FString AShipFixture::Prompt(AShipSurvivor* S) const
     FString Action;
     if (IsPickup(Kind)) Action = TEXT("E — podnieś ") + PickupName(Kind);
     else if (Kind == Note) Action = TEXT("E — przeczytaj notatkę");
-    else if (Kind == Charger) Action = S->bHasBattery ? TEXT("E — naładuj baterię") : TEXT("Potrzebna bateria");
-    else if (Kind == Crate) Action = TEXT("Skrzynia fizyczna — chwyć lub przesuń");
+    else if (Kind == Charger) Action = S->bHasBattery ? TEXT("E — naładuj baterię") : TEXT("E — sprawdź ładowarkę · potrzebna bateria");
+    else if (Kind == Crate) Action = TEXT("Przytrzymaj E — przesuń skrzynię");
     else if (Kind == Plate)
     {
         if (bSolved) Action = TEXT("Układ odblokowany");
@@ -522,17 +527,17 @@ FString AShipFixture::Prompt(AShipSurvivor* S) const
         Action += FString::Printf(TEXT(" · %d/%d"), FMath::RoundToInt(Progress*PlateGroupSize), PlateGroupSize);
     }
     else if (IsDoor(Kind) && bDoorObstructed)
-        Action = TEXT("Zamykanie wstrzymane. Zwolnij przejście lub odsuń skrzynię.");
+        Action = TEXT("E — sprawdź drzwi · zablokowane przejście");
     else if (Kind == Door)
-        Action = Channel.IsNone() && !bInterlockClosed ? (bOpen ? TEXT("E — zamknij drzwi") : TEXT("E — otwórz drzwi")) : (bOpen ? TEXT("Przejście otwarte") : TEXT("Drzwi zablokowane przez sterownik"));
+        Action = Channel.IsNone() && !bInterlockClosed ? (bOpen ? TEXT("E — zamknij drzwi") : TEXT("E — otwórz drzwi")) : (bOpen ? TEXT("E — sprawdź otwarte drzwi") : TEXT("E — sprawdź drzwi · blokada sterownika"));
     else if (Kind == RepairDoor)
         Action = bSolved ? (bOpen ? TEXT("E — zamknij naprawione drzwi") : TEXT("E — otwórz naprawione drzwi"))
             : (CanWeld(S) ? FString::Printf(TEXT("Przytrzymaj E — spawanie %d%% · pozostało %.1f s"),FMath::RoundToInt(Progress*100.f),
-                       (1.f-Progress)*FMath::Max(.25f,RepairTime)) : TEXT("Wybierz spawarkę z naładowaną baterią"));
+                       (1.f-Progress)*FMath::Max(.25f,RepairTime)) : TEXT("E — sprawdź spoinę · potrzebna spawarka i naładowana bateria"));
     else if (Kind == Keypad || Kind == BridgePad)
-        Action = bSolved ? TEXT("Dostęp przyznany") : (Kind == BridgePad && !S->bHasCard ? TEXT("Panel wymaga karty dostępu") : TEXT("E — wpisz kod"));
+        Action = bSolved ? TEXT("E — sprawdź dostęp · przyznany") : (Kind == BridgePad && !S->bHasCard ? TEXT("E — sprawdź panel · wymagana karta dostępu") : TEXT("E — wpisz kod"));
     else if (Kind == Scare) Action = bActive ? TEXT("Nasłuchuj przy drzwiach") : TEXT("E — sprawdź, co słychać za drzwiami");
-    else if (Kind == ExitKind) Action = HasBridgeAuthorization() ? TEXT("E — skorzystaj z wyjścia") : TEXT("Wyjście wymaga autoryzacji mostka");
+    else if (Kind == ExitKind) Action = HasBridgeAuthorization() ? TEXT("E — skorzystaj z wyjścia") : TEXT("E — sprawdź wyjście · wymagana autoryzacja mostka");
     if (Action.IsEmpty()) return Caption;
     return Caption.IsEmpty() ? Action : Caption + TEXT(" · ") + Action;
 }

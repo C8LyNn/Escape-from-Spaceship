@@ -64,7 +64,12 @@ void AShipLightStation::BeginPlay()
         return;
     }
 
-    SetActorTickInterval(.05f);
+    SetActorTickInterval(Mode == ELightStationMode::Memory ? 0.f : .05f);
+    if (Mode == ELightStationMode::Memory)
+    {
+        GlyphText->SetTextMaterial(FilteredTextMaterial);
+        if (AShipSurvivor* Player = FindSurvivor()) AddTickPrerequisiteActor(Player);
+    }
     const FVector Front = Trigger->GetComponentLocation() + GetActorForwardVector() * (Trigger->GetScaledBoxExtent().X + 1.5f);
     GlyphText->SetWorldLocationAndRotation(Front,GetActorRotation());
     GlyphText->SetWorldSize(GlyphSize);
@@ -166,9 +171,7 @@ void AShipLightStation::Tick(float DeltaSeconds)
             Progress = FMath::Clamp(float((ActiveUntil - Now) / FMath::Max(.1f, HoldSeconds)), 0.f, 1.f);
             SetSignal(Progress > 0.f);
             SetDisplay(Value.IsEmpty() ? TEXT("SLAD") : Value);
-            GlyphText->SetVisibility(bActive);
-            if (bActive)
-                GlyphText->SetTextRenderColor((FLinearColor(.70f,.90f,1.f) * Progress).ToFColorSRGB());
+            GlyphText->SetVisibility(S->bLampOn && S->Filter == PrimaryColor() && S->PowerLevel >= MinimumPower);
             break;
         }
         case ELightStationMode::Dark:
@@ -225,7 +228,7 @@ FString AShipLightStation::Prompt(AShipSurvivor* S) const
             break;
         case ELightStationMode::Memory:
             Help = FString::Printf(TEXT("Naświetl napis · kolor %s"), *ColorName(PrimaryColor()));
-            if (bActive) Help += FString::Printf(TEXT(" · widoczność %d s"),SecondsRemaining());
+            if (bActive) Help += FString::Printf(TEXT(" · pamięć czujnika %d s"),SecondsRemaining());
             break;
         case ELightStationMode::Dark:
             Help = TEXT("Podejdź i odsuń światło od czujnika");

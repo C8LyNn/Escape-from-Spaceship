@@ -1,6 +1,8 @@
 #include "ShipHUD.h"
 
 #include "ShipSurvivor.h"
+#include "Components/ProgressBar.h"
+#include "Kismet/GameplayStatics.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Fonts/FontMeasure.h"
 #include "Rendering/DrawElements.h"
@@ -74,13 +76,7 @@ namespace
         {
             Text(String,(W - TextWidth(String,Size,bBold))*.5f,Y,Size,Color,bBold);
         }
-        void Meter(float X, float Y, float Width, const FString& Label,float Value,const FLinearColor& Color)
-        {
-            const FString Caption = FString::Printf(TEXT("%s   %d%%"),*Label,FMath::RoundToInt(Value));
-            Text(Caption,X,Y,14.f,Ink);
-            Rect(X,Y+25.f,Width,4.f,Rule);
-            Rect(X,Y+25.f,Width*FMath::Clamp(Value/100.f,0.f,1.f),4.f,Color);
-        }
+
         void Banner(float X,float Y,float Width,const FString& Value,const FLinearColor& Color)
         {
             const TArray<FString> Rows=Lines(Value,16.f,Width-40.f);
@@ -138,8 +134,8 @@ namespace
         static void Play(FShipCanvas& C,AShipSurvivor& P,const FString& Prompt)
         {
             const bool bLamp = P.Equipped != TEXT("Welder") && (P.Equipped == TEXT("White") ? P.bHasWhite : P.bHasColorLamp);
-            const float Height = bLamp ? 142.f : 107.f;
-            const float X=24.f, Y=C.H-Height-25.f;
+            const float Height = bLamp ? 97.f : 69.f;
+            const float X=24.f, Y=85.f;
             C.Rect(X,Y,365.f,Height,Strip);
             C.Rect(X,Y,3.f,Height,P.bWelding?Warning:Accent);
             C.Text(P.GetToolLabel(),X+16.f,Y+9.f,19.f,Ink,true);
@@ -152,17 +148,12 @@ namespace
                 if (bLamp)
                 {
                     C.Text(FString::Printf(TEXT("Z/X  Moc %d/5      C/V  Promień %d/5"),P.PowerLevel,P.RadiusLevel),X+16.f,Y+65.f,14.f,Ink);
-                    C.Text(FString::Printf(TEXT("Pobór %.2f%%/s"),P.bLampOn ? P.GetLampDrainPerSecond() : 0.f),X+216.f,Y+99.f,13.f,Soft);
+
                 }
             }
-            const FLinearColor MeterColor=P.Charge<18.f?Warning:Accent;
-            C.Meter(X+16.f,Y+Height-41.f,330.f,P.bHasBattery?TEXT("Wspólna bateria"):TEXT("Brak baterii"),P.Charge,MeterColor);
-            if (P.Stamina < 99.f)
-            {
-                C.Rect(X,Y-47.f,205.f,40.f,Strip);
-                C.Meter(X+12.f,Y-44.f,180.f,TEXT("Wytrzymałość"),P.Stamina,P.Stamina < 20.f ? Warning : Accent);
-            }
-            C.Text(TEXT("I  Wyposażenie i sterowanie     G  Wyłącz zestaw"),C.W-365.f,C.H-41.f,13.f,Soft);
+
+            const FString Controls = TEXT("I  Wyposażenie i sterowanie     G  Wyłącz zestaw");
+            C.Text(Controls,C.W-C.TextWidth(Controls,13.f)-24.f,C.H-41.f,13.f,Soft);
             if (!Prompt.IsEmpty()) C.Banner((C.W-650.f)*.5f,C.H*.66f,650.f,Prompt,Accent);
         }
         static void Inventory(FShipCanvas& C,AShipSurvivor& P)
@@ -182,7 +173,8 @@ namespace
                 C.Text(Names[I],X+55.f,R,16.f,Have[I]?Ink:Soft);
                 C.Text(Have[I]?TEXT("jest"):TEXT("brak"),X+290.f,R,13.f,Have[I]?Accent:Soft);
             }
-            C.Meter(X+33.f,Y+303.f,286.f,TEXT("Energia"),P.Charge,P.Charge<18.f?Warning:Accent);
+            C.Text(FString::Printf(TEXT("Energia: %d%%   ·   Pobór %.2f%%/s"),
+                FMath::RoundToInt(P.Charge), P.bLampOn ? P.GetLampDrainPerSecond() : 0.f),X+33.f,Y+303.f,14.f,Ink);
             C.Rect(X+347.f,Y+96.f,1.f,260.f,Rule);
             const float TX=X+374.f;
             C.Text(TEXT("Dziennik"),TX,Y+94.f,19.f,Accent,true);
@@ -200,7 +192,7 @@ namespace
             C.Rect(X+32.f,Y+384.f,PW-64.f,1.f,Rule);
             C.Text(TEXT("1  Biała latarka       2  Latarka z kolorami       3  Spawarka       F  Światło       Q  Następny kolor"),X+32.f,Y+396.f,15.f,Ink);
             C.Text(TEXT("Z / X   Zmniejsz / zwiększ moc        C / V   Zmniejsz / zwiększ promień wiązki"),X+32.f,Y+425.f,15.f,Ink);
-            C.Text(TEXT("E  Interakcja / przytrzymaj       LPM  Przytrzymaj, aby przesunąć skrzynię       G  Wyłącz zestaw"),X+32.f,Y+454.f,14.f,Ink);
+            C.Text(TEXT("E  Interakcja       Przytrzymaj E lub LPM, aby przesunąć skrzynię       G  Wyłącz zestaw"),X+32.f,Y+454.f,14.f,Ink);
             C.Text(TEXT("WASD  Ruch       Mysz  Rozglądanie       Spacja  Skok       Shift  Sprint       Ctrl  Kucanie       Tab  Ekwipunek bazowy"),X+32.f,Y+484.f,13.f,Soft);
         }
         static void Keypad(FShipCanvas& C,AShipSurvivor& P)
@@ -222,6 +214,35 @@ namespace
             C.Center(P.bEscaped?TEXT("G   Wróć do zwiedzania       R   Uruchom tę mapę od nowa"):TEXT("R lub G   Uruchom tę mapę od nowa"),C.H*.40f+135.f,16.f,Soft);
         }
     };
+}
+
+void UShipVitalsWidget::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+    if (BatteryBar) StockBatteryTint = BatteryBar->GetFillColorAndOpacity();
+}
+
+void UShipVitalsWidget::NativeConstruct()
+{
+    Super::NativeConstruct();
+    Kit = Cast<AShipSurvivor>(UGameplayStatics::GetActorOfClass(this, AShipSurvivor::StaticClass()));
+}
+
+float UShipVitalsWidget::DisplayedBatteryPercent(float StockPercent) const
+{
+    const AShipSurvivor* Equipment = Kit.Get();
+    if (!Equipment || !Equipment->bKitEnabled) return StockPercent;
+    return Equipment->bHasBattery ? FMath::Clamp(Equipment->Charge / 100.f, 0.f, 1.f) : 0.f;
+}
+
+void UShipVitalsWidget::NativeTick(const FGeometry& Geometry, float DeltaTime)
+{
+    Super::NativeTick(Geometry, DeltaTime);
+    if (!BatteryBar) return;
+    const AShipSurvivor* Equipment = Kit.Get();
+    const bool bUsingFilters = Equipment && Equipment->bKitEnabled && Equipment->Equipped == TEXT("ColorLamp");
+    const FLinearColor Color = bUsingFilters ? Equipment->GetFilterColor() : StockBatteryTint;
+    if (!BatteryBar->GetFillColorAndOpacity().Equals(Color)) BatteryBar->SetFillColorAndOpacity(Color);
 }
 
 void UShipHUDOverlay::SetSurvivor(AShipSurvivor* InSurvivor) { Survivor=InSurvivor; }
