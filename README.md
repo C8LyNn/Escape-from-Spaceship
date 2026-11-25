@@ -42,6 +42,8 @@ Od miejsca startu idź w lewo za tablicą **STANOWISKA LDD** do stołu ze sprzę
 
 Moc i promień mają po pięć ustawień. Obie latarki zachowują wybrane ustawienia przy zmianie koloru lub narzędzia. Większa moc i większy promień niezależnie przyspieszają rozładowanie baterii. Panel pokazuje bieżący pobór. Zgaszona latarka nie pobiera energii.
 
+Plecak pod **Tab** otwiera się w czasie gry. Na drabinie postać trzyma się szczebla, a w powietrzu nadal działa grawitacja. Zapalona latarka zużywa energię także podczas przeglądania plecaka. W zbliżeniu na kłódkę wiązka zestawu gaśnie do chwili powrotu do postaci. Po przełączeniu na zestaw klawiszem **G** bazowa latarka zachowuje stan baterii. Powrót przywraca jej poprzedni stan włączenia. Jeśli postać zginie przy otwartym plecaku, panel ustępuje miejsca ekranowi restartu. [Test przełączania wyposażenia i sterowania w PIE](Tests/Gameplay/test_equipment_handoffs.py)
+
 Przy pozostałych stanowiskach możesz sprawdzić naprawę drzwi, zamek szyfrowy, dwie płyty obciążane skrzyniami, sekwencje trzech i czterech płyt, dźwięki za drzwiami, śmiertelną pułapkę oraz wyjście odblokowywane kartą i kodem z notatki. **R** po śmierci lub udanej próbie uruchamia scenę od nowa.
 
 **Drabina serwisowa** stoi przy stanowisku wyposażenia. Podejdź do dolnych szczebli i naciśnij **E**. Przytrzymaj **W**, aby wejść na podest na wysokości 2,8 m. Przy krawędzi podestu **E** pozwala ponownie chwycić drabinę, a **S** zejść. W połowie drogi możesz puścić klawisz ruchu, rozejrzeć się, użyć latarki, puścić drabinę przez **E** albo odskoczyć **Spacją**. Zajęty podest wstrzymuje wejście na górę. Do kolejnego stanowiska możesz skopiować aktora **Ship Ladder**, ustawić wysokość i prędkość wspinania i umieścić podest za jego górną krawędzią.

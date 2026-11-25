@@ -3,6 +3,7 @@
 #include "ShipFixture.h"
 #include "ShipHUD.h"
 #include "ShipLadder.h"
+#include "Blueprint/UserWidget.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/OverlapResult.h"
 #include "GameFramework/Character.h"
@@ -135,7 +136,7 @@ void AShipSurvivor::SyncPawn()
     APawn* Pawn = LocalPC.IsValid() ? LocalPC->GetPawn() : nullptr;
     if (TrackedPawn.Get() == Pawn) return;
     LeaveLadder();
-    if (OriginalLight.IsValid() && bKitEnabled) OriginalLight->SetVisibility(bOriginalLightVisible);
+    if (bKitEnabled) SetStockLightEnabled(bOriginalLightVisible);
     EndUse();
     EndDrag();
     ClosePanel();
@@ -147,7 +148,7 @@ void AShipSurvivor::SyncPawn()
     if (OriginalLight.IsValid() && bKitEnabled)
     {
         bOriginalLightVisible = OriginalLight->IsVisible();
-        OriginalLight->SetVisibility(false);
+        SetStockLightEnabled(false);
     }
     TInlineComponentArray<UActorComponent*> Components(Pawn);
     for (UActorComponent* Component : Components)
@@ -162,7 +163,7 @@ void AShipSurvivor::EndPlay(const EEndPlayReason::Type Reason)
     ClosePanel();
     EndUse();
     EndDrag();
-    if (OriginalLight.IsValid() && bKitEnabled) OriginalLight->SetVisibility(bOriginalLightVisible);
+    if (bKitEnabled) SetStockLightEnabled(bOriginalLightVisible);
     if (Overlay) Overlay->RemoveFromParent();
     if (LocalPC.IsValid()) DisableInput(LocalPC.Get());
     Super::EndPlay(Reason);
@@ -226,7 +227,7 @@ void AShipSurvivor::UpdateInputRouting()
         else if (K == EKeys::R) bOwn = bDead || bEscaped;
         else if (K == EKeys::Left || K == EKeys::Right || K == EKeys::PageUp || K == EKeys::PageDown) bOwn = bInventoryOpen;
         else if (K == EKeys::Escape) bOwn = bModal;
-        else if (K == EKeys::Tab) bOwn = IsKeypadOpen() || bInventoryOpen;
+        else if (K == EKeys::Tab) bOwn = bModal;
         else if (K == EKeys::Enter || K == EKeys::BackSpace) bOwn = IsKeypadOpen();
         else { const int32 N = DigitFor(K); bOwn = IsKeypadOpen() || (bKitEnabled && N >= 1 && N <= 3); }
         Binding.bConsumeInput = bOwn && !bYield;
@@ -309,7 +310,7 @@ bool AShipSurvivor::BeamReaches(const FVector& Point) const
 
 bool AShipSurvivor::BeamReachesTarget(const FVector& Point, const AActor* Receiver) const
 {
-    if (!bKitEnabled || !bLampOn || !bHasBattery || Charge <= 0.f || bDead || bEscaped || !GetWorld() || !TrackedPawn.IsValid()) return false;
+    if (!bKitEnabled || !bLampOn || !bHasBattery || Charge <= 0.f || bDead || bEscaped || !GetWorld() || !HasPlayerView()) return false;
     const FVector Start = ViewOrigin();
     const FVector Delta = Point - Start;
     const float Distance = Delta.Size();
@@ -410,6 +411,32 @@ void AShipSurvivor::UpdateDrag()
     Grabber->SetTargetLocation(Target);
 }
 
+bool AShipSurvivor::HasPlayerView() const
+{
+    return TrackedPawn.IsValid() && LocalPC.IsValid() && LocalPC->GetViewTarget() == TrackedPawn.Get();
+}
+
+void AShipSurvivor::SetStockLightEnabled(bool bEnable)
+{
+    USpotLightComponent* Light = OriginalLight.Get();
+    if (!Light || Light->IsVisible() == bEnable) return;
+    // The stock component owns both visibility and its battery timer.
+    for (UActorComponent* Component : Light->GetOwner()->GetComponents())
+    {
+        const FObjectPropertyBase* Lamp = FindFProperty<FObjectPropertyBase>(Component->GetClass(), TEXT("Flashlight Light"));
+        if (Lamp && Lamp->GetObjectPropertyValue_InContainer(Component) == Light)
+        {
+            UFunction* Toggle = Component->FindFunction(TEXT("ToggleFlashlight"));
+            if (Toggle && Toggle->NumParms == 0)
+            {
+                Component->ProcessEvent(Toggle, nullptr);
+                return;
+            }
+        }
+    }
+    Light->SetVisibility(bEnable);
+}
+
 void AShipSurvivor::SetKit(bool bEnable)
 {
     if (bKitEnabled == bEnable) return;
@@ -417,7 +444,7 @@ void AShipSurvivor::SetKit(bool bEnable)
     if (OriginalLight.IsValid())
     {
         if (bEnable) bOriginalLightVisible = OriginalLight->IsVisible();
-        OriginalLight->SetVisibility(bEnable ? false : bOriginalLightVisible);
+        SetStockLightEnabled(!bEnable && bOriginalLightVisible);
     }
     if (!bEnable) { LeaveLadder(); ClosePanel(); EndUse(); EndDrag(); bLampOn = false; }
     UpdateBeam();
@@ -529,7 +556,7 @@ void AShipSurvivor::UpdateBeam()
     Filter = Equipped == TEXT("ColorLamp") ? LastFilter : FName(TEXT("White"));
     if (!bKitEnabled || !bHasBattery || Charge <= 0.f || bDead || bEscaped) { bWelding = false; bLampOn = false; }
     if (Equipped == TEXT("Welder") || (Equipped == TEXT("White") && !bHasWhite) || (Equipped == TEXT("ColorLamp") && !bHasColorLamp)) bLampOn = false;
-    const bool bVisible = bLampOn || bWelding;
+    const bool bVisible = HasPlayerView() && (bLampOn || bWelding);
     if (Beam->IsVisible() != bVisible) Beam->SetVisibility(bVisible);
     if (bVisible)
     {
@@ -586,6 +613,16 @@ void AShipSurvivor::ClosePanel()
     Keypad.Reset(); EnteredCode.Reset(); bInventoryOpen = false;
     LockControls(bDead || bEscaped);
     UpdateInputRouting();
+}
+void AShipSurvivor::CloseStockInventory()
+{
+    APlayerController* PC = LocalPC.Get();
+    if (!PC) return;
+    const FObjectPropertyBase* Ref = FindFProperty<FObjectPropertyBase>(PC->GetClass(), TEXT("W_InventoryMenuRef"));
+    const UUserWidget* Menu = Ref ? Cast<UUserWidget>(Ref->GetObjectPropertyValue_InContainer(PC)) : nullptr;
+    if (!IsValid(Menu) || !Menu->IsVisible()) return;
+    UFunction* Toggle = PC->FindFunction(TEXT("ToggleInventory"));
+    if (Toggle && Toggle->NumParms == 0) PC->ProcessEvent(Toggle, nullptr);
 }
 void AShipSurvivor::OpenKeypad(AShipFixture* Fixture)
 {
@@ -649,12 +686,14 @@ void AShipSurvivor::ClampNoteScroll(int32 Maximum) { ScrollLines = FMath::Clamp(
 void AShipSurvivor::Die()
 {
     if (bDead || bEscaped) return;
+    CloseStockInventory();
     LeaveLadder();
     SetKit(true); bDead = true; ClosePanel(); EndUse(); EndDrag(); UpdateBeam(); Beep(.48f);
 }
 void AShipSurvivor::Escape()
 {
     if (bDead || bEscaped) return;
+    CloseStockInventory();
     LeaveLadder();
     SetKit(true); bEscaped = true; ClosePanel(); EndUse(); EndDrag(); UpdateBeam(); Beep(1.5f);
 }
@@ -676,6 +715,7 @@ void AShipSurvivor::Tick(float DeltaSeconds)
         Focus.Reset(); FocusCrate.Reset();
         if (bOwnUse) EndUse();
         if (IsDragging()) EndDrag();
+        TickEquipment(UGameplayStatics::IsGamePaused(this) ? 0.f : DeltaSeconds);
         UpdateInputRouting();
         return;
     }
@@ -696,22 +736,25 @@ void AShipSurvivor::Tick(float DeltaSeconds)
         if (LocalPC->IsInputKeyDown(EKeys::LeftMouseButton)) UpdateDrag();
         else EndDrag();
     }
-    if (bKitEnabled)
-    {
-        if (OriginalLight.IsValid() && OriginalLight->IsVisible()) OriginalLight->SetVisibility(false);
-        if (UActorComponent* Stats = MovementStats.Get())
-            if (const FNumericProperty* Property = FindFProperty<FNumericProperty>(Stats->GetClass(),TEXT("CurrentStamina")))
-                if (Property->IsFloatingPoint()) Stamina = Property->GetFloatingPointPropertyValue(Property->ContainerPtrToValuePtr<void>(Stats));
-        const float Drain = bLampOn ? GetLampDrainPerSecond() : 0.f;
-        Charge = FMath::Clamp(Charge - Drain * DeltaSeconds, 0.f, 100.f);
-        if (Charge > 20.f) bWarnedLowCharge = false;
-        if (!bWarnedLowCharge && Charge > 0.f && Charge <= 15.f && (bLampOn || bWelding))
-        {
-            bWarnedLowCharge = true;
-            Notify(TEXT("Niski poziom baterii · Z zmniejsza moc, C zwęża wiązkę."));
-        }
-        if (Drain > 0.f && Charge <= 0.f) Notify(TEXT("Bateria rozładowana. Wróć do ładowarki w kajucie."));
-        UpdateBeam();
-    }
+    TickEquipment(DeltaSeconds);
     UpdateInputRouting();
+}
+
+void AShipSurvivor::TickEquipment(float DeltaSeconds)
+{
+    if (!bKitEnabled) return;
+    SetStockLightEnabled(false);
+    if (UActorComponent* Stats = MovementStats.Get())
+        if (const FNumericProperty* Property = FindFProperty<FNumericProperty>(Stats->GetClass(),TEXT("CurrentStamina")))
+            if (Property->IsFloatingPoint()) Stamina = Property->GetFloatingPointPropertyValue(Property->ContainerPtrToValuePtr<void>(Stats));
+    const float Drain = bLampOn && HasPlayerView() ? GetLampDrainPerSecond() : 0.f;
+    Charge = FMath::Clamp(Charge - Drain * DeltaSeconds, 0.f, 100.f);
+    if (Charge > 20.f) bWarnedLowCharge = false;
+    if (!bWarnedLowCharge && Charge > 0.f && Charge <= 15.f && (Drain > 0.f || bWelding))
+    {
+        bWarnedLowCharge = true;
+        Notify(TEXT("Niski poziom baterii · Z zmniejsza moc, C zwęża wiązkę."));
+    }
+    if (Drain > 0.f && Charge <= 0.f) Notify(TEXT("Bateria rozładowana. Wróć do ładowarki w kajucie."));
+    UpdateBeam();
 }

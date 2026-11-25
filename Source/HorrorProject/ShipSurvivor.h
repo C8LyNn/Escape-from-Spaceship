@@ -127,6 +127,10 @@ private:
     void ChangeFilter(int32 Step);
     void AdjustLamp(FKey Key);
     bool CanAdjustLamp() const;
+    bool HasPlayerView() const;
+    void SetStockLightEnabled(bool bEnable);
+    void CloseStockInventory();
+    void TickEquipment(float DeltaSeconds);
     void ApplyBeamSettings();
     void UpdateBeam();
     void SetTool(const FString& Tool);
