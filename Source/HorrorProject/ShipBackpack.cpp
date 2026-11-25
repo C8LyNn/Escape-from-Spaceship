@@ -235,7 +235,9 @@ void AShipSurvivor::UpdateHandMesh()
         return;
     }
     const FBoxSphereBounds Bounds = Mesh->GetBounds();
-    const float Factor = 21.f / FMath::Max(1., 2.*Bounds.BoxExtent.GetMax());
+    // Imported equipment uses the same centimetres on the bench and in the player's hand.
+    const bool bStockInventoryProp = Kind == TEXT("Bandage") || Kind == TEXT("FlashlightBattery") || Kind == TEXT("DoorKey");
+    const double Factor = bStockInventoryProp ? 21. / FMath::Max(1., 2. * Bounds.BoxExtent.GetMax()) : 1.;
     FVector Axis = FVector::ForwardVector;
     if (Bounds.BoxExtent.Y >= Bounds.BoxExtent.X && Bounds.BoxExtent.Y > Bounds.BoxExtent.Z) Axis = FVector::RightVector;
     else if (Bounds.BoxExtent.Z > Bounds.BoxExtent.X) Axis = FVector::UpVector;

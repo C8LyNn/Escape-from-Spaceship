@@ -40,6 +40,8 @@ Otwórz `HorrorProject.uproject` w Unreal Engine 5.8.4 i naciśnij **Play**. Map
 
 Ruch obsługują WASD i mysz. Shift służy do sprintu, Ctrl do kucania, E do interakcji, F do latarki, a Tab do ekwipunku. Przy drzwiach fizycznych przytrzymaj lewy przycisk myszy i przesuń mysz. Kod do stanowiska z zamkiem to **9516**.
 
+Modele z Fab i Sketchfab wstawiaj z Content Browser ze skalą aktora `(1, 1, 1)`. W galerii podpis **MAKIETA 1:5** oznacza, że dany egzemplarz jest pięć razy mniejszy od modułu używanego w grze. Drobne przedmioty na stanowiskach i w dłoni gracza mają tę samą wielkość.
+
 ## Moduły sterowane światłem
 
 W scenie testowej przy trzech sąsiednich panelach wybierz latarkę zagadkową. Czerwonym filtrem wysuniesz blok, a po odsunięciu wiązki możesz zaświecić drugi raz, aby go cofnąć. **C** zwęża wiązkę do jednego panelu, **V** pozwala objąć kilka z tego samego miejsca.
