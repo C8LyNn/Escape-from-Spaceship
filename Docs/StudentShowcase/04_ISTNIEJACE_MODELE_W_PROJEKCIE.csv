@@ -1,115 +1,115 @@
-﻿Ścieżka w Content Browser,Typ,Pakiet,Rozmiar pliku (bajty)
-/Game/Maps/_GENERATED/PCCOMPUTER/Box_15683B30,StaticMesh,Maps,13571
-/Game/Polar/Meshes/Architecture/SM_Ceiling,StaticMesh,Polar,32295
-/Game/Polar/Meshes/Architecture/SM_Ceiling_Closed_Stat,StaticMesh,Polar,33613
-/Game/Polar/Meshes/Architecture/SM_Ceiling_Transition_01,StaticMesh,Polar,19585
-/Game/Polar/Meshes/Architecture/SM_Ceiling_Transition_01_Glass,StaticMesh,Polar,13904
-/Game/Polar/Meshes/Architecture/SM_Ceiling_Transition_01_Open,StaticMesh,Polar,25378
-/Game/Polar/Meshes/Architecture/SM_Ceiling_Transition_02,StaticMesh,Polar,22732
-/Game/Polar/Meshes/Architecture/SM_Circle_Frame,StaticMesh,Polar,81820
-/Game/Polar/Meshes/Architecture/SM_Floor_01,StaticMesh,Polar,30341
-/Game/Polar/Meshes/Architecture/SM_Floor_01_Opeque,StaticMesh,Polar,30416
-/Game/Polar/Meshes/Architecture/SM_Floor_02,StaticMesh,Polar,27094
-/Game/Polar/Meshes/Architecture/SM_Floor_Transition_01,StaticMesh,Polar,23129
-/Game/Polar/Meshes/Architecture/SM_Floor_Transition_02,StaticMesh,Polar,23231
-/Game/Polar/Meshes/Architecture/SM_Pillar,StaticMesh,Polar,72272
-/Game/Polar/Meshes/Architecture/SM_Stairs,StaticMesh,Polar,30494
-/Game/Polar/Meshes/Architecture/SM_Wall_Flat,StaticMesh,Polar,25899
-/Game/Polar/Meshes/Architecture/SM_Wall_Transition,StaticMesh,Polar,30415
-/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Broken,StaticMesh,Polar,56935
-/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Broken_Small,StaticMesh,Polar,71848
-/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Closed,StaticMesh,Polar,36910
-/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Open,StaticMesh,Polar,36626
-/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Rubble,StaticMesh,Polar,80416
-/Game/Polar/Meshes/Props/SM_Cloth_Flat,StaticMesh,Polar,50920
-/Game/Polar/Meshes/Props/SM_Cloth_Round,StaticMesh,Polar,25142
-/Game/Polar/Meshes/Props/SM_Crate_01,StaticMesh,Polar,31614
-/Game/Polar/Meshes/Props/SM_Crate_02,StaticMesh,Polar,18797
-/Game/Polar/Meshes/Props/SM_Crate_Stacked_Cloth,StaticMesh,Polar,125151
-/Game/Polar/Meshes/Props/SM_Generator_Attachment_01,StaticMesh,Polar,91052
-/Game/Polar/Meshes/Props/SM_Generator_Attachment_02,StaticMesh,Polar,33783
-/Game/Polar/Meshes/Props/SM_Generator_Body,StaticMesh,Polar,140393
-/Game/Polar/Meshes/Props/SM_Generator_Floor_Cloth,StaticMesh,Polar,120956
-/Game/Polar/Meshes/Props/SM_Grid,StaticMesh,Polar,18451
-/Game/Polar/Meshes/Props/SM_Ground_Glass,StaticMesh,Polar,39776
-/Game/Polar/Meshes/Props/SM_Ground_Rocks_01,StaticMesh,Polar,27953
-/Game/Polar/Meshes/Props/SM_Ground_Rocks_02,StaticMesh,Polar,32868
-/Game/Polar/Meshes/Props/SM_Light,StaticMesh,Polar,32829
-/Game/Polar/Meshes/Props/SM_Light_Shafts,StaticMesh,Polar,13576
-/Game/Polar/Meshes/Props/SM_Pipe_Curve,StaticMesh,Polar,34189
-/Game/Polar/Meshes/Props/SM_Pipe_Straight,StaticMesh,Polar,24107
-/Game/Polar/Meshes/Props/SM_Pipes_Multi,StaticMesh,Polar,37358
-/Game/Polar/Meshes/Props/SM_Tank,StaticMesh,Polar,495926
-/Game/Polar/Meshes/Props/SM_Tank_Broken,StaticMesh,Polar,518035
-/Game/Polar/Meshes/Props/SM_Wires_01,StaticMesh,Polar,75153
-/Game/Polar/Meshes/Props/SM_Wires_02,StaticMesh,Polar,70393
-/Game/Polar/Meshes/Props/SM_Wires_03,StaticMesh,Polar,59154
-/Game/Polar/Meshes/Props/SM_Wires_Broken,StaticMesh,Polar,28242
-/Game/Polar/Meshes/Props/SM_Wires_Floor,StaticMesh,Polar,93777
-/Game/Polar/Meshes/Vista/SM_Foreground,StaticMesh,Polar,1053544
-/Game/Polar/Meshes/Vista/SM_Foreground_Complex_Collision,StaticMesh,Polar,1053565
-/Game/Polar/Meshes/Vista/SM_Ground_Vista,StaticMesh,Polar,603131
-/Game/Polar/Meshes/Vista/SM_Ground_Vista_Complex_Collision,StaticMesh,Polar,603347
-/Game/Polar/Meshes/Vista/SM_Mountain_01,StaticMesh,Polar,520090
-/Game/Polar/Meshes/Vista/SM_Mountain_01_Complex_Collision,StaticMesh,Polar,520306
-/Game/Polar/Meshes/Vista/SM_Mountain_02,StaticMesh,Polar,966729
-/Game/Polar/Meshes/Vista/SM_Mountain_02_Complex_Collision,StaticMesh,Polar,966945
-/Game/Polar/Meshes/Vista/SM_Planet_01,StaticMesh,Polar,202953
-/Game/Polar/Meshes/Vista/SM_Sky_Sphere_Stat,StaticMesh,Polar,1055519
-/Game/Props/Meshes/Bandage,StaticMesh,Props,17348
-/Game/Props/Meshes/Battery,StaticMesh,Props,34576
-/Game/Props/Meshes/Box,StaticMesh,Props,20463
-/Game/Props/Meshes/BoxTop,StaticMesh,Props,20043
-/Game/Props/Meshes/DoorKey,StaticMesh,Props,22400
-/Game/Props/Meshes/Lock,SkeletalMesh (wg odwolan BP_Lock),Props,364026
-/Game/Props/Meshes/LockDial,StaticMesh,Props,17569
-/Game/StarterContent/Architecture/Floor_400x400,StaticMesh,StarterContent,15408
-/Game/StarterContent/Architecture/Pillar_50x500,StaticMesh,StarterContent,15861
-/Game/StarterContent/Architecture/SM_AssetPlatform,StaticMesh,StarterContent,160364
-/Game/StarterContent/Architecture/Wall_400x200,StaticMesh,StarterContent,14683
-/Game/StarterContent/Architecture/Wall_400x300,StaticMesh,StarterContent,13933
-/Game/StarterContent/Architecture/Wall_400x400,StaticMesh,StarterContent,14660
-/Game/StarterContent/Architecture/Wall_500x500,StaticMesh,StarterContent,17336
-/Game/StarterContent/Architecture/Wall_Door_400x300,StaticMesh,StarterContent,16508
-/Game/StarterContent/Architecture/Wall_Door_400x400,StaticMesh,StarterContent,16392
-/Game/StarterContent/Architecture/Wall_Window_400x300,StaticMesh,StarterContent,17385
-/Game/StarterContent/Architecture/Wall_Window_400x400,StaticMesh,StarterContent,17251
-/Game/StarterContent/Blueprints/Assets/SM_Arrows,StaticMesh,StarterContent,190020
-/Game/StarterContent/Blueprints/Assets/Skybox,StaticMesh,StarterContent,209212
-/Game/StarterContent/Props/MaterialSphere,StaticMesh,StarterContent,47333
-/Game/StarterContent/Props/SM_Bush,StaticMesh,StarterContent,66229
-/Game/StarterContent/Props/SM_Chair,StaticMesh,StarterContent,99160
-/Game/StarterContent/Props/SM_CornerFrame,StaticMesh,StarterContent,38228
-/Game/StarterContent/Props/SM_Couch,StaticMesh,StarterContent,108540
-/Game/StarterContent/Props/SM_Door,StaticMesh,StarterContent,63947
-/Game/StarterContent/Props/SM_DoorFrame,StaticMesh,StarterContent,23125
-/Game/StarterContent/Props/SM_GlassWindow,StaticMesh,StarterContent,36547
-/Game/StarterContent/Props/SM_Lamp_Ceiling,StaticMesh,StarterContent,113036
-/Game/StarterContent/Props/SM_Lamp_Wall,StaticMesh,StarterContent,60277
-/Game/StarterContent/Props/SM_PillarFrame,StaticMesh,StarterContent,43484
-/Game/StarterContent/Props/SM_PillarFrame300,StaticMesh,StarterContent,44444
-/Game/StarterContent/Props/SM_Rock,StaticMesh,StarterContent,71152
-/Game/StarterContent/Props/SM_Shelf,StaticMesh,StarterContent,46806
-/Game/StarterContent/Props/SM_Stairs,StaticMesh,StarterContent,27358
-/Game/StarterContent/Props/SM_Statue,StaticMesh,StarterContent,191942
-/Game/StarterContent/Props/SM_TableRound,StaticMesh,StarterContent,242868
-/Game/StarterContent/Props/SM_WindowFrame,StaticMesh,StarterContent,25448
-/Game/StarterContent/Shapes/Shape_Cone,StaticMesh,StarterContent,27018
-/Game/StarterContent/Shapes/Shape_Cube,StaticMesh,StarterContent,16145
-/Game/StarterContent/Shapes/Shape_Cylinder,StaticMesh,StarterContent,31341
-/Game/StarterContent/Shapes/Shape_NarrowCapsule,StaticMesh,StarterContent,47855
-/Game/StarterContent/Shapes/Shape_Pipe,StaticMesh,StarterContent,26253
-/Game/StarterContent/Shapes/Shape_Pipe_180,StaticMesh,StarterContent,85759
-/Game/StarterContent/Shapes/Shape_Pipe_90,StaticMesh,StarterContent,59989
-/Game/StarterContent/Shapes/Shape_Plane,StaticMesh,StarterContent,16473
-/Game/StarterContent/Shapes/Shape_QuadPyramid,StaticMesh,StarterContent,16296
-/Game/StarterContent/Shapes/Shape_Sphere,StaticMesh,StarterContent,37887
-/Game/StarterContent/Shapes/Shape_Torus,StaticMesh,StarterContent,70998
-/Game/StarterContent/Shapes/Shape_TriPyramid,StaticMesh,StarterContent,16154
-/Game/StarterContent/Shapes/Shape_Trim,StaticMesh,StarterContent,20918
-/Game/StarterContent/Shapes/Shape_Trim_90_In,StaticMesh,StarterContent,30650
-/Game/StarterContent/Shapes/Shape_Trim_90_Out,StaticMesh,StarterContent,31102
-/Game/StarterContent/Shapes/Shape_Tube,StaticMesh,StarterContent,41303
-/Game/StarterContent/Shapes/Shape_Wedge_A,StaticMesh,StarterContent,16633
-/Game/StarterContent/Shapes/Shape_Wedge_B,StaticMesh,StarterContent,16760
-/Game/StarterContent/Shapes/Shape_WideCapsule,StaticMesh,StarterContent,42421
+﻿Ścieżka w Content Browser,Typ,Pakiet,Rozmiar pliku (bajty),ID eksponatu,Dział,Aktor w mapie,Status
+/Game/Maps/_GENERATED/PCCOMPUTER/Box_15683B30,StaticMesh,Maps,13571,BASE-001,Przedmioty i dekoracje,StaticMeshActor_360,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Ceiling,StaticMesh,Polar,32295,BASE-002,Konstrukcja statku,StaticMeshActor_29,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Ceiling_Closed_Stat,StaticMesh,Polar,33613,BASE-003,Konstrukcja statku,StaticMeshActor_32,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Ceiling_Transition_01,StaticMesh,Polar,19585,BASE-004,Konstrukcja statku,StaticMeshActor_35,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Ceiling_Transition_01_Glass,StaticMesh,Polar,13904,BASE-005,Konstrukcja statku,StaticMeshActor_38,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Ceiling_Transition_01_Open,StaticMesh,Polar,25378,BASE-006,Konstrukcja statku,StaticMeshActor_41,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Ceiling_Transition_02,StaticMesh,Polar,22732,BASE-007,Konstrukcja statku,StaticMeshActor_44,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Circle_Frame,StaticMesh,Polar,81820,BASE-008,Konstrukcja statku,StaticMeshActor_47,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Floor_01,StaticMesh,Polar,30341,BASE-009,Konstrukcja statku,StaticMeshActor_50,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Floor_01_Opeque,StaticMesh,Polar,30416,BASE-010,Konstrukcja statku,StaticMeshActor_53,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Floor_02,StaticMesh,Polar,27094,BASE-011,Konstrukcja statku,StaticMeshActor_56,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Floor_Transition_01,StaticMesh,Polar,23129,BASE-012,Konstrukcja statku,StaticMeshActor_59,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Floor_Transition_02,StaticMesh,Polar,23231,BASE-013,Konstrukcja statku,StaticMeshActor_62,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Pillar,StaticMesh,Polar,72272,BASE-014,Konstrukcja statku,StaticMeshActor_65,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Stairs,StaticMesh,Polar,30494,BASE-015,Konstrukcja statku,StaticMeshActor_68,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Wall_Flat,StaticMesh,Polar,25899,BASE-016,Konstrukcja statku,StaticMeshActor_71,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Wall_Transition,StaticMesh,Polar,30415,BASE-017,Konstrukcja statku,StaticMeshActor_74,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Broken,StaticMesh,Polar,56935,BASE-018,Zagrożenia i zniszczenia,StaticMeshActor_276,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Broken_Small,StaticMesh,Polar,71848,BASE-019,Zagrożenia i zniszczenia,StaticMeshActor_279,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Closed,StaticMesh,Polar,36910,BASE-020,Konstrukcja statku,StaticMeshActor_77,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Open,StaticMesh,Polar,36626,BASE-021,Konstrukcja statku,StaticMeshActor_80,UMIESZCZONO
+/Game/Polar/Meshes/Architecture/SM_Wall_Tubes_Rubble,StaticMesh,Polar,80416,BASE-022,Zagrożenia i zniszczenia,StaticMeshActor_282,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Cloth_Flat,StaticMesh,Polar,50920,BASE-023,Przedmioty i dekoracje,StaticMeshActor_363,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Cloth_Round,StaticMesh,Polar,25142,BASE-024,Przedmioty i dekoracje,StaticMeshActor_366,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Crate_01,StaticMesh,Polar,31614,BASE-025,Wyposażenie statku,StaticMeshActor_308,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Crate_02,StaticMesh,Polar,18797,BASE-026,Wyposażenie statku,StaticMeshActor_311,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Crate_Stacked_Cloth,StaticMesh,Polar,125151,BASE-027,Wyposażenie statku,StaticMeshActor_314,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Generator_Attachment_01,StaticMesh,Polar,91052,BASE-028,Wyposażenie statku,StaticMeshActor_317,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Generator_Attachment_02,StaticMesh,Polar,33783,BASE-029,Wyposażenie statku,StaticMeshActor_320,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Generator_Body,StaticMesh,Polar,140393,BASE-030,Wyposażenie statku,StaticMeshActor_323,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Generator_Floor_Cloth,StaticMesh,Polar,120956,BASE-031,Wyposażenie statku,StaticMeshActor_326,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Grid,StaticMesh,Polar,18451,BASE-032,Konstrukcja statku,StaticMeshActor_83,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Ground_Glass,StaticMesh,Polar,39776,BASE-033,Zagrożenia i zniszczenia,StaticMeshActor_285,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Ground_Rocks_01,StaticMesh,Polar,27953,BASE-034,Zagrożenia i zniszczenia,StaticMeshActor_288,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Ground_Rocks_02,StaticMesh,Polar,32868,BASE-035,Zagrożenia i zniszczenia,StaticMeshActor_291,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Light,StaticMesh,Polar,32829,BASE-036,Oświetlenie,StaticMeshActor_4,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Light_Shafts,StaticMesh,Polar,13576,BASE-037,Oświetlenie,StaticMeshActor_7,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Pipe_Curve,StaticMesh,Polar,34189,BASE-038,Konstrukcja statku,StaticMeshActor_86,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Pipe_Straight,StaticMesh,Polar,24107,BASE-039,Konstrukcja statku,StaticMeshActor_89,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Pipes_Multi,StaticMesh,Polar,37358,BASE-040,Konstrukcja statku,StaticMeshActor_92,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Tank,StaticMesh,Polar,495926,BASE-041,Wyposażenie statku,StaticMeshActor_329,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Tank_Broken,StaticMesh,Polar,518035,BASE-042,Zagrożenia i zniszczenia,StaticMeshActor_294,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Wires_01,StaticMesh,Polar,75153,BASE-043,Konstrukcja statku,StaticMeshActor_95,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Wires_02,StaticMesh,Polar,70393,BASE-044,Konstrukcja statku,StaticMeshActor_98,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Wires_03,StaticMesh,Polar,59154,BASE-045,Konstrukcja statku,StaticMeshActor_101,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Wires_Broken,StaticMesh,Polar,28242,BASE-046,Zagrożenia i zniszczenia,StaticMeshActor_297,UMIESZCZONO
+/Game/Polar/Meshes/Props/SM_Wires_Floor,StaticMesh,Polar,93777,BASE-047,Konstrukcja statku,StaticMeshActor_104,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Foreground,StaticMesh,Polar,1053544,BASE-048,Konstrukcja statku,StaticMeshActor_107,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Foreground_Complex_Collision,StaticMesh,Polar,1053565,BASE-049,Konstrukcja statku,StaticMeshActor_110,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Ground_Vista,StaticMesh,Polar,603131,BASE-050,Konstrukcja statku,StaticMeshActor_113,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Ground_Vista_Complex_Collision,StaticMesh,Polar,603347,BASE-051,Konstrukcja statku,StaticMeshActor_116,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Mountain_01,StaticMesh,Polar,520090,BASE-052,Konstrukcja statku,StaticMeshActor_119,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Mountain_01_Complex_Collision,StaticMesh,Polar,520306,BASE-053,Konstrukcja statku,StaticMeshActor_122,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Mountain_02,StaticMesh,Polar,966729,BASE-054,Konstrukcja statku,StaticMeshActor_125,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Mountain_02_Complex_Collision,StaticMesh,Polar,966945,BASE-055,Konstrukcja statku,StaticMeshActor_128,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Planet_01,StaticMesh,Polar,202953,BASE-056,Konstrukcja statku,StaticMeshActor_131,UMIESZCZONO
+/Game/Polar/Meshes/Vista/SM_Sky_Sphere_Stat,StaticMesh,Polar,1055519,BASE-057,Konstrukcja statku,StaticMeshActor_134,UMIESZCZONO
+/Game/Props/Meshes/Bandage,StaticMesh,Props,17348,BASE-058,Przedmioty i dekoracje,StaticMeshActor_369,UMIESZCZONO
+/Game/Props/Meshes/Battery,StaticMesh,Props,34576,BASE-059,Oświetlenie,StaticMeshActor_10,UMIESZCZONO
+/Game/Props/Meshes/Box,StaticMesh,Props,20463,BASE-060,Wyposażenie statku,StaticMeshActor_332,UMIESZCZONO
+/Game/Props/Meshes/BoxTop,StaticMesh,Props,20043,BASE-061,Wyposażenie statku,StaticMeshActor_335,UMIESZCZONO
+/Game/Props/Meshes/DoorKey,StaticMesh,Props,22400,BASE-062,Drzwi i interakcje,StaticMeshActor_246,UMIESZCZONO
+/Game/Props/Meshes/Lock,SkeletalMesh,Props,364026,BASE-063,Drzwi i interakcje,SkeletalMeshActor_0,UMIESZCZONO
+/Game/Props/Meshes/LockDial,StaticMesh,Props,17569,BASE-064,Drzwi i interakcje,StaticMeshActor_251,UMIESZCZONO
+/Game/StarterContent/Architecture/Floor_400x400,StaticMesh,StarterContent,15408,BASE-065,Konstrukcja statku,StaticMeshActor_137,UMIESZCZONO
+/Game/StarterContent/Architecture/Pillar_50x500,StaticMesh,StarterContent,15861,BASE-066,Konstrukcja statku,StaticMeshActor_140,UMIESZCZONO
+/Game/StarterContent/Architecture/SM_AssetPlatform,StaticMesh,StarterContent,160364,BASE-067,Konstrukcja statku,StaticMeshActor_143,UMIESZCZONO
+/Game/StarterContent/Architecture/Wall_400x200,StaticMesh,StarterContent,14683,BASE-068,Konstrukcja statku,StaticMeshActor_146,UMIESZCZONO
+/Game/StarterContent/Architecture/Wall_400x300,StaticMesh,StarterContent,13933,BASE-069,Konstrukcja statku,StaticMeshActor_149,UMIESZCZONO
+/Game/StarterContent/Architecture/Wall_400x400,StaticMesh,StarterContent,14660,BASE-070,Konstrukcja statku,StaticMeshActor_152,UMIESZCZONO
+/Game/StarterContent/Architecture/Wall_500x500,StaticMesh,StarterContent,17336,BASE-071,Konstrukcja statku,StaticMeshActor_155,UMIESZCZONO
+/Game/StarterContent/Architecture/Wall_Door_400x300,StaticMesh,StarterContent,16508,BASE-072,Drzwi i interakcje,StaticMeshActor_254,UMIESZCZONO
+/Game/StarterContent/Architecture/Wall_Door_400x400,StaticMesh,StarterContent,16392,BASE-073,Drzwi i interakcje,StaticMeshActor_257,UMIESZCZONO
+/Game/StarterContent/Architecture/Wall_Window_400x300,StaticMesh,StarterContent,17385,BASE-074,Konstrukcja statku,StaticMeshActor_158,UMIESZCZONO
+/Game/StarterContent/Architecture/Wall_Window_400x400,StaticMesh,StarterContent,17251,BASE-075,Konstrukcja statku,StaticMeshActor_161,UMIESZCZONO
+/Game/StarterContent/Blueprints/Assets/SM_Arrows,StaticMesh,StarterContent,190020,BASE-076,Przedmioty i dekoracje,StaticMeshActor_372,UMIESZCZONO
+/Game/StarterContent/Blueprints/Assets/Skybox,StaticMesh,StarterContent,209212,BASE-077,Przedmioty i dekoracje,StaticMeshActor_375,UMIESZCZONO
+/Game/StarterContent/Props/MaterialSphere,StaticMesh,StarterContent,47333,BASE-078,Przedmioty i dekoracje,StaticMeshActor_378,UMIESZCZONO
+/Game/StarterContent/Props/SM_Bush,StaticMesh,StarterContent,66229,BASE-079,Przedmioty i dekoracje,StaticMeshActor_381,UMIESZCZONO
+/Game/StarterContent/Props/SM_Chair,StaticMesh,StarterContent,99160,BASE-080,Wyposażenie statku,StaticMeshActor_338,UMIESZCZONO
+/Game/StarterContent/Props/SM_CornerFrame,StaticMesh,StarterContent,38228,BASE-081,Konstrukcja statku,StaticMeshActor_164,UMIESZCZONO
+/Game/StarterContent/Props/SM_Couch,StaticMesh,StarterContent,108540,BASE-082,Wyposażenie statku,StaticMeshActor_341,UMIESZCZONO
+/Game/StarterContent/Props/SM_Door,StaticMesh,StarterContent,63947,BASE-083,Drzwi i interakcje,StaticMeshActor_260,UMIESZCZONO
+/Game/StarterContent/Props/SM_DoorFrame,StaticMesh,StarterContent,23125,BASE-084,Drzwi i interakcje,StaticMeshActor_263,UMIESZCZONO
+/Game/StarterContent/Props/SM_GlassWindow,StaticMesh,StarterContent,36547,BASE-085,Konstrukcja statku,StaticMeshActor_167,UMIESZCZONO
+/Game/StarterContent/Props/SM_Lamp_Ceiling,StaticMesh,StarterContent,113036,BASE-086,Oświetlenie,StaticMeshActor_13,UMIESZCZONO
+/Game/StarterContent/Props/SM_Lamp_Wall,StaticMesh,StarterContent,60277,BASE-087,Oświetlenie,StaticMeshActor_16,UMIESZCZONO
+/Game/StarterContent/Props/SM_PillarFrame,StaticMesh,StarterContent,43484,BASE-088,Konstrukcja statku,StaticMeshActor_170,UMIESZCZONO
+/Game/StarterContent/Props/SM_PillarFrame300,StaticMesh,StarterContent,44444,BASE-089,Konstrukcja statku,StaticMeshActor_173,UMIESZCZONO
+/Game/StarterContent/Props/SM_Rock,StaticMesh,StarterContent,71152,BASE-090,Przedmioty i dekoracje,StaticMeshActor_384,UMIESZCZONO
+/Game/StarterContent/Props/SM_Shelf,StaticMesh,StarterContent,46806,BASE-091,Wyposażenie statku,StaticMeshActor_344,UMIESZCZONO
+/Game/StarterContent/Props/SM_Stairs,StaticMesh,StarterContent,27358,BASE-092,Przedmioty i dekoracje,StaticMeshActor_387,UMIESZCZONO
+/Game/StarterContent/Props/SM_Statue,StaticMesh,StarterContent,191942,BASE-093,Przedmioty i dekoracje,StaticMeshActor_390,UMIESZCZONO
+/Game/StarterContent/Props/SM_TableRound,StaticMesh,StarterContent,242868,BASE-094,Wyposażenie statku,StaticMeshActor_347,UMIESZCZONO
+/Game/StarterContent/Props/SM_WindowFrame,StaticMesh,StarterContent,25448,BASE-095,Konstrukcja statku,StaticMeshActor_176,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Cone,StaticMesh,StarterContent,27018,BASE-096,Konstrukcja statku,StaticMeshActor_179,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Cube,StaticMesh,StarterContent,16145,BASE-097,Konstrukcja statku,StaticMeshActor_182,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Cylinder,StaticMesh,StarterContent,31341,BASE-098,Konstrukcja statku,StaticMeshActor_185,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_NarrowCapsule,StaticMesh,StarterContent,47855,BASE-099,Konstrukcja statku,StaticMeshActor_188,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Pipe,StaticMesh,StarterContent,26253,BASE-100,Konstrukcja statku,StaticMeshActor_191,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Pipe_180,StaticMesh,StarterContent,85759,BASE-101,Konstrukcja statku,StaticMeshActor_194,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Pipe_90,StaticMesh,StarterContent,59989,BASE-102,Konstrukcja statku,StaticMeshActor_197,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Plane,StaticMesh,StarterContent,16473,BASE-103,Konstrukcja statku,StaticMeshActor_200,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_QuadPyramid,StaticMesh,StarterContent,16296,BASE-104,Konstrukcja statku,StaticMeshActor_203,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Sphere,StaticMesh,StarterContent,37887,BASE-105,Konstrukcja statku,StaticMeshActor_206,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Torus,StaticMesh,StarterContent,70998,BASE-106,Konstrukcja statku,StaticMeshActor_209,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_TriPyramid,StaticMesh,StarterContent,16154,BASE-107,Konstrukcja statku,StaticMeshActor_212,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Trim,StaticMesh,StarterContent,20918,BASE-108,Konstrukcja statku,StaticMeshActor_215,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Trim_90_In,StaticMesh,StarterContent,30650,BASE-109,Konstrukcja statku,StaticMeshActor_218,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Trim_90_Out,StaticMesh,StarterContent,31102,BASE-110,Konstrukcja statku,StaticMeshActor_221,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Tube,StaticMesh,StarterContent,41303,BASE-111,Konstrukcja statku,StaticMeshActor_224,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Wedge_A,StaticMesh,StarterContent,16633,BASE-112,Konstrukcja statku,StaticMeshActor_227,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_Wedge_B,StaticMesh,StarterContent,16760,BASE-113,Konstrukcja statku,StaticMeshActor_230,UMIESZCZONO
+/Game/StarterContent/Shapes/Shape_WideCapsule,StaticMesh,StarterContent,42421,BASE-114,Konstrukcja statku,StaticMeshActor_233,UMIESZCZONO

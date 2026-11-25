@@ -1,109 +1,71 @@
-# RESULTS — scena pokazowa modeli i mechanik
+# Escape from Spaceship · raport ze sceny pokazowej
 
-Stan na 2026-11-12. **Zadanie nie jest ukończone.** Scena `L_ModelsAndMechanics_Showcase`
-nie istnieje, żaden model nie został zaimportowany i żadna mechanika nie była testowana w PIE.
-Powód: na komputerze nie ma Unreal Engine 5.5 (jest tylko 5.7.1), a konwersja projektu do 5.7
-nie została dozwolona.
+**Unreal Engine 5.8.4 · 561 eksponatów · 14 z 14 mechanik z wynikiem PASS.** W maszynowej kontroli odczytano z zapisanej mapy 114 modeli z projektu wykładowcy i 447 modeli lub wariantów z 42 źródeł. Każda ścieżka siatki ma w galerii osobny egzemplarz i podpis. Testy wykonano 25 listopada 2026 r. w kompilacji 58902052.
 
-## Co jest zrobione
+## Uruchomienie i trasa zwiedzania
 
-| Element | Stan |
+Otwórz `HorrorProject.uproject` z gałęzi `showcase/ue-5.8` i wybierz **Play**. Startowa mapa to `/Game/StudentShowcase/Maps/L_ModelsAndMechanics_Showcase`. Przed graczem jest turkusowa aleja sześciu działów, za nim hala czternastu stanowisk. Dział konstrukcji ma poszerzone skrzydło na zestaw modułów statku. Podesty oznaczono identyfikatorem BASE lub SRC. Tablice **BRAK MODELU** odnoszą się do pozycji SRC i typów LDD.
+
+WASD i mysz sterują postacią. Shift uruchamia sprint, Ctrl kucanie, E interakcję, F latarkę, a Tab ekwipunek. Przy fizycznych drzwiach przytrzymaj lewy przycisk myszy i porusz myszą. Kombinacja czterech tarcz zamka to **9516**.
+
+Wersję silnika dobrano do sekcji narzędzi w aktualnym dokumencie grupy. Oryginalna mapa `/Game/Maps/Level1` jest dostępna obok sceny pokazowej. Gałąź `main` zachowuje bazę w UE 5.5. [Level Design Document Grupy 2](https://drive.google.com/file/d/1D_hWoKvc8RPVyMT4YRYq2RtOo48hKyNd/view)
+
+## Modele i brakujące źródła
+
+Sprawdzono wszystkie **46** linków z LDD i pobrano pliki z **43** źródeł. W projekcie wykorzystano **42**, w tym 9 pobranych z Fab i 33 ze Sketchfab. Największe zestawy to SRC-23 z 217 modułami i wariantami, SRC-09 z 60 meblami, SRC-40 z 26 znakami ewakuacyjnymi i SRC-24 z 21 płytami podłogowymi. SRC-40 podpisano w dokumencie „Sing”. Oględziny geometrii i tekstur pozwoliły przypisać go do znaków ewakuacyjnych. [Manifest 46 źródeł](01_REFERENCJE_MODELI.csv) · [Autorzy i licencje](CREDITS.md)
+
+| Dział galerii | Modele z bazy | Importowane eksponaty | Głębokość wejścia gracza podczas testu |
+|---|---:|---:|---:|
+| Oświetlenie | 5 | 9 | 12,16 m |
+| Konstrukcja statku | 69 | 281 | 102,60 m |
+| Drzwi i interakcje | 7 | 14 | 15,50 m |
+| Zagrożenia i zniszczenia | 8 | 0 | 8,81 m |
+| Wyposażenie statku | 14 | 72 | 52,36 m |
+| Przedmioty i dekoracje | 11 | 71 | 49,01 m |
+
+| Źródło pominięte w scenie | Powód |
 |---|---|
-| Czysta kopia bazy w `C8LyNn/Escape-from-Spaceship` (gałąź `main`) | ZROBIONE |
-| Repozytorium wykładowcy `Mikoo2137/HorrorProject-5.5` | NIETKNIĘTE (tylko odczyt, commit `7975d17`) |
-| Usunięcie tokena Android File Server z kopii | ZROBIONE |
-| Porównanie wersji LDD | ZROBIONE |
-| Weryfikacja licencji 46 odnośników | ZROBIONE |
-| Inwentaryzacja modeli już obecnych w projekcie | ZROBIONE (wg nazw plików, bez podglądu w edytorze) |
-| Statyczna kontrola Blueprintów mechanik | ZROBIONE (pliki istnieją, brak zgubionych odwołań `/Game/`) |
-| Otwarcie projektu w UE 5.5 i test `Level1` | NIEZROBIONE — brak UE 5.5 |
-| Pobranie i import modeli | NIEZROBIONE — brak logowania do Sketchfab, brak UE 5.5 |
-| Nowa mapa, galeria, strefa mechanik | NIEZROBIONE — brak UE 5.5 |
-| Test PIE, zrzuty ekranu | NIEZROBIONE — brak UE 5.5 |
+| SRC-11 · Hospital Bed | Plik pobrany do lokalnego audytu. Nazwy siatek i wygląd wskazują na model z komercyjnego pakietu KitBash3D Secret Lab. Nie potwierdzono praw do udostępnionej kopii. |
+| SRC-20 · zestaw wentylatorów | Płatna oferta. W galerii można obejrzeć wentylację z odrębnego źródła SRC-22. |
+| SRC-21 · Poppy Playtime Chapter 2 Walkables Vent | Zawartość pochodzi z gry. Brak potwierdzenia uprawnień publikującego do udzielenia licencji. |
+| SRC-37 · plik dokumentów | Opis autora zawiera polecenie „do not use” przy oznaczeniu CC BY. |
 
-## Blokery
+Wśród **75 typów LDD** bezpośredni model ma **45**, a dla **8** dalszych wystawiono wystarczający odpowiednik z podanym ograniczeniem. Spośród **22** typów oznaczonych tablicą braków cztery mają również eksponat pokrewny. Dotyczy to sygnalizatora obrotowego, drzwi przesuwnych, bezpieczników i notatnika. [Manifest typów i zakres dopasowań](02_KATEGORIE_Z_DOKUMENTU.csv) · [Inwentarz 114 modeli bazowych](04_ISTNIEJACE_MODELE_W_PROJEKCIE.csv)
 
-1. **Brak Unreal Engine 5.5.** Epic Games Launcher ma zainstalowany tylko UE 5.7.1.
-2. **Brak miejsca na dysku C:.** Wolne jest ok. 16 GB z 1,9 TB; instalacja UE 5.5 wymaga
-   kilkudziesięciu GB.
-3. **Brak logowania do Sketchfab.** Pobieranie modeli wymaga zalogowanego konta.
-
-## Level Design Document
-
-- `LEVEL_DESIGN_DOCUMENT_Grupa_2 (1).pdf` z Pobranych i PDF z paczki to ten sam plik
-  (identyczna suma SHA-256).
-- `LEVEL_DESIGN_DOCUMENT_Grupa_2 (1).docx` ma tę samą treść co PDF; różnice to wyłącznie
-  łamanie wierszy w adresach. Oba zawierają te same 46 odnośników co `01_REFERENCJE_MODELI.csv`.
-
-## Modele — liczby
-
-| Miara | Liczba |
+| Dział | Typy oznaczone tablicą braków |
 |---|---|
-| Odnośniki z dokumentu | 46 |
-| Licencja sprawdzona | 46 |
-| Dozwolone do użycia | 44 |
-| Zablokowane | 2 |
-| Pobrane | 0 |
-| Zaimportowane | 0 |
-| Umieszczone w scenie | 0 |
+| Oświetlenie | włączniki światła (LDD-05), uszkodzone lampy (LDD-06), obrotowe sygnalizatory ostrzegawcze (LDD-10) |
+| Konstrukcja statku | korytka kablowe (LDD-23), narożniki korytek kablowych (LDD-24), rozdzielacze chłodziwa (LDD-26), rampy techniczne (LDD-27) |
+| Drzwi i interakcje | drzwi przesuwne (LDD-30), dźwignie (LDD-35), bezpieczniki (LDD-36) |
+| Zagrożenia i zniszczenia | Dziury w podłodze (LDD-43), przepaście (LDD-44), mechanizmy zgniatające (LDD-45), plamy krwi (LDD-47), ślady pazurów (LDD-48) |
+| Wyposażenie statku | Łóżka (LDD-51), beczki (LDD-57), skrzynki narzędziowe (LDD-62), umywalki (LDD-65) |
+| Przedmioty i dekoracje | butelki (LDD-68), notatniki (LDD-70), zdjęcia załogi (LDD-71) |
 
-Licencje 44 dozwolonych: 37 × CC BY 4.0, 2 × CC BY-NC 4.0, 1 × CC BY-SA 4.0,
-4 × Sketchfab Free Standard. Wszystkie CC wymagają atrybucji autora (kolumna w CSV).
+## Testy w Play In Editor
 
-Zablokowane:
+**Oryginalny Level1.** Wejście W przesunęło postać o 149 cm w osi X. F zapalił reflektor, Tab otworzył zwinięty ekwipunek, a interakcja z drzwiami zmieniła ich stan. Interakcja z zamkiem przełączyła kamerę gracza na aktora z czterema tarczami i kombinacją 9–5–1–6.
 
-- **SRC-20** Industrial Exhaust Fans and vents pack — model płatny, niepobieralny bez zakupu.
-- **SRC-21** Poppy Playtime Chapter 2 Walkables Vent — zawartość z komercyjnej gry;
-  oznaczenie CC BY przez wgrywającego nie daje pewności praw.
+**Showroom.** Wyniki to **14 PASS, 0 FAIL, 0 NOT TESTED**. Testy sprawdziły ruch i staminę, latarkę i baterię, ekwipunek, trzy rodzaje drzwi, zamek, oba rodzaje światła, zdrowie i leczenie, śmierć i restart, podpowiedzi oraz podnoszenie. Zarejestrowano reakcje na prawdziwe wejście gracza w PIE i efekty kontrolnych wywołań oryginalnych funkcji Blueprintów. Metodę dla każdej próby podaje CSV. W bazowej funkcji `DropItem` przedmiot znika ze slotu. Nowy pickup w świecie gry nie powstaje. [14 stanowisk i obserwacje](03_TESTY_MECHANIK.csv)
 
-Do potwierdzenia po pobraniu: SRC-40 „Sing” (prawdopodobnie „Sink”, umywalka),
-skład pakietów SRC-09 (50+ mebli) i SRC-23 (modularne wnętrze statku).
+**Przejście galerii.** Ten sam gracz ciągłym ruchem WASD osiągnął wszystkie 21 punktów trasy, wszedł do sześciu działów, przeszedł poszerzone skrzydło konstrukcji i dotarł do końca głównej alei. Długość przejścia wyliczona z próbek położenia to około **694 m**. Odcinek alei miał **71,43 m**. W każdym dziale komponent ruchu potwierdził kontakt z jego podłogą.
 
-## Typy elementów z dokumentu (75)
+**Kontrola po zapisie.** Po ponownym otwarciu mapy sprawdzono 561 podpisów oraz położenie i podparcie wszystkich eksponatów. Każda z 447 importowanych siatek ma materiał i prostą kolizję. Podesty mają kolizję z graczem, a wystawione na nich modele można oglądać bez zahaczania postacią o detale. W 902 paczkach galerii wykryto 0 brakujących twardych odwołań do zawartości projektu. Kompilacja Blueprintów zwróciła 0 błędów, 0 ostrzeżeń i 0 plików, których nie udało się załadować.
 
-| Stan | Liczba |
+**Ponowne uruchomienie projektu.** W osobnym procesie UE 5.8.4 otwarto plik projektu bez wskazywania mapy. Edytor załadował showroom, a Play uruchomił oryginalną postać `L1_Character_C`. Świat gry zawierał wszystkie 561 oznaczonych eksponatów. Wtyczka Android File Server była wyłączona, a konfiguracja po tej próbie była wolna od jej wpisu uwierzytelniającego.
+
+## Zmiany w kopii projektu
+
+Dodano oddzielną mapę, sześć działów, stanowiska, oświetlenie, materiały ekspozycji i foldery modeli według kategorii. Skorygowano ścieżki GameMode i GameInstance. Trzy demonstracyjne instancje drzwi korzystają z lokalnej kopii siatki z prostą kolizją. Wczytanie gry po śmierci na mapie pokazowej wraca do tej mapy, a inne poziomy zachowują pierwotny cel restartu. W SRC-12 zastąpiono grafikę programu FL Studio własną grafiką ekranów. Repozytorium zawiera projekt z przypisaną atrybucją. Oryginalne pobrania i dane sesji są poza repozytorium.
+
+## Zrzuty z uruchomionej gry
+
+Sześć ujęć zapisano bezpośrednio z PIE w rozdzielczości 2560 × 1440.
+
+| | |
 |---|---|
-| Jest kandydat w projekcie (do ponownego użycia) | 26 |
-| Tylko odnośnik, model niepobrany | 25 |
-| Brak modelu i brak odnośnika | 24 |
-
-Typy bez modelu i bez odnośnika:
-
-- Oświetlenie: włączniki światła, uszkodzone lampy, panele oświetleniowe, sygnalizatory stanu,
-  wskaźniki sygnałowe.
-- Konstrukcja statku: znaki ewakuacyjne, korytka kablowe, narożniki korytek kablowych,
-  rozdzielacze chłodziwa, rampy techniczne, barierki.
-- Drzwi i interakcje: drzwi przesuwne, przyciski, dźwignie, bezpieczniki.
-- Zagrożenia i zniszczenia: dziury w podłodze, przepaście, mechanizmy zgniatające, plamy krwi,
-  ślady pazurów.
-- Wyposażenie statku: beczki, skrzynki narzędziowe.
-- Przedmioty i dekoracje: butelki, zdjęcia załogi.
-
-Cała kategoria „Zagrożenia i zniszczenia” nie ma w dokumencie ani jednego odnośnika.
-
-## Mechaniki (14)
-
-| Wynik | Liczba |
-|---|---|
-| PASS | 0 |
-| FAIL | 0 |
-| NOT TESTED | 14 |
-
-Wszystkie Blueprinty wskazane w `03_TESTY_MECHANIK.csv` istnieją w projekcie.
-Ustalenia ze statycznej analizy plików (do potwierdzenia w edytorze):
-
-- `BP_PickupActor_Flashlight` to pickup **baterii** (mesh `Battery`), nie latarki.
-  Latarka jest komponentem `BPC_Flashlight` i nie ma modelu 3D.
-- `BP_PhysicsDoor` i `BP_Interaction_LightSwitch` są użyte tylko w `Level1.umap`.
-- `DefaultEngine.ini` wskazuje `GlobalDefaultGameMode` i `GameInstanceClass` pod ścieżkami,
-  pod którymi nie ma plików (`/Game/Blueprints/Level1/L1_GameMode`,
-  `/Game/Blueprints/HG_GameInstance`; pliki leżą w `/Game/Blueprints/Game/...`).
-  `Level1` odwołuje się do `L1_GameMode` bezpośrednio, więc nowa mapa będzie potrzebować
-  ustawienia GameMode Override w World Settings.
-
-## Pliki
-
-- `01_REFERENCJE_MODELI.csv` — 46 odnośników: autor, licencja, statusy.
-- `02_KATEGORIE_Z_DOKUMENTU.csv` — 75 typów: odnośniki, kandydaci w projekcie, stan.
-- `03_TESTY_MECHANIK.csv` — 14 mechanik: obecność Blueprintów, stan testu.
-- `04_ISTNIEJACE_MODELE_W_PROJEKCIE.csv` — 114 modeli obecnych w bazie.
+| ![Widok z wejścia na główną aleję galerii](PIE/01_Panorama_galerii.png) | ![Reaktor i moduły konstrukcyjne, w tle oznaczenia ewakuacyjne](PIE/02_Konstrukcja_statku.png) |
+| Widok z wejścia na główną aleję galerii | Reaktor i moduły konstrukcyjne, w tle oznaczenia ewakuacyjne |
+| ![Oscyloskop laboratoryjny i sąsiednie eksponaty](PIE/03_Przedmioty_laboratoryjne.png) | ![Stanowiska testów mechanik](PIE/04_Hala_mechanik.png) |
+| Oscyloskop laboratoryjny i sąsiednie eksponaty | Stanowiska testów mechanik |
+| ![Drzwi interaktywne i stanowisko klucza](PIE/05_Drzwi_i_klucz.png) | ![Warianty mebli z zestawu SRC-09](PIE/06_Meble_statku.png) |
+| Drzwi interaktywne i stanowisko klucza | Warianty mebli z zestawu SRC-09 |

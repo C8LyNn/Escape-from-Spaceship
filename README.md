@@ -1,6 +1,6 @@
 # Escape from Spaceship
 
-Projekt uczelniany (Grupa 2) w Unreal Engine **5.5**, Blueprint-only.
+Projekt uczelniany Grupy 2. Gałąź `showcase/ue-5.8` zawiera grywalną scenę pokazową w **Unreal Engine 5.8**. Czysta baza wykładowcy w wersji 5.5 jest na gałęzi `main`.
 
 ## Pochodzenie bazy
 
@@ -19,9 +19,10 @@ Różnice względem oryginału w czystej bazie:
 
 ## Uruchomienie
 
-Otwórz `HorrorProject.uproject` w Unreal Engine 5.5. Nie konwertuj projektu do nowszej
-wersji silnika bez uzgodnienia w grupie.
+Otwórz `HorrorProject.uproject` w Unreal Engine 5.8.4 i naciśnij **Play**. Mapa startowa `/Game/StudentShowcase/Maps/L_ModelsAndMechanics_Showcase` ma sześć działów galerii na wprost i czternaście stanowisk testowych za miejscem startu. Turkusowa linia prowadzi przez galerię, bursztynowe oznaczenia prowadzą przez stanowiska. Oryginalną mapę ćwiczeń można otworzyć pod `/Game/Maps/Level1`.
+
+Ruch obsługują WASD i mysz. Shift służy do sprintu, Ctrl do kucania, E do interakcji, F do latarki, a Tab do ekwipunku. Przy drzwiach fizycznych przytrzymaj lewy przycisk myszy i przesuń mysz. Kod do stanowiska z zamkiem to **9516**.
 
 ## Dokumentacja sceny pokazowej
 
-Stan prac, manifest modeli i wyniki testów mechanik: `Docs/StudentShowcase/`.
+Wyniki testów PIE, zrzuty ekranu i wykaz braków zawiera [raport](Docs/StudentShowcase/RESULTS.md). Autorów i licencje pobranych modeli podają [atrybucje](Docs/StudentShowcase/CREDITS.md).
