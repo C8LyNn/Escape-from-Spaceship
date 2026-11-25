@@ -19,7 +19,7 @@ Różnice względem oryginału w czystej bazie:
 
 ## Uruchomienie
 
-Po zaakceptowaniu zaproszenia do prywatnego repozytorium pobierz gałąź ze sceną testową.
+Pobierz gałąź zespołu ze sceną testową.
 
 ```sh
 git clone --single-branch --branch gameplay/ldd-ue-5.8 https://github.com/C8LyNn/Escape-from-Spaceship.git
@@ -41,6 +41,8 @@ Otwórz `HorrorProject.uproject` w Unreal Engine 5.8.4 i naciśnij **Play**. Map
 Ruch obsługują WASD i mysz. Shift służy do sprintu, Ctrl do kucania, E do interakcji, F do latarki, a Tab do ekwipunku. Przy drzwiach fizycznych przytrzymaj lewy przycisk myszy i przesuń mysz. Kod do stanowiska z zamkiem to **9516**.
 
 Modele z Fab i Sketchfab wstawiaj z Content Browser ze skalą aktora `(1, 1, 1)`. W galerii podpis **MAKIETA 1:5** oznacza, że dany egzemplarz jest pięć razy mniejszy od modułu używanego w grze. Drobne przedmioty na stanowiskach i w dłoni gracza mają tę samą wielkość.
+
+Sprawdź wymiary modelu względem postaci 176 cm przed użyciem go w grze. Tabela obejmuje 447 siatek, w tym wysokości siedzisk i wyniki prób przejścia przez wybrane drzwi i korytarze. W pobranej kopii projektu otwórz raport HTML, aby filtrować wyniki i oglądać kształty z podziałką. [Tabela na GitHubie](Docs/StudentShowcase/Ocena_skali_modeli.csv) · [Raport HTML](Docs/StudentShowcase/Ocena_skali_modeli.html)
 
 ## Moduły sterowane światłem
 
