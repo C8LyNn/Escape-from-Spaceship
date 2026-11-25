@@ -1,4 +1,5 @@
 #include "ShipFixture.h"
+#include "ShipBackpackGrid.h"
 #include "ShipSurvivor.h"
 
 #include "CollisionShape.h"
@@ -27,7 +28,8 @@ namespace
     const FName Roar(TEXT("Roar")), Scare(TEXT("Scare")), ExitKind(TEXT("Exit")), Hazard(TEXT("Hazard")), PushCrate(TEXT("PushCrate"));
     const FLinearColor Amber(1.f, .32f, .03f), Green(.05f, 1.f, .35f), Blue(.08f, .55f, 1.f);
 
-    bool IsPickup(FName K) { return K == White || K == ColorLamp || K == Welder || K == Battery || K == Card || K == Note || K == TEXT("Glowstick"); }
+    const FName SmallBackpack(TEXT("SmallBackpack")), LargeBackpack(TEXT("LargeBackpack"));
+    bool IsPickup(FName K) { return K == White || K == ColorLamp || K == Welder || K == Battery || K == Card || K == Note || K == TEXT("Glowstick") || K == SmallBackpack || K == LargeBackpack; }
     bool IsDoor(FName K) { return K == Door || K == RepairDoor; }
 
     FString PickupName(FName K)
@@ -516,11 +518,24 @@ void AShipFixture::Tick(float DeltaSeconds)
         CheckVolume(S);
 }
 
+int32 AShipFixture::BackpackUpgradeCapacity() const
+{
+    if (Kind == SmallBackpack) return 16;
+    if (Kind == LargeBackpack) return 24;
+    return 0;
+}
+
 FString AShipFixture::Prompt(AShipSurvivor* S) const
 {
     if (!CanAct(S) || Kind == Glyph || Kind == Hazard || Kind == Roar || (IsPickup(Kind) && bActive)) return {};
     FString Action;
-    if (IsPickup(Kind)) Action = TEXT("E — podnieś ") + PickupName(Kind);
+    if (const int32 Capacity = BackpackUpgradeCapacity())
+    {
+        Action = Capacity > S->BackpackCapacity
+            ? FString::Printf(TEXT("E — załóż plecak · %d → %s"), S->BackpackCapacity, *ShipBackpackGrid::CapacityLabel(Capacity))
+            : FString::Printf(TEXT("Masz już plecak na %s"), *ShipBackpackGrid::CapacityLabel(S->BackpackCapacity));
+    }
+    else if (IsPickup(Kind)) Action = TEXT("E — podnieś ") + PickupName(Kind);
 
     else if (Kind == Charger) Action = S->bHasBattery ? TEXT("E — naładuj baterię") : TEXT("E — sprawdź ładowarkę · potrzebna bateria");
     else if (Kind == Crate) Action = TEXT("Przytrzymaj E — przesuń skrzynię");

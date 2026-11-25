@@ -46,7 +46,8 @@ Od startu idź za tablicą **STANOWISKA LDD** do stołu. Zabierz **E** latarkę 
 
 | Klawisz | Działanie |
 | --- | --- |
-| **Tab / 1–8** | Otwórz plecak i kliknij przedmiot lub wybierz numer jego pola. Wybrany przedmiot trafi do ręki, a poprzedni zajmie zwolnione pole. Numer pustego pola chowa trzymany przedmiot. |
+| **Tab / 1–8** | Otwórz plecak i kliknij przedmiot lub wybierz numer pola na bieżącej stronie. Wybrany przedmiot trafi do ręki, a poprzedni zajmie zwolnione pole. Numer pustego pola chowa trzymany przedmiot. |
+| **Kółko myszy / PgUp / PgDn** | W otwartym małym lub dużym plecaku przejdź do poprzedniej albo następnej strony. |
 | **F** | Włącz lub zgaś latarkę. |
 | **Q / kółko myszy** | Q wybiera kolejny kolor. Kółkiem możesz przechodzić w obie strony między czerwonym, zielonym, niebieskim i fioletowym. |
 | **Z / X** | Zmniejsz lub zwiększ moc światła. |
@@ -57,7 +58,9 @@ Od startu idź za tablicą **STANOWISKA LDD** do stołu. Zabierz **E** latarkę 
 
 Moc i promień mają po pięć ustawień. Obie latarki zachowują wybrane ustawienia przy zmianie koloru lub narzędzia. Większa moc i większy promień niezależnie przyspieszają rozładowanie baterii. Plecak pod **Tab** pokazuje bieżący pobór. Zgaszona latarka nie pobiera energii.
 
-Plecak pod **Tab** ma osiem pól wspólnych dla sprzętu, notatek, przedmiotów z paczki i pojemnika na glowsticki. Do naprawy zabierz spawarkę WD01 i akumulator, wybierz spawarkę w plecaku i przytrzymaj **E** przy drzwiach. Zebrane notatki są stronami jednego notesu. Z notesem w ręce **LPM** otwiera tekst, **← / →** zmienia stronę, **Tab / Esc** zamyka czytanie.
+Na początku masz osiem pól na sprzęt, notatki, przedmioty z paczki i pojemnik na glowsticki. Przy stole ze sprzętem znajdziesz mały plecak na 16 pól i duży na 24. Wyceluj w wybrany plecak i naciśnij **E**. Możesz od razu założyć duży plecak, także gdy wszystkie pola są zajęte. Każda strona mieści osiem przedmiotów.
+
+Do naprawy zabierz spawarkę WD01 i akumulator, wybierz spawarkę w plecaku i przytrzymaj **E** przy drzwiach. Zebrane notatki są stronami jednego notesu. Z notesem w ręce **LPM** otwiera tekst, **← / →** zmienia stronę, **Tab / Esc** zamyka czytanie.
 
 Pojemnik mieści cztery glowsticki. Każdy rzucony **LPM** odbija się, osiada i oświetla otoczenie przez 45 sekund. Co 12 sekund odnawia się jedna sztuka, także po schowaniu pojemnika. [Test plecaka, glowsticków i zagadek](Tests/Gameplay/test_shared_backpack.py)
 

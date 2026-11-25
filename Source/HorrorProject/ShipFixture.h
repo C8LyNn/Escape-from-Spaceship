@@ -56,6 +56,7 @@ public:
     UPROPERTY(BlueprintReadOnly, Category="Fixture|State") float Progress = 0.f;
     UPROPERTY(BlueprintReadOnly, Category="Fixture|State") int32 ScareStage = 0;
 
+    int32 BackpackUpgradeCapacity() const;
     UFUNCTION(BlueprintPure, Category="Fixture") virtual FString Prompt(AShipSurvivor* Survivor) const;
     UFUNCTION(BlueprintCallable, Category="Fixture") virtual void Use(AShipSurvivor* Survivor);
     UFUNCTION(BlueprintCallable, Category="Fixture") virtual void HeldUse(AShipSurvivor* Survivor, float DeltaSeconds);

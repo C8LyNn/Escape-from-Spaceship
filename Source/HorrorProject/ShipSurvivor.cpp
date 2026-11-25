@@ -2,6 +2,7 @@
 
 #include "ShipFixture.h"
 #include "ShipInventoryLibrary.h"
+#include "ShipBackpackGrid.h"
 #include "Components/StaticMeshComponent.h"
 #include "ShipHUD.h"
 #include "ShipLadder.h"
@@ -64,6 +65,14 @@ namespace
         bool HandleKeyUpEvent(FSlateApplication&, const FKeyEvent& Event) override
         {
             return Consumed.Remove(Event.GetKey()) > 0;
+        }
+        bool HandleMouseWheelOrGestureEvent(FSlateApplication&, const FPointerEvent& Event, const FPointerEvent*) override
+        {
+            if (!Owner.IsValid() || !Owner->IsStockInventoryVisible() || Owner->BackpackPageCount() <= 1 || Event.GetWheelDelta() == 0) return false;
+            UGameViewportClient* Client = Owner->GetWorld()->GetGameViewport();
+            const TSharedPtr<SViewport> View = Client ? Client->GetGameViewportWidget() : nullptr;
+            if (!View || !View->GetCachedGeometry().IsUnderLocation(Event.GetScreenSpacePosition())) return false;
+            return Owner->HandleModalShortcut(Event.GetWheelDelta() > 0 ? EKeys::PageUp : EKeys::PageDown, false);
         }
         const TCHAR* GetDebugName() const override { return TEXT("ShipModalShortcuts"); }
     private:
@@ -152,6 +161,9 @@ void AShipSurvivor::SyncPawn()
     EndDrag();
     ClosePanel();
     TrackedPawn = Pawn;
+    BackpackPage = 0;
+    BackpackCapacity = FMath::Max(ShipBackpackGrid::PageSize, UShipInventoryLibrary::SlotCount(Pawn));
+    if (Pawn) ShipBackpackGrid::ShowPage(LocalPC.Get(), BackpackPage);
     UpdateHandMesh();
     OriginalLight.Reset();
     MovementStats.Reset();
@@ -262,8 +274,15 @@ bool AShipSurvivor::HandleModalShortcut(FKey Key, bool bRepeat)
         const int32 Digit = DigitFor(Key);
         UGameViewportClient* Client = GetWorld()->GetGameViewport();
         const TSharedPtr<SViewport> View = Client ? Client->GetGameViewportWidget() : nullptr;
-        if (Digit < 1 || Digit > 8 || !View || !View->HasAnyUserFocusOrFocusedDescendants()) return false;
-        if (!bRepeat) EquipSlot(Digit - 1);
+        if (!View || !View->HasAnyUserFocusOrFocusedDescendants()) return false;
+        if (Key == EKeys::PageUp || Key == EKeys::PageDown)
+        {
+            if (BackpackPageCount() == 1) return false;
+            if (!bRepeat) ChangeBackpackPage(Key == EKeys::PageUp ? -1 : 1);
+            return true;
+        }
+        if (Digit < 1 || Digit > ShipBackpackGrid::PageSize) return false;
+        if (!bRepeat) EquipSlot(QuickSlotIndex(Digit));
         return true;
     }
     if ((!IsKeypadOpen() && !bReadingNote) || IsBaseMenuActive()) return false;
@@ -549,6 +568,11 @@ void AShipSurvivor::ToggleLamp()
 void AShipSurvivor::CycleFilter() { ChangeFilter(1); }
 void AShipSurvivor::ScrollEquipment(FKey Key)
 {
+    if (IsStockInventoryVisible())
+    {
+        ChangeBackpackPage(Key == EKeys::MouseScrollUp ? -1 : 1);
+        return;
+    }
     if (IsBaseMenuActive() || bReadingNote || IsKeypadOpen() || bDead || bEscaped) return;
     const int32 Step = Key == EKeys::MouseScrollUp ? 1 : -1;
     if (IsDragging()) GrabDistance = FMath::Clamp(GrabDistance + Step * 24.f, 78.f, UseRange);
@@ -720,7 +744,7 @@ void AShipSurvivor::PressDigit(FKey Key)
     if (Digit == INDEX_NONE || bDead || bEscaped) return;
     if (IsStockInventoryVisible())
     {
-        if (Digit >= 1 && Digit <= 8) EquipSlot(Digit - 1);
+        if (Digit >= 1 && Digit <= ShipBackpackGrid::PageSize) EquipSlot(QuickSlotIndex(Digit));
         return;
     }
     if (IsBaseMenuActive()) return;
@@ -729,7 +753,7 @@ void AShipSurvivor::PressDigit(FKey Key)
         if (EnteredCode.Len() < GetCodeLength()) { EnteredCode.AppendChar(TCHAR('0' + Digit)); Beep(1.f + .035f * Digit); }
         return;
     }
-    if (!bReadingNote && Digit >= 1 && Digit <= 8) EquipSlot(Digit - 1);
+    if (!bReadingNote && Digit >= 1 && Digit <= ShipBackpackGrid::PageSize) EquipSlot(QuickSlotIndex(Digit));
 }
 void AShipSurvivor::DeleteDigit()
 {
@@ -767,8 +791,16 @@ void AShipSurvivor::ToggleInventory()
 }
 void AShipSurvivor::PriorNote() { if (bReadingNote && !Notes.IsEmpty()) { SelectedNote = (SelectedNote + Notes.Num() - 1) % Notes.Num(); ScrollLines = 0; } }
 void AShipSurvivor::NextNote() { if (bReadingNote && !Notes.IsEmpty()) { SelectedNote = (SelectedNote + 1) % Notes.Num(); ScrollLines = 0; } }
-void AShipSurvivor::PageUp() { if (bReadingNote) ScrollLines = FMath::Max(0, ScrollLines - 5); }
-void AShipSurvivor::PageDown() { if (bReadingNote) ScrollLines += 5; }
+void AShipSurvivor::PageUp()
+{
+    if (bReadingNote) ScrollLines = FMath::Max(0, ScrollLines - 5);
+    else ChangeBackpackPage(-1);
+}
+void AShipSurvivor::PageDown()
+{
+    if (bReadingNote) ScrollLines += 5;
+    else ChangeBackpackPage(1);
+}
 void AShipSurvivor::ClampNoteScroll(int32 Maximum) { ScrollLines = FMath::Clamp(ScrollLines,0,FMath::Max(0,Maximum)); }
 
 void AShipSurvivor::Die()

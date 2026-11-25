@@ -23,6 +23,8 @@ public:
     // Exchanges a whole stack with the selected slot. The stock grid remains authoritative.
     static bool SwapWithHand(AActor* Player, int32 Index, TSubclassOf<AActor>& Hand, int32& Amount);
     static bool StorePackItem(AActor* Player, UClass* Item, int32 PreferredIndex);
+    static int32 SlotCount(AActor* Player);
+    static bool ExpandBackpack(APlayerController* PC, int32 Capacity);
     static int32 FindSlot(AActor* Player, UClass* Item);
     static bool IsDoorKey(UClass* Item);
     static bool UseStockConsumable(AActor* Player, UClass* Item);

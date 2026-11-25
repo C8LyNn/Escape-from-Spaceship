@@ -1,5 +1,7 @@
 #include "ShipInventoryLibrary.h"
 #include "ShipSurvivor.h"
+#include "ShipBackpackGrid.h"
+#include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Kismet/GameplayStatics.h"
@@ -58,6 +60,7 @@ namespace
             AmountField = StructField<FIntProperty>(Slot->Struct, TEXT("Amount"));
         }
         int32 Num() const { return ItemField && AmountField ? Slots().Num() : 0; }
+        void Resize(int32 Count) const { Slots().Resize(Count); }
         UClass* Item(int32 Index) const { return Cast<UClass>(ItemField->GetObjectPropertyValue_InContainer(Slots().GetRawPtr(Index))); }
         int32 Amount(int32 Index) const { return AmountField->GetPropertyValue_InContainer(Slots().GetRawPtr(Index)); }
         void Set(int32 Index, UClass* Class, int32 Count) const
@@ -279,6 +282,27 @@ bool UShipInventoryLibrary::DropSlot(UActorComponent* Inventory, int32 Index, TS
     Slots.Set(Index, nullptr, 0);
     if (FInventorySlots::IsKey(Item)) Slots.RefreshKeyCount();
     Slots.Refresh(Index);
+    return true;
+}
+
+int32 UShipInventoryLibrary::SlotCount(AActor* Player)
+{
+    return FInventorySlots(PlayerInventory(Player)).Num();
+}
+
+bool UShipInventoryLibrary::ExpandBackpack(APlayerController* PC, int32 Capacity)
+{
+    FInventorySlots Slots(PlayerInventory(PC ? PC->GetPawn() : nullptr));
+    const int32 OldCount = Slots.Num();
+    if (OldCount <= 0 || OldCount >= Capacity) return false;
+    Slots.Resize(Capacity);
+    for (int32 I = OldCount; I < Capacity; ++I) Slots.Set(I, nullptr, 0);
+    if (!ShipBackpackGrid::Expand(PC, OldCount, Capacity))
+    {
+        Slots.Resize(OldCount);
+        return false;
+    }
+    for (int32 I = OldCount; I < Capacity; ++I) Slots.Refresh(I);
     return true;
 }
 

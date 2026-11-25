@@ -38,6 +38,10 @@ public:
     UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") FString Equipped = TEXT("StockLamp");
     UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") int32 GlowstickCharges = 0;
     static constexpr int32 MaxGlowsticks = 4;
+    UPROPERTY(BlueprintReadOnly, Category="Ship|Inventory") int32 BackpackCapacity = 8;
+    UPROPERTY(BlueprintReadOnly, Category="Ship|Inventory") int32 BackpackPage = 0;
+    int32 BackpackPageCount() const;
+    int32 QuickSlotIndex(int32 Digit) const;
     bool CollectItem(AShipFixture* Fixture);
     bool EquipSlot(int32 Index);
     int32 HeldKeyCount() const;
@@ -102,6 +106,7 @@ private:
     int32 LastStockSlot = INDEX_NONE;
     double NextGlowstick = 0.;
     void InitPack();
+    void ChangeBackpackPage(int32 Delta);
     void UpdateHandMesh();
     void UseHeldItem();
     void RechargeGlowsticks();

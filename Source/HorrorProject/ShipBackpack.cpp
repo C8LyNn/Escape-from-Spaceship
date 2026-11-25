@@ -1,5 +1,6 @@
 #include "ShipSurvivor.h"
 #include "ShipFixture.h"
+#include "ShipBackpackGrid.h"
 #include "ShipGlowstick.h"
 #include "ShipInventoryLibrary.h"
 #include "Blueprint/UserWidget.h"
@@ -65,6 +66,19 @@ FName AShipSurvivor::HandKind(UClass* Type) const
 bool AShipSurvivor::CollectItem(AShipFixture* Fixture)
 {
     if (!IsValid(Fixture) || !TrackedPawn.IsValid()) return false;
+    if (const int32 Capacity = Fixture->BackpackUpgradeCapacity())
+    {
+        if (BackpackCapacity >= Capacity)
+        {
+            Notify(FString::Printf(TEXT("Twój plecak ma już %s."), *ShipBackpackGrid::CapacityLabel(BackpackCapacity)));
+            return false;
+        }
+        if (!UShipInventoryLibrary::ExpandBackpack(LocalPC.Get(), Capacity)) return false;
+        BackpackCapacity = Capacity;
+        Notify(FString::Printf(TEXT("Założono %s plecak · %s. Tab otwiera plecak."),
+            Capacity == 16 ? TEXT("mały") : TEXT("duży"), *ShipBackpackGrid::CapacityLabel(Capacity)));
+        return true;
+    }
     const FName Kind = Fixture->Kind;
     UClass* Item = PackClasses.FindRef(Kind).Get();
     if (!Item) return false;
@@ -94,9 +108,30 @@ bool AShipSurvivor::CollectItem(AShipFixture* Fixture)
         ScrollLines = 0;
     }
     const int32 Index = UShipInventoryLibrary::FindSlot(TrackedPawn.Get(), Item);
-    Notify(Index == INDEX_NONE ? TEXT("Przedmiot w ręce.") :
-        FString::Printf(TEXT("W plecaku: %s · Tab lub %d, aby wziąć do ręki."), *Fixture->Caption, Index+1));
+    if (Index == INDEX_NONE) Notify(TEXT("Przedmiot w ręce."));
+    else if (BackpackPageCount() == 1)
+        Notify(FString::Printf(TEXT("W plecaku: %s · Tab lub %d, aby wziąć do ręki."), *Fixture->Caption, Index+1));
+    else
+        Notify(FString::Printf(TEXT("W plecaku: %s · strona %d, klawisz %d."), *Fixture->Caption,
+            Index / ShipBackpackGrid::PageSize + 1, Index % ShipBackpackGrid::PageSize + 1));
     return true;
+}
+
+int32 AShipSurvivor::BackpackPageCount() const
+{
+    return FMath::DivideAndRoundUp(BackpackCapacity, ShipBackpackGrid::PageSize);
+}
+
+int32 AShipSurvivor::QuickSlotIndex(int32 Digit) const
+{
+    return BackpackPage * ShipBackpackGrid::PageSize + Digit - 1;
+}
+
+void AShipSurvivor::ChangeBackpackPage(int32 Delta)
+{
+    if (!IsStockInventoryVisible()) return;
+    const int32 Next = FMath::Clamp(BackpackPage + Delta, 0, BackpackPageCount() - 1);
+    if (Next != BackpackPage && ShipBackpackGrid::ShowPage(LocalPC.Get(), Next)) BackpackPage = Next;
 }
 
 bool AShipSurvivor::IsStockInventoryVisible() const

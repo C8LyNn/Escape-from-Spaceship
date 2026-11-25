@@ -1,6 +1,7 @@
 #include "ShipHUD.h"
 
 #include "ShipSurvivor.h"
+#include "ShipBackpackGrid.h"
 #include "Components/ProgressBar.h"
 #include "Kismet/GameplayStatics.h"
 #include "Framework/Application/SlateApplication.h"
@@ -119,8 +120,17 @@ namespace
             FShipCanvas C(Geometry,List,Layer);
             if (P->IsStockInventoryVisible())
             {
-                const float X = (C.W-840.f)*.5f, Y = C.H-80.f;
-                C.Rect(X,Y,840.f,69.f,Panel);
+                const bool bHasPages = P->BackpackPageCount() > 1;
+                const float X = (C.W-840.f)*.5f, Y = C.H-(bHasPages ? 111.f : 80.f);
+                C.Rect(X,Y,840.f,bHasPages ? 100.f : 69.f,Panel);
+                if (bHasPages)
+                {
+                    const FString Bag = FString::Printf(TEXT("%s plecak · %s   |   Strona %d/%d"),
+                        P->BackpackCapacity == 16 ? TEXT("Mały") : TEXT("Duży"), *ShipBackpackGrid::CapacityLabel(P->BackpackCapacity),
+                        P->BackpackPage+1, P->BackpackPageCount());
+                    C.Text(Bag,X+16.f,Y+69.f,16.f,Accent,true);
+                    C.Text(TEXT("Kółko myszy lub PgUp / PgDn   ·   Zmień stronę"),X+395.f,Y+69.f,15.f,Soft);
+                }
                 C.Text(TEXT("W ręce: ") + P->GetToolLabel(),X+16.f,Y+6.f,18.f,Ink,true);
                 if (P->bHasBattery)
                     C.Text(FString::Printf(TEXT("Akumulator %d%%    Pobór %.2f%%/s"),
@@ -136,7 +146,9 @@ namespace
             else if (P->bKitEnabled) Play(C,*P,Prompt);
             else
             {
-                C.Text(TEXT("Tab  Plecak   ·   1–8  Wybór przedmiotu"),24.f,36.f,15.f,Ink);
+                FString Controls = TEXT("Tab  Plecak   ·   1–8  Wybór przedmiotu");
+                if (P->BackpackPageCount() > 1) Controls += FString::Printf(TEXT(" · strona %d/%d"), P->BackpackPage+1, P->BackpackPageCount());
+                C.Text(Controls,24.f,36.f,15.f,Ink);
                 if (!Prompt.IsEmpty()) C.Banner((C.W-650.f)*.5f,C.H-97.f,650.f,Prompt,Accent);
             }
             if (!P->bDead && !P->bEscaped)
@@ -170,7 +182,8 @@ namespace
                 }
             }
 
-            const FString Controls = TEXT("Tab  Plecak     1–8  Zamień przedmiot z ręką");
+            FString Controls = TEXT("Tab  Plecak     1–8  Zamień przedmiot z ręką");
+            if (P.BackpackPageCount() > 1) Controls += FString::Printf(TEXT(" · strona %d/%d"), P.BackpackPage+1, P.BackpackPageCount());
             C.Text(Controls,C.W-C.TextWidth(Controls,13.f)-24.f,C.H-41.f,13.f,Soft);
             if (!Prompt.IsEmpty()) C.Banner((C.W-650.f)*.5f,C.H*.66f,650.f,Prompt,Accent);
         }
@@ -218,11 +231,11 @@ int32 UShipNumberedSlot::NativePaint(const FPaintArgs& Args, const FGeometry& Ge
     const FIntProperty* Field = FindFProperty<FIntProperty>(GetClass(),TEXT("Index"));
     if (!Field) return Layer;
     const int32 Index = Field->GetPropertyValue_InContainer(this);
-    if (Index < 0 || Index > 7) return Layer;
+    if (Index < 0) return Layer;
     const auto Badge = Geometry.ToPaintGeometry(FVector2f(21,21), FSlateLayoutTransform(FVector2f(4,4)));
     FSlateDrawElement::MakeBox(List,++Layer,Badge,FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")),ESlateDrawEffect::None,Panel);
     FSlateDrawElement::MakeText(List,++Layer,Geometry.ToPaintGeometry(FVector2f(20,20),FSlateLayoutTransform(FVector2f(9,4))),
-        FString::FromInt(Index+1),FCoreStyle::GetDefaultFontStyle(TEXT("Bold"),12),ESlateDrawEffect::None,Ink);
+        FString::FromInt(Index % ShipBackpackGrid::PageSize + 1),FCoreStyle::GetDefaultFontStyle(TEXT("Bold"),12),ESlateDrawEffect::None,Ink);
     return Layer;
 }
 
