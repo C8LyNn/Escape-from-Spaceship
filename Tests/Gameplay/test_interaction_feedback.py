@@ -73,6 +73,7 @@ def cases(world, check):
         value = tint()
         check(label, str(prop(kit, 'Filter')) == color and
               all(abs(a-b) < .015 for a,b in zip(value, palette[color])), value)
+    yield from tap('Two')  # Take the collected color lamp out of its backpack slot.
     starting_charge = kit.charge
     kit.set_editor_property('Charge', 63.5)
     check('bottom battery bar reads the equipped shared cell',
@@ -83,7 +84,6 @@ def cases(world, check):
     check('holstering restores the neutral lower battery bar', min(tint()) > .85, tint())
     yield from tap('G')
     kit.set_editor_property('Charge', starting_charge)
-    yield from tap('Two')
     check_filter('equipping the color flashlight tints the lower bar', 'Red')
     yield from tap('MouseScrollUp')
     check_filter('wheel forward selects green on the light and lower bar', 'Green')

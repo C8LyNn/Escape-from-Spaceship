@@ -1,4 +1,8 @@
 #include "ShipInventoryLibrary.h"
+#include "ShipSurvivor.h"
+#include "Blueprint/UserWidget.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
@@ -25,6 +29,11 @@ namespace
             if (It->GetAuthoredName() == Name || It->GetName().StartsWith(FString(Name) + TEXT("_")))
                 return *It;
         return nullptr;
+    }
+
+    AShipSurvivor* Equipment(const UObject* Context)
+    {
+        return Context ? Cast<AShipSurvivor>(UGameplayStatics::GetActorOfClass(Context, AShipSurvivor::StaticClass())) : nullptr;
     }
 
     class FInventorySlots
@@ -75,7 +84,8 @@ namespace
             AActor* Owner = Component->GetOwner();
             FByteProperty* KeyCount = Owner ? FindFProperty<FByteProperty>(Owner->GetClass(), TEXT("KeyCollected")) : nullptr;
             if (!KeyCount) return;
-            int64 Count = 0;
+            const AShipSurvivor* Kit = Equipment(Owner);
+            int64 Count = Kit ? Kit->HeldKeyCount() : 0;
             for (int32 I = 0; I < Num(); ++I)
                 if (IsKey(Item(I))) Count += FMath::Max(0, Amount(I));
             KeyCount->SetPropertyValue_InContainer(Owner, static_cast<uint8>(FMath::Min<int64>(255, Count)));
@@ -272,9 +282,73 @@ bool UShipInventoryLibrary::DropSlot(UActorComponent* Inventory, int32 Index, TS
     return true;
 }
 
+bool UShipInventoryLibrary::StorePackItem(AActor* Player, UClass* Item, int32 PreferredIndex)
+{
+    FInventorySlots Slots(PlayerInventory(Player));
+    if (!Slots.Accepts(Item)) return false;
+    int32 Index = PreferredIndex;
+    if (Index < 0 || Index >= Slots.Num() || Slots.Item(Index))
+    {
+        for (Index = 0; Index < Slots.Num() && Slots.Item(Index); ++Index) {}
+        if (Index == Slots.Num()) return false;
+    }
+    Slots.Set(Index, Item, 1);
+    Slots.Refresh(Index);
+    return true;
+}
+
+int32 UShipInventoryLibrary::FindSlot(AActor* Player, UClass* Item)
+{
+    FInventorySlots Slots(PlayerInventory(Player));
+    for (int32 I = 0; I < Slots.Num(); ++I)
+        if (Slots.Item(I) == Item) return I;
+    return INDEX_NONE;
+}
+
+bool UShipInventoryLibrary::SwapWithHand(AActor* Player, int32 Index, TSubclassOf<AActor>& Hand, int32& Amount)
+{
+    FInventorySlots Slots(PlayerInventory(Player));
+    if (Index < 0 || Index >= Slots.Num() || (Hand && !Slots.Accepts(Hand.Get()))) return false;
+    UClass* Selected = Slots.Item(Index);
+    const int32 Count = Slots.Amount(Index);
+    if (!Hand && !Selected) return false;
+    const bool bKey = Slots.IsKey(Selected) || Slots.IsKey(Hand.Get());
+    Slots.Set(Index, Hand.Get(), Amount);
+    Hand = Selected;
+    Amount = Count;
+    if (bKey) Slots.RefreshKeyCount();
+    Slots.Refresh(Index);
+    return true;
+}
+
+bool UShipInventoryLibrary::EquipClickedSlot(UUserWidget* Slot, int32 Index)
+{
+    // Shift-click retains the pack's original Use / Drop context menu.
+    if (!Slot || FSlateApplication::Get().GetModifierKeys().IsShiftDown()) return false;
+    AShipSurvivor* Kit = Equipment(Slot);
+    return Kit && Kit->IsStockInventoryVisible() && Kit->EquipSlot(Index);
+}
+
+bool UShipInventoryLibrary::IsDoorKey(UClass* Item) { return FInventorySlots::IsKey(Item); }
+
+bool UShipInventoryLibrary::UseStockConsumable(AActor* Player, UClass* Item)
+{
+    if (!Player || !Item) return false;
+    AActor* Action = Player->GetWorld()->SpawnActor<AActor>(Item);
+    if (!Action) return false;
+    UFunction* Use = Action->FindFunction(TEXT("UseItem"));
+    FBoolProperty* Success = FindFProperty<FBoolProperty>(Item, TEXT("UseItemSuccess"));
+    if (Use && Use->NumParms == 0 && Success) Action->ProcessEvent(Use, nullptr);
+    const bool bUsed = Success && Success->GetPropertyValue_InContainer(Action);
+    Action->Destroy();
+    return bUsed;
+}
+
 bool UShipInventoryLibrary::CanUnlockWithKey(AActor* Door, AActor* Player)
 {
-    return IsValid(Door) && (Door->ActorHasTag(UnlockedTag) || FInventorySlots(PlayerInventory(Player)).FirstKey() != INDEX_NONE);
+    const AShipSurvivor* Kit = Equipment(Player);
+    return IsValid(Door) && (Door->ActorHasTag(UnlockedTag) || (Kit && Kit->HeldKeyCount() > 0)
+        || FInventorySlots(PlayerInventory(Player)).FirstKey() != INDEX_NONE);
 }
 
 bool UShipInventoryLibrary::UnlockWithKey(AActor* Door, AActor* Player)
@@ -282,6 +356,13 @@ bool UShipInventoryLibrary::UnlockWithKey(AActor* Door, AActor* Player)
     if (!IsValid(Door)) return false;
     if (Door->ActorHasTag(UnlockedTag)) return true;
     FInventorySlots Slots(PlayerInventory(Player));
+    if (AShipSurvivor* Kit = Equipment(Player); Kit && Kit->HeldKeyCount() > 0)
+    {
+        Kit->ConsumeOneInHand();
+        Door->Tags.AddUnique(UnlockedTag);
+        Slots.RefreshKeyCount();
+        return true;
+    }
     const int32 I = Slots.FirstKey();
     if (I == INDEX_NONE) return false;
     Slots.Set(I, Slots.Item(I), Slots.Amount(I) - 1);

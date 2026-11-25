@@ -12,6 +12,8 @@ class UMaterialParameterCollection;
 class UPhysicsHandleComponent;
 class UPrimitiveComponent;
 class UShipHUDOverlay;
+class UStaticMeshComponent;
+class UStaticMesh;
 class USoundBase;
 class USpotLightComponent;
 
@@ -33,7 +35,15 @@ public:
     UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") bool bLampOn = false;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") bool bWelding = false;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") FName Filter = TEXT("White");
-    UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") FString Equipped = TEXT("White");
+    UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") FString Equipped = TEXT("StockLamp");
+    UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") int32 GlowstickCharges = 0;
+    static constexpr int32 MaxGlowsticks = 4;
+    bool CollectItem(AShipFixture* Fixture);
+    bool EquipSlot(int32 Index);
+    int32 HeldKeyCount() const;
+    void ConsumeOneInHand();
+    bool IsStockInventoryVisible() const;
+    UFUNCTION(BlueprintPure, Category="Ship|Equipment") FString HandHint() const;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Equipment") float Charge = 0.f;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Player") float Stamina = 100.f;
     UPROPERTY(BlueprintReadOnly, Category="Ship|Player") bool bDead = false;
@@ -56,7 +66,7 @@ public:
     UFUNCTION(BlueprintPure) FVector ViewDirection() const;
     UFUNCTION(BlueprintPure) bool IsOnLadder() const;
 
-    bool IsInventoryOpen() const { return bInventoryOpen; }
+    bool IsReadingNote() const { return bReadingNote; }
     UFUNCTION(BlueprintPure, Category="Ship|Keypad") bool IsKeypadOpen() const { return Keypad.IsValid(); }
     bool IsDragging() const;
     bool IsBaseMenuActive() const;
@@ -84,6 +94,18 @@ private:
     UPROPERTY() TObjectPtr<UMaterialParameterCollection> BeamParameters;
     UPROPERTY() TSubclassOf<UInterface> StockInteraction;
     UPROPERTY() TSubclassOf<UInterface> StockGrab;
+    UPROPERTY() TMap<FName,TSubclassOf<AActor>> PackClasses;
+    UPROPERTY() TMap<FName,TObjectPtr<UStaticMesh>> PackMeshes;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> HandMesh;
+    UPROPERTY() TSubclassOf<AActor> HandClass;
+    int32 HandAmount = 0;
+    int32 LastStockSlot = INDEX_NONE;
+    double NextGlowstick = 0.;
+    void InitPack();
+    void UpdateHandMesh();
+    void UseHeldItem();
+    void RechargeGlowsticks();
+    FName HandKind(UClass* Type) const;
     TWeakObjectPtr<AActor> StockTarget;
     TWeakObjectPtr<AActor> HeldStockObject;
     FKey CrateGrabKey;
@@ -109,7 +131,7 @@ private:
     bool bLadderUseDown = false;
     bool bWarnedLowCharge = false;
     bool bOwnDrag = false;
-    bool bInventoryOpen = false;
+    bool bReadingNote = false;
     bool bLockedControls = false;
     int32 SelectedNote = INDEX_NONE;
     int32 ScrollLines = 0;
@@ -143,7 +165,7 @@ private:
     void TickEquipment(float DeltaSeconds);
     void ApplyBeamSettings();
     void UpdateBeam();
-    void SetTool(const FString& Tool);
+
     void PressDigit(FKey Key);
     void DeleteDigit();
     void ConfirmCode();

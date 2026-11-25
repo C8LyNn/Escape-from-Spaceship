@@ -104,7 +104,6 @@ def run():
         yield from tap('G')
         check('Returning to a stored unlit stock flashlight keeps it off', not stock_light.is_visible())
         yield from tap('G')
-        yield from tap('Two')
         if not kit.get_editor_property('bLampOn'):
             yield from tap('F')
         selected = str(kit.get_editor_property('Filter'))

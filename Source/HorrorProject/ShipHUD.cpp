@@ -9,6 +9,7 @@
 #include "Rendering/SlateRenderer.h"
 #include "Styling/CoreStyle.h"
 #include "Widgets/SLeafWidget.h"
+#include "UObject/UnrealType.h"
 
 namespace
 {
@@ -114,15 +115,31 @@ namespace
             FSlateWindowElementList& List, int32 Layer, const FWidgetStyle&, bool) const override
         {
             AShipSurvivor* P=Player.Get();
-            if (!P || P->IsBaseMenuActive()) return Layer;
+            if (!P) return Layer;
             FShipCanvas C(Geometry,List,Layer);
+            if (P->IsStockInventoryVisible())
+            {
+                const float X = (C.W-840.f)*.5f, Y = C.H-80.f;
+                C.Rect(X,Y,840.f,69.f,Panel);
+                C.Text(TEXT("W ręce: ") + P->GetToolLabel(),X+16.f,Y+6.f,18.f,Ink,true);
+                if (P->bHasBattery)
+                    C.Text(FString::Printf(TEXT("Akumulator %d%%    Pobór %.2f%%/s"),
+                        FMath::RoundToInt(P->Charge),P->bLampOn ? P->GetLampDrainPerSecond() : 0.f),X+515.f,Y+8.f,15.f,Soft);
+                C.Text(TEXT("Kliknij przedmiot lub naciśnij 1–8, aby zamienić go z ręką.   Shift + klik: opcje przedmiotu."),X+16.f,Y+38.f,15.f,Soft);
+                return C.TopLayer();
+            }
+            if (P->IsBaseMenuActive()) return Layer;
             const FString Prompt=P->GetPrompt();
             if (P->bDead || P->bEscaped) Ending(C,*P);
             else if (P->IsKeypadOpen()) Keypad(C,*P);
-            else if (P->IsInventoryOpen()) Inventory(C,*P);
+            else if (P->IsReadingNote()) NoteReader(C,*P);
             else if (P->bKitEnabled) Play(C,*P,Prompt);
-            else if (!Prompt.IsEmpty()) C.Banner((C.W-650.f)*.5f,C.H-97.f,650.f,Prompt,Accent);
-            if (P->bKitEnabled && !P->bDead && !P->bEscaped)
+            else
+            {
+                C.Text(TEXT("Tab  Plecak   ·   1–8  Wybór przedmiotu"),24.f,36.f,15.f,Ink);
+                if (!Prompt.IsEmpty()) C.Banner((C.W-650.f)*.5f,C.H-97.f,650.f,Prompt,Accent);
+            }
+            if (!P->bDead && !P->bEscaped)
             {
                 const FString Notice=P->GetNotice();
                 if (!Notice.IsEmpty()) C.Banner((C.W-590.f)*.5f,20.f,590.f,Notice,Accent);
@@ -133,7 +150,7 @@ namespace
         TWeakObjectPtr<AShipSurvivor> Player;
         static void Play(FShipCanvas& C,AShipSurvivor& P,const FString& Prompt)
         {
-            const bool bLamp = P.Equipped != TEXT("Welder") && (P.Equipped == TEXT("White") ? P.bHasWhite : P.bHasColorLamp);
+            const bool bLamp = P.Equipped == TEXT("White") || P.Equipped == TEXT("ColorLamp");
             const float Height = bLamp ? 97.f : 69.f;
             const float X=24.f, Y=85.f;
             C.Rect(X,Y,365.f,Height,Strip);
@@ -141,6 +158,7 @@ namespace
             C.Text(P.GetToolLabel(),X+16.f,Y+9.f,19.f,Ink,true);
             if (P.Equipped==TEXT("Welder"))
                 C.Text(P.bWelding?TEXT("Łuk aktywny"):TEXT("Przyłóż do spoiny i trzymaj E"),X+16.f,Y+41.f,14.f,P.bWelding?Warning:Soft);
+            else if (!bLamp) C.Text(P.HandHint(),X+16.f,Y+41.f,14.f,Soft);
             else
             {
                 C.Rect(X+16.f,Y+45.f,10.f,10.f,P.GetFilterColor());
@@ -152,48 +170,25 @@ namespace
                 }
             }
 
-            const FString Controls = TEXT("I  Wyposażenie i sterowanie     G  Wyłącz zestaw");
+            const FString Controls = TEXT("Tab  Plecak     1–8  Zamień przedmiot z ręką");
             C.Text(Controls,C.W-C.TextWidth(Controls,13.f)-24.f,C.H-41.f,13.f,Soft);
             if (!Prompt.IsEmpty()) C.Banner((C.W-650.f)*.5f,C.H*.66f,650.f,Prompt,Accent);
         }
-        static void Inventory(FShipCanvas& C,AShipSurvivor& P)
+        static void NoteReader(FShipCanvas& C,AShipSurvivor& P)
         {
-            const float PW=970.f,PH=520.f,X=(C.W-PW)*.5f,Y=(C.H-PH)*.5f;
+            const float W=760.f, H=410.f, X=(C.W-W)*.5f, Y=(C.H-H)*.5f;
             C.Rect(0,0,C.W,C.H,FLinearColor(0.f,.008f,.013f,.72f));
-            C.Rect(X,Y,PW,PH,Panel); C.Rect(X,Y,PW,3.f,Accent);
-            C.Text(TEXT("Wyposażenie"),X+32.f,Y+22.f,29.f,Ink,true);
-            C.Text(TEXT("I / Esc / Tab   Zamknij"),X+PW-201.f,Y+35.f,14.f,Soft);
-            C.Rect(X+32.f,Y+77.f,PW-64.f,1.f,Rule);
-            const FString Names[]={TEXT("Latarka biała"),TEXT("Latarka z kolorami"),TEXT("Spawarka"),TEXT("Bateria przenośna"),TEXT("Karta dostępu")};
-            const bool Have[]={P.bHasWhite,P.bHasColorLamp,P.bHasWelder,P.bHasBattery,P.bHasCard};
-            for (int32 I=0;I<5;++I)
-            {
-                const float R=Y+99.f+I*37.f;
-                C.Rect(X+34.f,R+7.f,8.f,8.f,Have[I]?Accent:Rule);
-                C.Text(Names[I],X+55.f,R,16.f,Have[I]?Ink:Soft);
-                C.Text(Have[I]?TEXT("jest"):TEXT("brak"),X+290.f,R,13.f,Have[I]?Accent:Soft);
-            }
-            C.Text(FString::Printf(TEXT("Energia: %d%%   ·   Pobór %.2f%%/s"),
-                FMath::RoundToInt(P.Charge), P.bLampOn ? P.GetLampDrainPerSecond() : 0.f),X+33.f,Y+303.f,14.f,Ink);
-            C.Rect(X+347.f,Y+96.f,1.f,260.f,Rule);
-            const float TX=X+374.f;
-            C.Text(TEXT("Dziennik"),TX,Y+94.f,19.f,Accent,true);
+            C.Rect(X,Y,W,H,Panel);
+            C.Text(FString::Printf(TEXT("Notatka serwisowa   %d / %d"),P.NoteIndex()+1,P.Notes.Num()),X+30.f,Y+24.f,24.f,Ink,true);
             if (P.Notes.IsValidIndex(P.NoteIndex()))
             {
-                C.Text(FString::Printf(TEXT("Notatka %d z %d"),P.NoteIndex()+1,P.Notes.Num()),TX,Y+127.f,14.f,Soft);
-                TArray<FString> Rows=C.Lines(P.Notes[P.NoteIndex()],17.f,PW-412.f);
-                constexpr int32 Visible=7;
+                const TArray<FString> Rows=C.Lines(P.Notes[P.NoteIndex()],18.f,W-68.f);
+                constexpr int32 Visible=10;
                 P.ClampNoteScroll(Rows.Num()-Visible);
-                const int32 End=FMath::Min(Rows.Num(),P.NoteScroll()+Visible);
-                for (int32 I=P.NoteScroll();I<End;++I) C.Text(Rows[I],TX,Y+160.f+(I-P.NoteScroll())*25.f,17.f,Ink);
-                C.Text(TEXT("← / →   notatki      PgUp / PgDn   przewiń"),TX,Y+342.f,13.f,Soft);
+                for (int32 I=P.NoteScroll(); I<FMath::Min(Rows.Num(),P.NoteScroll()+Visible); ++I)
+                    C.Text(Rows[I],X+34.f,Y+85.f+25.f*(I-P.NoteScroll()),18.f,Ink);
             }
-            else C.Text(TEXT("Przeczytane notatki pojawią się tutaj."),TX,Y+143.f,16.f,Soft);
-            C.Rect(X+32.f,Y+384.f,PW-64.f,1.f,Rule);
-            C.Text(TEXT("1  Biała latarka       2  Latarka z kolorami       3  Spawarka       F  Światło       Q  Następny kolor"),X+32.f,Y+396.f,15.f,Ink);
-            C.Text(TEXT("Z / X   Zmniejsz / zwiększ moc        C / V   Zmniejsz / zwiększ promień wiązki"),X+32.f,Y+425.f,15.f,Ink);
-            C.Text(TEXT("E  Interakcja       Przytrzymaj E lub LPM, aby przesunąć skrzynię       G  Wyłącz zestaw"),X+32.f,Y+454.f,14.f,Ink);
-            C.Text(TEXT("WASD  Ruch       Mysz  Rozglądanie       Spacja  Skok       Shift  Sprint       Ctrl  Kucanie       Tab  Ekwipunek bazowy"),X+32.f,Y+484.f,13.f,Soft);
+            C.Text(TEXT("← / →   Inna notatka      PgUp / PgDn   Przewiń      Tab / Esc   Zamknij"),X+32.f,Y+H-43.f,15.f,Soft);
         }
         static void Keypad(FShipCanvas& C,AShipSurvivor& P)
         {
@@ -214,6 +209,21 @@ namespace
             C.Center(P.bEscaped?TEXT("G   Wróć do zwiedzania       R   Uruchom tę mapę od nowa"):TEXT("R lub G   Uruchom tę mapę od nowa"),C.H*.40f+135.f,16.f,Soft);
         }
     };
+}
+
+int32 UShipNumberedSlot::NativePaint(const FPaintArgs& Args, const FGeometry& Geometry, const FSlateRect& Clip,
+    FSlateWindowElementList& List, int32 Layer, const FWidgetStyle& Style, bool bEnabled) const
+{
+    Layer = Super::NativePaint(Args,Geometry,Clip,List,Layer,Style,bEnabled);
+    const FIntProperty* Field = FindFProperty<FIntProperty>(GetClass(),TEXT("Index"));
+    if (!Field) return Layer;
+    const int32 Index = Field->GetPropertyValue_InContainer(this);
+    if (Index < 0 || Index > 7) return Layer;
+    const auto Badge = Geometry.ToPaintGeometry(FVector2f(21,21), FSlateLayoutTransform(FVector2f(4,4)));
+    FSlateDrawElement::MakeBox(List,++Layer,Badge,FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")),ESlateDrawEffect::None,Panel);
+    FSlateDrawElement::MakeText(List,++Layer,Geometry.ToPaintGeometry(FVector2f(20,20),FSlateLayoutTransform(FVector2f(9,4))),
+        FString::FromInt(Index+1),FCoreStyle::GetDefaultFontStyle(TEXT("Bold"),12),ESlateDrawEffect::None,Ink);
+    return Layer;
 }
 
 void UShipVitalsWidget::NativeOnInitialized()

@@ -28,6 +28,16 @@ private:
     FLinearColor StockBatteryTint = FLinearColor::White;
 };
 
+/** Draw the quick-select number on each of the stock backpack's actual buttons. */
+UCLASS()
+class HORRORPROJECT_API UShipNumberedSlot : public UUserWidget
+{
+    GENERATED_BODY()
+protected:
+    virtual int32 NativePaint(const FPaintArgs& Args, const FGeometry& Geometry, const FSlateRect& Clip,
+        FSlateWindowElementList& List, int32 Layer, const FWidgetStyle& Style, bool bEnabled) const override;
+};
+
 /** Hit-test transparent overlay for the existing player HUD. */
 UCLASS()
 class HORRORPROJECT_API UShipHUDOverlay : public UUserWidget

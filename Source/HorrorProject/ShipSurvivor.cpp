@@ -1,6 +1,8 @@
 #include "ShipSurvivor.h"
 
 #include "ShipFixture.h"
+#include "ShipInventoryLibrary.h"
+#include "Components/StaticMeshComponent.h"
 #include "ShipHUD.h"
 #include "ShipLadder.h"
 #include "Blueprint/UserWidget.h"
@@ -82,6 +84,7 @@ AShipSurvivor::AShipSurvivor()
     static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> Params(TEXT("/Game/ShipMechanics/Filters/MPC_HandheldBeam.MPC_HandheldBeam"));
     BeamParameters = Params.Object;
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Kit"));
+    InitPack();
     Beam = CreateDefaultSubobject<USpotLightComponent>(TEXT("HandheldBeam"));
     Beam->SetupAttachment(RootComponent);
     Beam->SetMobility(EComponentMobility::Movable);
@@ -149,6 +152,7 @@ void AShipSurvivor::SyncPawn()
     EndDrag();
     ClosePanel();
     TrackedPawn = Pawn;
+    UpdateHandMesh();
     OriginalLight.Reset();
     MovementStats.Reset();
     if (!Pawn) return;
@@ -219,7 +223,7 @@ void AShipSurvivor::ConfigureInput()
 void AShipSurvivor::UpdateInputRouting()
 {
     if (!InputComponent) return;
-    const bool bModal = IsKeypadOpen() || bInventoryOpen || bDead || bEscaped;
+    const bool bModal = IsKeypadOpen() || bReadingNote || bDead || bEscaped;
     const bool bYield = IsBaseMenuActive();
     for (auto& Binding : InputComponent->KeyBindings)
     {
@@ -231,16 +235,17 @@ void AShipSurvivor::UpdateInputRouting()
                 && !StockTarget->GetClass()->ImplementsInterface(StockInteraction))
             || bOwnUse || bModal || IsOnLadder() || bLadderUseDown;
         else if (K == EKeys::SpaceBar) bOwn = IsOnLadder() || bModal;
-        else if (K == EKeys::LeftMouseButton) bOwn = FocusCrate.IsValid() || bOwnDrag || bModal;
+        else if (K == EKeys::LeftMouseButton) bOwn = FocusCrate.IsValid() || bOwnDrag || bModal
+            || Equipped == TEXT("Glowstick") || Equipped == TEXT("Note") || Equipped == TEXT("Bandage") || Equipped == TEXT("FlashlightBattery");
         else if (K == EKeys::F || K == EKeys::Q || K == EKeys::I) bOwn = bKitEnabled;
-        else if (K == EKeys::MouseScrollDown || K == EKeys::MouseScrollUp) bOwn = !bModal && (IsDragging() || (bKitEnabled && bHasColorLamp));
+        else if (K == EKeys::MouseScrollDown || K == EKeys::MouseScrollUp) bOwn = !bModal && (IsDragging() || Equipped == TEXT("ColorLamp"));
         else if (K == EKeys::Z || K == EKeys::X || K == EKeys::C || K == EKeys::V) bOwn = CanAdjustLamp();
         else if (K == EKeys::R) bOwn = bDead || bEscaped;
-        else if (K == EKeys::Left || K == EKeys::Right || K == EKeys::PageUp || K == EKeys::PageDown) bOwn = bInventoryOpen;
+        else if (K == EKeys::Left || K == EKeys::Right || K == EKeys::PageUp || K == EKeys::PageDown) bOwn = bReadingNote;
         else if (K == EKeys::Escape) bOwn = bModal;
         else if (K == EKeys::Tab) bOwn = bModal;
         else if (K == EKeys::Enter || K == EKeys::BackSpace) bOwn = IsKeypadOpen();
-        else { const int32 N = DigitFor(K); bOwn = IsKeypadOpen() || (bKitEnabled && N >= 1 && N <= 3); }
+        else { const int32 N = DigitFor(K); bOwn = IsKeypadOpen() || (N >= 1 && N <= 8); }
         Binding.bConsumeInput = bOwn && !bYield;
     }
 }
@@ -252,7 +257,16 @@ bool AShipSurvivor::IsBaseMenuActive() const
 
 bool AShipSurvivor::HandleModalShortcut(FKey Key, bool bRepeat)
 {
-    if ((!IsKeypadOpen() && !bInventoryOpen) || IsBaseMenuActive()) return false;
+    if (IsStockInventoryVisible())
+    {
+        const int32 Digit = DigitFor(Key);
+        UGameViewportClient* Client = GetWorld()->GetGameViewport();
+        const TSharedPtr<SViewport> View = Client ? Client->GetGameViewportWidget() : nullptr;
+        if (Digit < 1 || Digit > 8 || !View || !View->HasAnyUserFocusOrFocusedDescendants()) return false;
+        if (!bRepeat) EquipSlot(Digit - 1);
+        return true;
+    }
+    if ((!IsKeypadOpen() && !bReadingNote) || IsBaseMenuActive()) return false;
     const bool bClose = Key == EKeys::Escape || Key == EKeys::Tab;
     const bool bSubmit = IsKeypadOpen() && Key == EKeys::Enter;
     if (!bClose && !bSubmit) return false;
@@ -287,7 +301,7 @@ void AShipSurvivor::RefreshFocus()
     Focus.Reset();
     FocusCrate.Reset();
     StockTarget.Reset();
-    if (!TrackedPawn.IsValid() || IsOnLadder() || bDead || bEscaped || IsKeypadOpen() || bInventoryOpen) return;
+    if (!TrackedPawn.IsValid() || IsOnLadder() || bDead || bEscaped || IsKeypadOpen() || bReadingNote) return;
     FHitResult Hit;
     FCollisionQueryParams Params(SCENE_QUERY_STAT(ShipInteraction), false, TrackedPawn.Get());
     Params.AddIgnoredActor(this);
@@ -348,7 +362,7 @@ bool AShipSurvivor::BeamReachesTarget(const FVector& Point, const AActor* Receiv
 
 void AShipSurvivor::StartUse()
 {
-    if (IsBaseMenuActive() || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped || bLadderUseDown) return;
+    if (IsBaseMenuActive() || bReadingNote || IsKeypadOpen() || bDead || bEscaped || bLadderUseDown) return;
     if (IsOnLadder())
     {
         bLadderUseDown = true;
@@ -381,7 +395,6 @@ void AShipSurvivor::StartUse()
         }
         return;
     }
-    SetKit(true);
     bOwnUse = true;
     HeldFixture = Fixture;
     Fixture->Use(this);
@@ -415,7 +428,7 @@ void AShipSurvivor::LeaveLadder()
 }
 void AShipSurvivor::JumpFromLadder()
 {
-    if (IsOnLadder() && !IsBaseMenuActive() && !bInventoryOpen && !IsKeypadOpen() && !bDead && !bEscaped)
+    if (IsOnLadder() && !IsBaseMenuActive() && !bReadingNote && !IsKeypadOpen() && !bDead && !bEscaped)
     {
         MountedLadder->Release(true);
         MountedLadder.Reset();
@@ -424,7 +437,12 @@ void AShipSurvivor::JumpFromLadder()
 bool AShipSurvivor::IsDragging() const { return Grabber->GetGrabbedComponent() != nullptr; }
 void AShipSurvivor::StartDrag()
 {
-    if (IsDragging() || IsBaseMenuActive() || IsOnLadder() || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
+    if (IsDragging() || IsBaseMenuActive() || IsOnLadder() || bReadingNote || IsKeypadOpen() || bDead || bEscaped) return;
+    if (Equipped == TEXT("Glowstick") || Equipped == TEXT("Note") || Equipped == TEXT("Bandage") || Equipped == TEXT("FlashlightBattery"))
+    {
+        UseHeldItem();
+        return;
+    }
     RefreshFocus();
     GrabFocusedCrate(EKeys::LeftMouseButton);
 }
@@ -501,7 +519,7 @@ void AShipSurvivor::SetKit(bool bEnable)
         if (bEnable) bOriginalLightVisible = OriginalLight->IsVisible();
         SetStockLightEnabled(!bEnable && bOriginalLightVisible);
     }
-    if (!bEnable) { LeaveLadder(); ClosePanel(); EndUse(); EndDrag(); bLampOn = false; }
+    if (!bEnable) { ClosePanel(); EndUse(); EndDrag(); bLampOn = false; }
     UpdateBeam();
     UpdateInputRouting();
 }
@@ -510,25 +528,19 @@ void AShipSurvivor::ToggleKit()
     if (IsBaseMenuActive()) return;
     if (bDead) { Restart(); return; }
     if (bEscaped) { bEscaped = false; LockControls(false); }
-    SetKit(!bKitEnabled);
-    if (bKitEnabled) Notify(TEXT("Zestaw testowy aktywny. I otwiera wyposażenie i dziennik."));
-}
-void AShipSurvivor::SetTool(const FString& Tool)
-{
-    const bool bHave = Tool == TEXT("White") ? bHasWhite : Tool == TEXT("ColorLamp") ? bHasColorLamp : bHasWelder;
-    if (!bHave) { Notify(TEXT("Najpierw podnieś to narzędzie na stanowisku.")); return; }
-    if (Equipped != Tool) EndUse();
-    Equipped = Tool;
-    ApplyBeamSettings();
-    if (Tool == TEXT("Welder")) bLampOn = false;
-    UpdateBeam();
-    Beep(.85f);
+    if (bKitEnabled)
+    {
+        const int32 Slot = UShipInventoryLibrary::FindSlot(TrackedPawn.Get(), PackClasses.FindRef(TEXT("StockLamp")).Get());
+        if (Slot != INDEX_NONE) EquipSlot(Slot);
+    }
+    else if (LastStockSlot != INDEX_NONE) EquipSlot(LastStockSlot);
+    else Notify(TEXT("Tab otwiera plecak. Kliknij przedmiot lub naciśnij numer pola."));
 }
 void AShipSurvivor::ToggleLamp()
 {
-    if (IsBaseMenuActive() || !bKitEnabled || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
+    if (IsBaseMenuActive() || !bKitEnabled || bReadingNote || IsKeypadOpen() || bDead || bEscaped) return;
     if (Equipped == TEXT("Welder")) { Notify(TEXT("Przyłóż spawarkę do stanowiska i przytrzymaj E.")); return; }
-    if (Equipped == TEXT("ColorLamp") ? !bHasColorLamp : !bHasWhite) { Notify(TEXT("Najpierw podnieś odpowiednią latarkę.")); return; }
+    if (!CanAdjustLamp()) { Notify(TEXT("Wybierz latarkę w plecaku pod Tab.")); return; }
     if (!bHasBattery || Charge <= 0.f) { Notify(bHasBattery ? TEXT("Bateria jest pusta. Naładuj ją w kajucie.") : TEXT("Brak baterii. Poszukaj jej na stanowisku.")); return; }
     bLampOn = !bLampOn;
     UpdateBeam();
@@ -537,16 +549,16 @@ void AShipSurvivor::ToggleLamp()
 void AShipSurvivor::CycleFilter() { ChangeFilter(1); }
 void AShipSurvivor::ScrollEquipment(FKey Key)
 {
-    if (IsBaseMenuActive() || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
+    if (IsBaseMenuActive() || bReadingNote || IsKeypadOpen() || bDead || bEscaped) return;
     const int32 Step = Key == EKeys::MouseScrollUp ? 1 : -1;
     if (IsDragging()) GrabDistance = FMath::Clamp(GrabDistance + Step * 24.f, 78.f, UseRange);
     else ChangeFilter(Step);
 }
 void AShipSurvivor::ChangeFilter(int32 Step)
 {
-    if (IsBaseMenuActive() || !bKitEnabled || bInventoryOpen || IsKeypadOpen() || bDead || bEscaped) return;
+    if (IsBaseMenuActive() || !bKitEnabled || bReadingNote || IsKeypadOpen() || bDead || bEscaped) return;
     if (!bHasColorLamp) { if (Step > 0) Notify(TEXT("Podnieś latarkę z kolorami, aby zmienić kolor.")); return; }
-    if (Equipped != TEXT("ColorLamp")) { SetTool(TEXT("ColorLamp")); return; }
+    if (Equipped != TEXT("ColorLamp")) return;
     int32 Index = 0;
     while (Index < 4 && Filters[Index] != LastFilter) ++Index;
     LastFilter = Filters[(Index + Step + 4) % 4];
@@ -555,7 +567,7 @@ void AShipSurvivor::ChangeFilter(int32 Step)
 }
 bool AShipSurvivor::CanAdjustLamp() const
 {
-    return bKitEnabled && !bInventoryOpen && !IsKeypadOpen() && !bDead && !bEscaped && !IsBaseMenuActive()
+    return bKitEnabled && !bReadingNote && !IsKeypadOpen() && !bDead && !bEscaped && !IsBaseMenuActive()
         && ((Equipped == TEXT("White") && bHasWhite) || (Equipped == TEXT("ColorLamp") && bHasColorLamp));
 }
 void AShipSurvivor::AdjustLamp(FKey Key)
@@ -600,17 +612,12 @@ FString AShipSurvivor::GetFilterLabel() const
     if (Filter == TEXT("UV")) return TEXT("fioletowy (UV)");
     return TEXT("biały");
 }
-FString AShipSurvivor::GetToolLabel() const
-{
-    if (Equipped == TEXT("Welder")) return bHasWelder ? TEXT("Spawarka") : TEXT("Brak narzędzia");
-    if (Equipped == TEXT("ColorLamp")) return bHasColorLamp ? TEXT("Latarka z kolorami") : TEXT("Brak narzędzia");
-    return bHasWhite ? TEXT("Latarka biała") : TEXT("Brak narzędzia");
-}
+
 void AShipSurvivor::UpdateBeam()
 {
     Filter = Equipped == TEXT("ColorLamp") ? LastFilter : FName(TEXT("White"));
     if (!bKitEnabled || !bHasBattery || Charge <= 0.f || bDead || bEscaped) { bWelding = false; bLampOn = false; }
-    if (Equipped == TEXT("Welder") || (Equipped == TEXT("White") && !bHasWhite) || (Equipped == TEXT("ColorLamp") && !bHasColorLamp)) bLampOn = false;
+    if ((Equipped != TEXT("White") || !bHasWhite) && (Equipped != TEXT("ColorLamp") || !bHasColorLamp)) bLampOn = false;
     const bool bVisible = HasPlayerView() && (bLampOn || bWelding);
     if (Beam->IsVisible() != bVisible) Beam->SetVisibility(bVisible);
     if (bVisible)
@@ -686,7 +693,7 @@ void AShipSurvivor::LockControls(bool bLock)
 }
 void AShipSurvivor::ClosePanel()
 {
-    Keypad.Reset(); EnteredCode.Reset(); bInventoryOpen = false;
+    Keypad.Reset(); EnteredCode.Reset(); bReadingNote = false;
     LockControls(bDead || bEscaped);
     UpdateInputRouting();
 }
@@ -703,23 +710,26 @@ void AShipSurvivor::CloseStockInventory()
 void AShipSurvivor::OpenKeypad(AShipFixture* Fixture)
 {
     if (!IsValid(Fixture) || bDead || bEscaped) return;
-    SetKit(true); EndUse(); EndDrag();
-    bInventoryOpen = false; Keypad = Fixture; EnteredCode.Reset();
+    EndUse(); EndDrag();
+    bReadingNote = false; Keypad = Fixture; EnteredCode.Reset();
     LockControls(true); UpdateInputRouting();
 }
 void AShipSurvivor::PressDigit(FKey Key)
 {
     const int32 Digit = DigitFor(Key);
-    if (IsBaseMenuActive() || Digit == INDEX_NONE || bDead || bEscaped) return;
+    if (Digit == INDEX_NONE || bDead || bEscaped) return;
+    if (IsStockInventoryVisible())
+    {
+        if (Digit >= 1 && Digit <= 8) EquipSlot(Digit - 1);
+        return;
+    }
+    if (IsBaseMenuActive()) return;
     if (IsKeypadOpen())
     {
         if (EnteredCode.Len() < GetCodeLength()) { EnteredCode.AppendChar(TCHAR('0' + Digit)); Beep(1.f + .035f * Digit); }
         return;
     }
-    if (!bKitEnabled || bInventoryOpen) return;
-    if (Digit == 1) SetTool(TEXT("White"));
-    if (Digit == 2) SetTool(TEXT("ColorLamp"));
-    if (Digit == 3) SetTool(TEXT("Welder"));
+    if (!bReadingNote && Digit >= 1 && Digit <= 8) EquipSlot(Digit - 1);
 }
 void AShipSurvivor::DeleteDigit()
 {
@@ -742,21 +752,23 @@ void AShipSurvivor::ConfirmCode()
 void AShipSurvivor::ReadNote(const FString& Text)
 {
     if (Text.IsEmpty() || bDead || bEscaped) return;
-    SetKit(true); EndUse(); EndDrag();
+    EndUse(); EndDrag();
     LastNote = Text; SelectedNote = Notes.AddUnique(Text); ScrollLines = 0;
-    Keypad.Reset(); bInventoryOpen = true;
+    Keypad.Reset(); bReadingNote = true;
     LockControls(true); UpdateInputRouting();
 }
 void AShipSurvivor::ToggleInventory()
 {
-    if (IsBaseMenuActive() || !bKitEnabled || IsKeypadOpen() || bDead || bEscaped) return;
-    if (bInventoryOpen) { ClosePanel(); return; }
-    EndUse(); EndDrag(); bInventoryOpen = true; LockControls(true); UpdateInputRouting();
+    if (IsBaseMenuActive() || IsKeypadOpen() || bDead || bEscaped) return;
+    if (bReadingNote) { ClosePanel(); return; }
+    if (LocalPC.IsValid())
+        if (UFunction* Toggle = LocalPC->FindFunction(TEXT("ToggleInventory")); Toggle && Toggle->NumParms == 0)
+            LocalPC->ProcessEvent(Toggle, nullptr);
 }
-void AShipSurvivor::PriorNote() { if (bInventoryOpen && !Notes.IsEmpty()) { SelectedNote = (SelectedNote + Notes.Num() - 1) % Notes.Num(); ScrollLines = 0; } }
-void AShipSurvivor::NextNote() { if (bInventoryOpen && !Notes.IsEmpty()) { SelectedNote = (SelectedNote + 1) % Notes.Num(); ScrollLines = 0; } }
-void AShipSurvivor::PageUp() { if (bInventoryOpen) ScrollLines = FMath::Max(0, ScrollLines - 5); }
-void AShipSurvivor::PageDown() { if (bInventoryOpen) ScrollLines += 5; }
+void AShipSurvivor::PriorNote() { if (bReadingNote && !Notes.IsEmpty()) { SelectedNote = (SelectedNote + Notes.Num() - 1) % Notes.Num(); ScrollLines = 0; } }
+void AShipSurvivor::NextNote() { if (bReadingNote && !Notes.IsEmpty()) { SelectedNote = (SelectedNote + 1) % Notes.Num(); ScrollLines = 0; } }
+void AShipSurvivor::PageUp() { if (bReadingNote) ScrollLines = FMath::Max(0, ScrollLines - 5); }
+void AShipSurvivor::PageDown() { if (bReadingNote) ScrollLines += 5; }
 void AShipSurvivor::ClampNoteScroll(int32 Maximum) { ScrollLines = FMath::Clamp(ScrollLines,0,FMath::Max(0,Maximum)); }
 
 void AShipSurvivor::Die()
@@ -786,6 +798,8 @@ void AShipSurvivor::Tick(float DeltaSeconds)
     BindToPlayer(UGameplayStatics::GetPlayerController(this, 0));
     if (!LocalPC.IsValid()) return;
     SyncPawn();
+    RechargeGlowsticks();
+    HandMesh->SetVisibility(HandMesh->GetStaticMesh() && HasPlayerView() && !bDead && !bEscaped && !bReadingNote && !IsStockInventoryVisible());
     if (IsBaseMenuActive())
     {
         Focus.Reset(); FocusCrate.Reset(); StockTarget.Reset();
@@ -795,8 +809,8 @@ void AShipSurvivor::Tick(float DeltaSeconds)
         UpdateInputRouting();
         return;
     }
-    if (bLockedControls && !bInventoryOpen && !IsKeypadOpen() && !bEscaped && !bDead) LockControls(false);
-    if (IsOnLadder() && !bInventoryOpen && !IsKeypadOpen())
+    if (bLockedControls && !bReadingNote && !IsKeypadOpen() && !bEscaped && !bDead) LockControls(false);
+    if (IsOnLadder() && !bReadingNote && !IsKeypadOpen())
     {
         const float Axis = float(LocalPC->IsInputKeyDown(EKeys::W)) - float(LocalPC->IsInputKeyDown(EKeys::S));
         MountedLadder->Climb(Axis, DeltaSeconds);

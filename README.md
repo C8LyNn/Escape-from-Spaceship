@@ -42,24 +42,26 @@ Ruch obsługują WASD i mysz. Shift służy do sprintu, Ctrl do kucania, E do in
 
 ## Stanowiska mechanik z LDD
 
-Od miejsca startu idź w lewo za tablicą **STANOWISKA LDD** do stołu ze sprzętem. Weź białą latarkę, latarkę z kolorami i wspólną baterię, celując w każdy przedmiot i naciskając **E**. Podejdź do tablicy **CZTERY FILTRY**. Każda z czterech barw odsłania w tym samym miejscu inny znak farby i cyfrę kodu. Ustawienie promienia decyduje także o tym, jak daleko i jak szeroko od środka wiązki można ujawnić ślad. Litery i farba stopniowo zanikają przy brzegu wiązki.
+Od startu idź za tablicą **STANOWISKA LDD** do stołu. Zabierz **E** latarkę z filtrami i akumulator. Otwórz plecak pod **Tab** i kliknij latarkę, następnie włącz ją klawiszem **F**. Na tablicy **CZTERY FILTRY** każdy kolor odsłania pozycję i cyfrę. Przesuwaj wiązkę po napisie, **Q** przechodź do następnego koloru. Wpisz cyfry od pozycji 1 do 4 na pobliskim terminalu i naciśnij **Enter**.
 
 | Klawisz | Działanie |
 | --- | --- |
-| **1 / 2 / 3** | Wybierz białą latarkę, latarkę z kolorami lub spawarkę. |
+| **Tab / 1–8** | Otwórz plecak i kliknij przedmiot lub wybierz numer jego pola. Wybrany przedmiot trafi do ręki, a poprzedni zajmie zwolnione pole. Numer pustego pola chowa trzymany przedmiot. |
 | **F** | Włącz lub zgaś latarkę. |
 | **Q / kółko myszy** | Q wybiera kolejny kolor. Kółkiem możesz przechodzić w obie strony między czerwonym, zielonym, niebieskim i fioletowym. |
 | **Z / X** | Zmniejsz lub zwiększ moc światła. |
 | **C / V** | Zmniejsz lub zwiększ promień. Zmienia się szerokość stożka i jego zasięg. |
-| **E** | Podnieś przedmiot, przeczytaj notatkę, użyj ładowarki lub terminala. Przytrzymaj przy uszkodzonych drzwiach z wybraną spawarką. |
-| **LPM** | Przytrzymaj, by chwycić skrzynię. Kółko przybliża lub odsuwa trzymaną skrzynię. Puść LPM, by odstawić ją na płytę. |
-| **I / G** | Otwórz wyposażenie i dziennik / przełącz zestaw testowy. |
+| **E** | Podnieś narzędzie lub notatkę, użyj ładowarki albo terminala. Ze spawarką WD01 w ręce przytrzymaj E przy spoinie. |
+| **LPM** | Rzuć trzymany glowstick, przeczytaj trzymaną notatkę lub użyj bandaża albo zapasowej baterii osobistej. Skrzynię możesz zawsze chwycić, przytrzymując E. |
+| **Shift + klik w plecaku** | Otwórz opcje przedmiotu z paczki, np. użycie lub odłożenie stosu na podłogę. |
 
-Moc i promień mają po pięć ustawień. Obie latarki zachowują wybrane ustawienia przy zmianie koloru lub narzędzia. Większa moc i większy promień niezależnie przyspieszają rozładowanie baterii. Ekran wyposażenia pod **I** pokazuje bieżący pobór. Zgaszona latarka nie pobiera energii.
+Moc i promień mają po pięć ustawień. Obie latarki zachowują wybrane ustawienia przy zmianie koloru lub narzędzia. Większa moc i większy promień niezależnie przyspieszają rozładowanie baterii. Plecak pod **Tab** pokazuje bieżący pobór. Zgaszona latarka nie pobiera energii.
 
-Plecak pod **Tab** otwiera się w czasie gry. Na drabinie postać trzyma się szczebla, a w powietrzu nadal działa grawitacja. Zapalona latarka zużywa energię także podczas przeglądania plecaka. W zbliżeniu na kłódkę wiązka zestawu gaśnie do chwili powrotu do postaci. Po przełączeniu na zestaw klawiszem **G** bazowa latarka zachowuje stan baterii. Powrót przywraca jej poprzedni stan włączenia. Jeśli postać zginie przy otwartym plecaku, panel ustępuje miejsca ekranowi restartu. [Test przełączania wyposażenia i sterowania w PIE](Tests/Gameplay/test_equipment_handoffs.py)
+Plecak pod **Tab** ma osiem pól wspólnych dla sprzętu, notatek, przedmiotów z paczki i pojemnika na glowsticki. Do naprawy zabierz spawarkę WD01 i akumulator, wybierz spawarkę w plecaku i przytrzymaj **E** przy drzwiach. Zebrane notatki są stronami jednego notesu. Z notesem w ręce **LPM** otwiera tekst, **← / →** zmienia stronę, **Tab / Esc** zamyka czytanie.
 
-Przy pozostałych stanowiskach możesz sprawdzić naprawę drzwi, zamek szyfrowy, dwie płyty obciążane skrzyniami, sekwencje trzech i czterech płyt, dźwięki za drzwiami, śmiertelną pułapkę oraz wyjście odblokowywane kartą i kodem z notatki. **R** po śmierci lub udanej próbie uruchamia scenę od nowa.
+Pojemnik mieści cztery glowsticki. Każdy rzucony **LPM** odbija się, osiada i oświetla otoczenie przez 45 sekund. Co 12 sekund odnawia się jedna sztuka, także po schowaniu pojemnika. [Test plecaka, glowsticków i zagadek](Tests/Gameplay/test_shared_backpack.py)
+
+Przy pozostałych stanowiskach możesz sprawdzić naprawę drzwi, zamek szyfrowy, dwie płyty obciążane skrzyniami, osobne rzędy płyt **A → B → C** oraz **A → B → C → D**, dźwięki za drzwiami, śmiertelną pułapkę oraz wyjście odblokowywane kartą i kodem z notatki. **R** po śmierci lub udanej próbie uruchamia scenę od nowa.
 
 **Drabina serwisowa** stoi przy stanowisku wyposażenia. Podejdź do dolnych szczebli i naciśnij **E**. Przytrzymaj **W**, aby wejść na podest na wysokości 2,8 m. Przy krawędzi podestu **E** pozwala ponownie chwycić drabinę, a **S** zejść. W połowie drogi możesz puścić klawisz ruchu, rozejrzeć się, użyć latarki, puścić drabinę przez **E** albo odskoczyć **Spacją**. Zajęty podest wstrzymuje wejście na górę. Do kolejnego stanowiska możesz skopiować aktora **Ship Ladder**, ustawić wysokość i prędkość wspinania i umieścić podest za jego górną krawędzią.
 

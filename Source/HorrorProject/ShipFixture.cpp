@@ -27,7 +27,7 @@ namespace
     const FName Roar(TEXT("Roar")), Scare(TEXT("Scare")), ExitKind(TEXT("Exit")), Hazard(TEXT("Hazard")), PushCrate(TEXT("PushCrate"));
     const FLinearColor Amber(1.f, .32f, .03f), Green(.05f, 1.f, .35f), Blue(.08f, .55f, 1.f);
 
-    bool IsPickup(FName K) { return K == White || K == ColorLamp || K == Welder || K == Battery || K == Card; }
+    bool IsPickup(FName K) { return K == White || K == ColorLamp || K == Welder || K == Battery || K == Card || K == Note || K == TEXT("Glowstick"); }
     bool IsDoor(FName K) { return K == Door || K == RepairDoor; }
 
     FString PickupName(FName K)
@@ -36,6 +36,8 @@ namespace
         if (K == ColorLamp) return TEXT("latarkę z kolorami");
         if (K == Welder) return TEXT("spawarkę");
         if (K == Battery) return TEXT("baterię");
+        if (K == Note) return TEXT("notatkę");
+        if (K == TEXT("Glowstick")) return TEXT("glowsticki");
         return TEXT("kartę dostępu");
     }
 
@@ -115,6 +117,9 @@ void AShipFixture::Configure()
     const bool bSolid = IsDoor(Kind) || Kind == Crate || Kind == Plate || Kind == Scare;
     Mesh->SetMobility(EComponentMobility::Movable);
     Mesh->SetHiddenInGame(bInvisible, false);
+    // The glyph root anchors the paint and lettering. Its default cube would cover the board in the editor.
+    if (Kind == Glyph)
+        Mesh->SetVisibility(false, false);
     if (bSolid)
     {
         Mesh->SetCollisionProfileName(Kind == Crate ? TEXT("PhysicsActor") : TEXT("BlockAllDynamic"));
@@ -516,7 +521,7 @@ FString AShipFixture::Prompt(AShipSurvivor* S) const
     if (!CanAct(S) || Kind == Glyph || Kind == Hazard || Kind == Roar || (IsPickup(Kind) && bActive)) return {};
     FString Action;
     if (IsPickup(Kind)) Action = TEXT("E — podnieś ") + PickupName(Kind);
-    else if (Kind == Note) Action = TEXT("E — przeczytaj notatkę");
+
     else if (Kind == Charger) Action = S->bHasBattery ? TEXT("E — naładuj baterię") : TEXT("E — sprawdź ładowarkę · potrzebna bateria");
     else if (Kind == Crate) Action = TEXT("Przytrzymaj E — przesuń skrzynię");
     else if (Kind == Plate)
@@ -548,25 +553,14 @@ void AShipFixture::Use(AShipSurvivor* S)
     if (IsPickup(Kind))
     {
         if (bActive) return;
-        if (Kind == White) S->bHasWhite = true;
-        else if (Kind == ColorLamp) S->bHasColorLamp = true;
-        else if (Kind == Welder) S->bHasWelder = true;
-        else if (Kind == Battery) { S->bHasBattery = true; S->Charge = 100.f; }
-        else if (Kind == Card) S->bHasCard = true;
-        S->Notify(TEXT("Zebrano ") + PickupName(Kind) + TEXT("."));
+        if (!S->CollectItem(this)) return;
         bActive = bSolved = true;
         PlayCue();
         SetActorEnableCollision(false);
         SetActorHiddenInGame(true);
         return;
     }
-    if (Kind == Note)
-    {
-        bActive = true;
-        S->ReadNote(Value.IsEmpty() ? Caption : Value);
-        PlayCue(.6f);
-    }
-    else if (Kind == Charger)
+    if (Kind == Charger)
     {
         if (!S->bHasBattery) { S->Notify(TEXT("Najpierw podnieś baterię.")); return; }
         S->Charge = 100.f;
