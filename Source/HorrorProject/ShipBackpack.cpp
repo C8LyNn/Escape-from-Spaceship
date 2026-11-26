@@ -40,9 +40,12 @@ void AShipSurvivor::InitPack()
         PackClasses.Add(FName(StockKinds[I]), Item.Class);
         ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(*(FString(TEXT("/Game/Props/Meshes/")) + StockMeshes[I]));
         PackMeshes.Add(FName(StockKinds[I]), Mesh.Object);
+        if (Item.Class && !UShipInventoryLibrary::IsDoorKey(Item.Class))
+            PackDisplayScales.Add(FName(StockKinds[I]), FVector(UShipInventoryLibrary::StockPickupScale(Item.Class)));
     }
     ConstructorHelpers::FObjectFinder<UStaticMesh> StockFlash(TEXT("/Game/StudentShowcase/Assets/Oswietlenie/SRC_05/HandFlashlight/SM_HandFlashlight/StaticMeshes/SM_HandFlashlight"));
     PackMeshes.Add(TEXT("StockLamp"), StockFlash.Object);
+    PackDisplayScales.Add(TEXT("StockLamp"), FVector(1.15));
     ConstructorHelpers::FObjectFinder<UStaticMesh> GlowTube(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     PackMeshes.Add(TEXT("Glowstick"), GlowTube.Object);
     HandMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HeldItemMesh"));
@@ -104,7 +107,10 @@ bool AShipSurvivor::CollectItem(AShipFixture* Fixture)
         }
     }
     if (Kind != TEXT("Glowstick") && Fixture->Mesh->GetStaticMesh())
+    {
         PackMeshes.Add(Kind, Fixture->Mesh->GetStaticMesh());
+        PackDisplayScales.Add(Kind, Fixture->Mesh->GetComponentScale());
+    }
     if (Kind == TEXT("ColorLamp") && !bHasColorLamp) { bHasColorLamp = true; PuzzleCharge = 100.f; }
     if (Kind == TEXT("Welder")) bHasWelder = true;
     if (Kind == TEXT("Card")) bHasCard = true;
@@ -235,14 +241,27 @@ void AShipSurvivor::UpdateHandMesh()
         return;
     }
     const FBoxSphereBounds Bounds = Mesh->GetBounds();
-    // Imported equipment uses the same centimetres on the bench and in the player's hand.
-    const bool bStockInventoryProp = Kind == TEXT("Bandage") || Kind == TEXT("FlashlightBattery") || Kind == TEXT("DoorKey");
-    const double Factor = bStockInventoryProp ? 21. / FMath::Max(1., 2. * Bounds.BoxExtent.GetMax()) : 1.;
+    const FVector* DisplayScale = PackDisplayScales.Find(Kind);
+    const FVector Scale = DisplayScale ? *DisplayScale : FVector(Kind == TEXT("DoorKey") ? 21. / FMath::Max(1., 2. * Bounds.BoxExtent.GetMax()) : 1.);
     FVector Axis = FVector::ForwardVector;
     if (Bounds.BoxExtent.Y >= Bounds.BoxExtent.X && Bounds.BoxExtent.Y > Bounds.BoxExtent.Z) Axis = FVector::RightVector;
     else if (Bounds.BoxExtent.Z > Bounds.BoxExtent.X) Axis = FVector::UpVector;
-    const FQuat Orientation = FQuat::FindBetweenNormals(Axis, FVector::ForwardVector);
-    HandMesh->SetRelativeTransform(FTransform(Orientation, FVector(34,15,-12) - Orientation.RotateVector(Bounds.Origin * Factor), FVector(Factor)));
+    FQuat Orientation = FQuat::FindBetweenNormals(Axis, FVector::ForwardVector);
+    FVector Center(34,15,-12);
+    if (Kind == TEXT("Note"))
+    {
+        // Tilt the face of the page towards the camera.
+        Orientation = FRotator(62,-12,-5).Quaternion();
+        Center = FVector(42,18,-13);
+    }
+    else if (Kind == TEXT("Battery") || Kind == TEXT("FlashlightBattery") || Kind == TEXT("Bandage"))
+    {
+        Orientation = FRotator(38,-8,0).Quaternion() * Orientation;
+        Center = FVector(39,16,-13);
+    }
+    else if (Kind == TEXT("StockLamp") || Kind == TEXT("ColorLamp"))
+        Center = FVector(37,15,-12);
+    HandMesh->SetRelativeTransform(FTransform(Orientation, Center - Orientation.RotateVector(Bounds.Origin * Scale), Scale));
 }
 
 int32 AShipSurvivor::HeldKeyCount() const { return UShipInventoryLibrary::IsDoorKey(HandClass.Get()) ? HandAmount : 0; }

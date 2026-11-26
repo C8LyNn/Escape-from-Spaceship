@@ -173,7 +173,8 @@ namespace
             FHitResult Floor;
             if (!World->LineTraceSingleByChannel(Floor, Above, Above - FVector(0,0,210), ECC_Visibility, Query) || Floor.ImpactNormal.Z < .65f) continue;
             if (FMath::Abs(Floor.ImpactPoint.Z - StandingFloor.ImpactPoint.Z) > 45.) continue;
-            const FTransform Transform(FRotator(0.,Look.Yaw,0.), Floor.ImpactPoint + FVector(0,0,5));
+            const FTransform Transform(FRotator(0.,Look.Yaw,0.), Floor.ImpactPoint + FVector(0,0,5),
+                FVector(UShipInventoryLibrary::StockPickupScale(Item)));
             AActor* Pickup = World->SpawnActorDeferred<AActor>(Class, Transform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
             if (!Pickup) continue;
             AmountField->SetPropertyValue_InContainer(Pickup, Amount);
@@ -360,6 +361,19 @@ bool UShipInventoryLibrary::EquipClickedSlot(UUserWidget* Slot, int32 Index)
 }
 
 bool UShipInventoryLibrary::IsDoorKey(UClass* Item) { return FInventorySlots::IsKey(Item); }
+
+double UShipInventoryLibrary::StockPickupScale(const UClass* Item)
+{
+    static const FName BandagePackage(TEXT("/Game/Blueprints/Actors/Inventory/BP_InventoryItem_Bandage"));
+    static const FName BatteryPackage(TEXT("/Game/Blueprints/Actors/Inventory/BP_InventoryItem_FlashlightBattery"));
+    for (; Item; Item = Item->GetSuperClass())
+    {
+        const FName Package = Item->GetOutermost()->GetFName();
+        if (Package == BandagePackage) return 1.35;
+        if (Package == BatteryPackage) return 2.7;
+    }
+    return 1.;
+}
 
 bool UShipInventoryLibrary::UseStockConsumable(AActor* Player, UClass* Item)
 {

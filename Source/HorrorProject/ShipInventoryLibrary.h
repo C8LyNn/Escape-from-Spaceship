@@ -28,6 +28,7 @@ public:
     static bool ExpandBackpack(APlayerController* PC, int32 Capacity);
     static int32 FindSlot(AActor* Player, UClass* Item);
     static bool IsDoorKey(UClass* Item);
+    static double StockPickupScale(const UClass* Item);
     static bool UseStockConsumable(AActor* Player, UClass* Item);
     UFUNCTION(BlueprintCallable, Category="Inventory")
     static bool EquipClickedSlot(UUserWidget* Slot, int32 Index);

@@ -108,6 +108,7 @@ private:
     UPROPERTY() TSubclassOf<UInterface> StockGrab;
     UPROPERTY() TMap<FName,TSubclassOf<AActor>> PackClasses;
     UPROPERTY() TMap<FName,TObjectPtr<UStaticMesh>> PackMeshes;
+    TMap<FName,FVector> PackDisplayScales;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> HandMesh;
     UPROPERTY() TSubclassOf<AActor> HandClass;
     int32 HandAmount = 0;

@@ -57,6 +57,9 @@ def cases(world, check):
     check('E enters the lock inspection camera from the aisle', pc.get_view_target() == lock)
     dials = list(lock.get_editor_property('Dials'))
     code = list(lock.get_editor_property('LockCombination'))
+    body = lock.get_component_by_class(ue.SkeletalMeshComponent)
+    check('All four dials match the enlarged lock body', body.get_world_scale().x > 2.5 and len(dials) == 4 and all(
+        (dial.get_actor_scale3d() - body.get_world_scale()).length() < .001 for dial in dials))
     check('Four dials face the inspection camera', len(dials) == len(code) == 4 and all(
         (dial.get_actor_location() - view.get_world_location()).dot(view.get_forward_vector()) > 0 for dial in dials))
     for dial, wanted in zip(dials, code):
