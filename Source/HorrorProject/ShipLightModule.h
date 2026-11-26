@@ -6,6 +6,7 @@
 
 class AShipSurvivor;
 class UShipModulePhysics;
+class UStaticMesh;
 class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
 
@@ -16,6 +17,7 @@ class HORRORPROJECT_API AShipLightModule : public AActor
     GENERATED_BODY()
 public:
     AShipLightModule();
+    virtual void PostRegisterAllComponents() override;
     virtual void OnConstruction(const FTransform& Transform) override;
     virtual void Tick(float DeltaSeconds) override;
 
@@ -25,6 +27,12 @@ public:
     float Travel = 96.f;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Module") bool bGuide = false;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Module") TObjectPtr<UStaticMeshComponent> Block;
+    /** Face or guide rotor at the carriage pivot. The existing block and trough still provide collision. */
+    UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Module|Visuals") TObjectPtr<UStaticMesh> MovingVisualMesh;
+    /** Frame or guide mount at the actor pivot. */
+    UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Module|Visuals") TObjectPtr<UStaticMesh> FixedVisualMesh;
+    UFUNCTION(BlueprintCallable, Category="Module|Visuals")
+    void SetIndicatorColor(FLinearColor LinearColor, float Intensity = 1.f);
     UPROPERTY(BlueprintReadOnly, Category="Module") bool bExtended = false;
     UPROPERTY(BlueprintReadOnly, Category="Module") float Extension = 0.f;
     UPROPERTY(BlueprintReadOnly, Category="Module") int32 QuarterTurns = 0;
@@ -40,6 +48,8 @@ private:
     UPROPERTY() TObjectPtr<UStaticMeshComponent> LeftRail;
     UPROPERTY() TObjectPtr<UStaticMeshComponent> RightRail;
     UPROPERTY() TObjectPtr<UStaticMeshComponent> LightStrip;
+    UPROPERTY() TObjectPtr<UStaticMeshComponent> MovingVisual;
+    UPROPERTY() TObjectPtr<UStaticMeshComponent> FixedVisual;
     UPROPERTY() TObjectPtr<UShipModulePhysics> Contacts;
 
     UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> StripFinish;
@@ -48,6 +58,7 @@ private:
     float DarkTime = 0.f;
     float Roll = 0.f;
     void ConfigureGeometry();
+    void ConfigureVisuals();
     bool IsFaceLit(const AShipSurvivor& Player) const;
     void ApplyColor(FName Color, const AShipSurvivor* Player);
 };

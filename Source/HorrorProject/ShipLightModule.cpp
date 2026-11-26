@@ -8,6 +8,21 @@
 #include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 
+namespace
+{
+    const FLinearColor IdleIndicatorColor(.15f, .70f, .74f);
+
+    FLinearColor GetIndicatorColor(FName Filter, const FLinearColor& DefaultColor)
+    {
+        if (Filter == TEXT("Red"))   return FLinearColor(1.f, .06f, .04f);
+        if (Filter == TEXT("Green")) return FLinearColor(.1f, 1.f, .18f);
+        if (Filter == TEXT("White")) return FLinearColor::White;
+        if (Filter == TEXT("UV"))    return FLinearColor(.55f, .1f, 1.f);
+        if (Filter == TEXT("Blue"))  return FLinearColor(.08f, .35f, 1.f);
+        return DefaultColor;
+    }
+}
+
 AShipLightModule::AShipLightModule()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -33,12 +48,32 @@ AShipLightModule::AShipLightModule()
     RightRail = MakePart(TEXT("RightRail"), Track);
     LightStrip = MakePart(TEXT("ReceiverLight"), Carriage);
     LightStrip->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    auto MakeVisual = [&](FName Name, USceneComponent* Parent)
+    {
+        UStaticMeshComponent* Visual = CreateDefaultSubobject<UStaticMeshComponent>(Name);
+        Visual->SetupAttachment(Parent);
+        Visual->SetMobility(EComponentMobility::Movable);
+        Visual->SetCollisionProfileName(TEXT("NoCollision"));
+        Visual->SetGenerateOverlapEvents(false);
+        Visual->SetCanEverAffectNavigation(false);
+        return Visual;
+    };
+    // The rotor mesh includes its slope. Track adds the tilt only to the original collision pieces.
+    MovingVisual = MakeVisual(TEXT("MovingVisual"), Carriage);
+    FixedVisual = MakeVisual(TEXT("FixedVisual"), RootComponent);
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> Housing(TEXT("/Game/StudentShowcase/Display/MI_Pedestal.MI_Pedestal"));
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> Marker(TEXT("/Game/StudentShowcase/Display/MI_Teal.MI_Teal"));
     Block->SetMaterial(0,Housing.Object);
     Ramp->SetMaterial(0,Housing.Object);
     for (UStaticMeshComponent* Part : {LightStrip.Get(),LeftRail.Get(),RightRail.Get()}) Part->SetMaterial(0,Marker.Object);
     Contacts = CreateDefaultSubobject<UShipModulePhysics>(TEXT("SurfaceContacts"));
+}
+
+void AShipLightModule::PostRegisterAllComponents()
+{
+    Super::PostRegisterAllComponents();
+    if (MovingVisualMesh || FixedVisualMesh)
+        ConfigureVisuals();
 }
 
 void AShipLightModule::OnConstruction(const FTransform& Transform)
@@ -54,7 +89,6 @@ void AShipLightModule::ConfigureGeometry()
     const double HalfX = BlockSize.X * .5;
     LightStrip->SetRelativeLocation(FVector(HalfX + .5, 0, BlockSize.Z * .36));
     LightStrip->SetRelativeScale3D(FVector(1., BlockSize.Y * .65, 4.) / 100.);
-    LightStrip->SetVisibility(!bGuide);
     // Rotate the whole trough about local Z: +Y runs downhill towards the open exit.
     constexpr double Slope = 15.;
     const double Run = BlockSize.Y;
@@ -69,9 +103,21 @@ void AShipLightModule::ConfigureGeometry()
     }
     for (UStaticMeshComponent* Part : {Ramp.Get(),LeftRail.Get(),RightRail.Get()})
     {
-        Part->SetVisibility(bGuide);
         Part->SetCollisionEnabled(bGuide ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
     }
+    ConfigureVisuals();
+}
+
+void AShipLightModule::ConfigureVisuals()
+{
+    const bool bUseProxy = MovingVisualMesh == nullptr;
+    if (!bUseProxy || MovingVisual->GetStaticMesh())
+        Block->SetVisibility(bUseProxy);
+    MovingVisual->SetStaticMesh(MovingVisualMesh);
+    FixedVisual->SetStaticMesh(FixedVisualMesh);
+    LightStrip->SetVisibility(bUseProxy && !bGuide);
+    for (UStaticMeshComponent* Part : {Ramp.Get(), LeftRail.Get(), RightRail.Get()})
+        Part->SetVisibility(bUseProxy && bGuide);
 }
 
 void AShipLightModule::BeginPlay()
@@ -89,9 +135,21 @@ void AShipLightModule::BeginPlay()
 
 void AShipLightModule::ApplyColor(FName Color, const AShipSurvivor* Player)
 {
-    const FLinearColor Accent = Color.IsNone() || !Player ? FLinearColor(.15f,.70f,.74f) : Player->GetFilterColor();
+    const FLinearColor Accent = Color.IsNone() || !Player ? IdleIndicatorColor : Player->GetFilterColor();
 
     if (StripFinish) StripFinish->SetVectorParameterValue(TEXT("Color"),Accent);
+    if (MovingVisualMesh) SetIndicatorColor(GetIndicatorColor(Color, Accent), 1.f);
+}
+
+void AShipLightModule::SetIndicatorColor(FLinearColor LinearColor, float Intensity)
+{
+    const int32 Slot = MovingVisual->GetMaterialIndex(TEXT("Indicator"));
+    if (Slot == INDEX_NONE) return;
+    if (UMaterialInstanceDynamic* Indicator = MovingVisual->CreateDynamicMaterialInstance(Slot))
+    {
+        Indicator->SetVectorParameterValue(TEXT("IndicatorColor"), LinearColor);
+        Indicator->SetScalarParameterValue(TEXT("Intensity"), Intensity);
+    }
 }
 
 bool AShipLightModule::IsFaceLit(const AShipSurvivor& Player) const

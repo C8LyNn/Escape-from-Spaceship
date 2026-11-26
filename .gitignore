@@ -1,6 +1,7 @@
 # Unreal Engine – pliki generowane lokalnie (nie trafiają do repozytorium)
 Binaries/
 DerivedDataCache/
+__pycache__/
 Intermediate/
 Saved/
 Build/

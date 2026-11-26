@@ -35,7 +35,7 @@ def cases(world, check):
     digits = 'One Two Three Four Five Six Seven Eight'.split()
     for tag, item, scale in [('LAB-CHARGER', None, 1), ('LAB-BRIDGE', None, 2.4), ('LAB-FILTER-PAD', None, 1.5),
                             ('LAB-COLOR-LAMP', 'ColorLamp', 1.4), ('LAB-BATTERY', 'Battery', 3),
-                            ('LAB-CARD', 'Card', 1), ('LAB-NOTE', 'Note', 2.7), ('LAB-WHITE', 'FlashlightBattery', 2.7)]:
+                            ('LAB-CARD', 'Card', 1), ('LAB-NOTE', 'Note', 2.7), ('LAB-WHITE', 'FlashlightBattery', .9)]:
         fixture, = game.get_all_actors_with_tag(world, tag)
         comp = fixture.get_editor_property('Mesh')
         mesh = comp.static_mesh
@@ -83,11 +83,11 @@ def cases(world, check):
             check('The face of the note is visible in hand', held.get_up_vector().dot(to_camera) / to_camera.length() > .7)
 
     for station, pickup_name, item, scale in [('MECH-04', 'BP_PickupActor_Bandage_C', 'Bandage', 1.35),
-                                            ('MECH-03', 'BP_PickupActor_Flashlight_C', 'FlashlightBattery', 2.7)]:
+                                            ('MECH-03', 'BP_PickupActor_Flashlight_C', 'FlashlightBattery', .9)]:
         actor, = [a for a in game.get_all_actors_with_tag(world, station) if a.get_class().get_name() == pickup_name]
         pickup_type = actor.get_class()
         visual = actor.get_component_by_class(ue.StaticMeshComponent)
-        check(item + ' is enlarged on the original station', has_scale(visual, scale))
+        check(item + ' has the expected size on the original station', has_scale(visual, scale))
         point = ue.SystemLibrary.get_component_bounds(visual)[0]
         pawn.set_actor_location(ue.Vector(point.x, point.y + 85, home.z), False, True)
         yield .25

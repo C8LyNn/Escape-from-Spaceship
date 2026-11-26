@@ -46,6 +46,8 @@ Sprawdź wymiary modelu względem postaci 176 cm przed użyciem go w grze. Tabel
 
 ## Moduły sterowane światłem
 
+Modele paneli, prowadnicy, kieszeni, skrzyń i kuli znajdziesz w `Content/StatekFPP`. Zdjęcia z gry i pomiary pokazują także różnicę między widoczną a fizyczną szerokością toru. [Modele modułów i test w PIE](Docs/StudentShowcase/StatekFPP/README.md)
+
 W scenie testowej przy trzech sąsiednich panelach wybierz latarkę zagadkową. Czerwonym filtrem wysuniesz blok, a po odsunięciu wiązki możesz zaświecić drugi raz, aby go cofnąć. **C** zwęża wiązkę do jednego panelu, **V** pozwala objąć kilka z tego samego miejsca.
 
 - **Zielony** mocuje skrzynię dotykającą przodu modułu. Możesz stanąć na skrzyni, a **biały filtr** ją odczepia.

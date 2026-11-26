@@ -1,0 +1,930 @@
+{
+  "status": "PASS",
+  "baseline": false,
+  "shots": {
+    "01-panele-schowane": {
+      "file": "01-panele-schowane.jpg",
+      "sha256": "290d21a2745978c115d15b350bc6a32cc9fd2ebb23d54a1cd9c10bfd0b7292f3",
+      "camera_world_cm": [
+        -1280.0,
+        -3380.0,
+        136.15
+      ],
+      "state": {
+        "extensions_cm": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "02-panel-wysuniety": {
+      "file": "02-panel-wysuniety.jpg",
+      "sha256": "50fd4b7b67a7450e7c8da4c638f696c44febfccbf5ae3ee13c9c1d249c748f46",
+      "camera_world_cm": [
+        -1215.0,
+        -3574.0,
+        136.15
+      ],
+      "state": {
+        "moving_visual_delta_cm": [
+          0.0,
+          92.0,
+          0.0
+        ],
+        "block_delta_cm": [
+          0.0,
+          92.0,
+          0.0
+        ],
+        "fixed_visual_delta_cm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "indicator_linear_rgb_while_illuminated": [
+          1.0,
+          0.06,
+          0.04
+        ],
+        "intensity_while_illuminated": 1.0
+      }
+    },
+    "03-podloga-podniesiona": {
+      "file": "03-podloga-podniesiona.jpg",
+      "sha256": "a37d0c4c086e5a50bc183a7c394538430434bd2c08d3b2fb7253e790fdc64d5b",
+      "camera_world_cm": [
+        -1819.0,
+        -3484.0,
+        198.15
+      ],
+      "state": {
+        "moving_visual_delta_cm": [
+          0.0,
+          0.0,
+          100.0
+        ],
+        "block_delta_cm": [
+          0.0,
+          0.0,
+          100.0
+        ],
+        "fixed_visual_delta_cm": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "indicator_linear_rgb_while_illuminated": [
+          0.15,
+          0.7,
+          0.74
+        ],
+        "intensity_while_illuminated": 1.0
+      }
+    },
+    "04-prowadnica-po-obrocie": {
+      "file": "04-prowadnica-po-obrocie.jpg",
+      "sha256": "b6f6f79e8a3ae6e49483b670468afa0e5ec082724d4c9cfbe2f0a8584f7e2b12",
+      "camera_world_cm": [
+        -2810.0,
+        -3380.0,
+        498.15
+      ],
+      "state": {
+        "turns": 1,
+        "outlet_before": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "outlet_after": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "physical_outlet": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "pocket": "B",
+        "angle_deg": 90.0
+      }
+    },
+    "05-kula-w-torze": {
+      "file": "05-kula-w-torze.jpg",
+      "sha256": "aaec3f16d74298c9733bb044d608cd320cbb9e6b1fc7eb6e4bce62db7308558e",
+      "camera_world_cm": [
+        -3078.0,
+        -3520.0,
+        669.15
+      ],
+      "state": {
+        "center_world_cm": [
+          -3022.745,
+          -3740.0,
+          128.036
+        ],
+        "radius_cm": 19.0,
+        "distance_from_ramp_surface_minus_radius_cm": 0.0,
+        "cross_track_cm": -0.0,
+        "along_track_cm": -33.978,
+        "downhill_speed_cm_s": 29.589,
+        "simulating": true,
+        "visual_center_error_cm": 0.0
+      }
+    },
+    "06-przeswit-burt": {
+      "file": "06-przeswit-burt.jpg",
+      "sha256": "dde5c043743a84713eab202168af591f38c9349e5d28148676d58d71ad5de142",
+      "camera_world_cm": [
+        -3050.0,
+        -3740.0,
+        491.0
+      ],
+      "state": {
+        "view": "PIE, top down",
+        "line_vertical_lift_cm": 0.8,
+        "line_thickness_cm": 1.25,
+        "cyan_rendered_inner_rail_edges": {
+          "gap_cm": 46.0,
+          "linear_rgb": [
+            0.0,
+            1.0,
+            1.0
+          ],
+          "world_edge_endpoints_cm": [
+            [
+              [
+                -2946.6,
+                -3717.0,
+                147.87
+              ],
+              [
+                -3157.4,
+                -3717.0,
+                91.386
+              ]
+            ],
+            [
+              [
+                -2946.6,
+                -3763.0,
+                147.87
+              ],
+              [
+                -3157.4,
+                -3763.0,
+                91.386
+              ]
+            ]
+          ]
+        },
+        "orange_physics_inner_rail_edges": {
+          "gap_cm": 98.0,
+          "linear_rgb": [
+            1.0,
+            0.1599999964237213,
+            0.0
+          ],
+          "world_edge_endpoints_cm": [
+            [
+              [
+                -2945.435,
+                -3789.0,
+                148.233
+              ],
+              [
+                -3165.435,
+                -3789.0,
+                89.284
+              ]
+            ],
+            [
+              [
+                -2945.435,
+                -3691.0,
+                148.233
+              ],
+              [
+                -3165.435,
+                -3691.0,
+                89.284
+              ]
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "collision_settings": {
+    "original_sha256": "01377f918234a0418be86c951fa8e6ab2d1a485930d10b742699d583d8d2a5cf",
+    "current_sha256": "01377f918234a0418be86c951fa8e6ab2d1a485930d10b742699d583d8d2a5cf",
+    "active_components": 33
+  },
+  "local_lod0_mesh_bounds": {
+    "PanelWall_Face": {
+      "min_xyz_cm": [
+        -13.0,
+        -66.0,
+        -67.0
+      ],
+      "max_xyz_cm": [
+        13.0,
+        66.0,
+        67.0
+      ],
+      "size_xyz_cm": [
+        26.0,
+        132.0,
+        134.0
+      ]
+    },
+    "PanelWall_Frame": {
+      "min_xyz_cm": [
+        -15.5,
+        -70.0,
+        -74.0
+      ],
+      "max_xyz_cm": [
+        16.05,
+        70.0,
+        74.0
+      ],
+      "size_xyz_cm": [
+        31.55,
+        140.0,
+        148.0
+      ]
+    },
+    "PanelFloor_Face": {
+      "min_xyz_cm": [
+        -5.0,
+        -78.0,
+        -78.0
+      ],
+      "max_xyz_cm": [
+        5.0,
+        78.0,
+        78.0
+      ],
+      "size_xyz_cm": [
+        10.0,
+        156.0,
+        156.0
+      ]
+    },
+    "PanelFloor_Frame": {
+      "min_xyz_cm": [
+        -7.5,
+        -84.5,
+        -84.5
+      ],
+      "max_xyz_cm": [
+        6.08,
+        84.5,
+        84.5
+      ],
+      "size_xyz_cm": [
+        13.58,
+        169.0,
+        169.0
+      ]
+    },
+    "Guide_Rotor": {
+      "min_xyz_cm": [
+        -10.98,
+        -110.0,
+        -53.0
+      ],
+      "max_xyz_cm": [
+        92.497,
+        110.0,
+        53.0
+      ],
+      "size_xyz_cm": [
+        103.477,
+        220.0,
+        106.0
+      ]
+    },
+    "Guide_Mount": {
+      "min_xyz_cm": [
+        -24.0,
+        -46.0,
+        -48.0
+      ],
+      "max_xyz_cm": [
+        -10.92,
+        46.0,
+        46.0
+      ],
+      "size_xyz_cm": [
+        13.08,
+        92.0,
+        94.0
+      ]
+    },
+    "Guide_Pocket": {
+      "min_xyz_cm": [
+        0.0,
+        -50.0,
+        -53.0
+      ],
+      "max_xyz_cm": [
+        46.55,
+        50.0,
+        53.0
+      ],
+      "size_xyz_cm": [
+        46.55,
+        100.0,
+        106.0
+      ]
+    },
+    "CargoCrate": {
+      "min_xyz_cm": [
+        -36.0,
+        -36.0,
+        -36.0
+      ],
+      "max_xyz_cm": [
+        36.0,
+        36.0,
+        36.0
+      ],
+      "size_xyz_cm": [
+        72.0,
+        72.0,
+        72.0
+      ]
+    },
+    "ServiceBall": {
+      "min_xyz_cm": [
+        -19.0,
+        -19.0,
+        -19.0
+      ],
+      "max_xyz_cm": [
+        19.0,
+        19.0,
+        19.0
+      ],
+      "size_xyz_cm": [
+        38.0,
+        38.0,
+        38.0
+      ]
+    }
+  },
+  "guide_cm": {
+    "base_xyz": [
+      16.0,
+      220.0,
+      106.0
+    ],
+    "rail_inner_and_outer_planes": [
+      -27.0,
+      -23.0,
+      23.0,
+      27.0
+    ],
+    "visual_rail_gap": 46.0,
+    "visual_inner_edges_local": [
+      [
+        [
+          91.87,
+          -103.4,
+          -23.0
+        ],
+        [
+          35.386,
+          107.4,
+          -23.0
+        ]
+      ],
+      [
+        [
+          91.87,
+          -103.4,
+          23.0
+        ],
+        [
+          35.386,
+          107.4,
+          23.0
+        ]
+      ]
+    ],
+    "physics_rail_gap": 98.0,
+    "gap_difference": 52.0,
+    "ball_clearance_total": 8.0,
+    "rotation_radius": 121.586,
+    "visual_ramp_center_height": 44.08,
+    "physics_ramp_center_height": 45.063,
+    "mount_bottom_world_z": 32.0
+  },
+  "deck_z_cm": -14.0,
+  "folded_wall": {
+    "spacing_cm": [
+      140.0,
+      140.0
+    ],
+    "face_front_local_x": 13.0,
+    "frame_furthest_detail_local_x": 16.05,
+    "collider_front_local_x": 13.0,
+    "folded_floor_surface_z": -4.0
+  },
+  "pockets_cm": {
+    "A": {
+      "visual_pivot_world": [
+        -3050.0,
+        -3565.0,
+        60.14
+      ],
+      "visual_outward": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "projection_from_rotor": 175.0,
+      "visual_base_radial_bounds": [
+        125.0,
+        225.0
+      ],
+      "visual_mat_top_z": 66.54,
+      "visual_sill_top_z": 70.14,
+      "visual_stop_highest_z": 106.69,
+      "physics": {
+        "BASE": {
+          "radial_bounds": [
+            111.0,
+            211.0
+          ],
+          "top_z": -9.0
+        },
+        "SILL": {
+          "radial_bounds": [
+            108.5,
+            115.5
+          ],
+          "top_z": 8.0
+        },
+        "STOP": {
+          "radial_bounds": [
+            208.0,
+            216.0
+          ],
+          "top_z": 76.0
+        },
+        "LEFT": {
+          "radial_bounds": [
+            108.0,
+            214.0
+          ],
+          "top_z": 36.0
+        },
+        "RIGHT": {
+          "radial_bounds": [
+            108.0,
+            214.0
+          ],
+          "top_z": 36.0
+        }
+      },
+      "visual_minus_physics_cm": {
+        "floor_mat_top": 75.54,
+        "sill_top": 62.14,
+        "stop_highest": 30.69,
+        "floor_radial_center": 14.0
+      },
+      "pocket_to_sweep_clearance": 3.414
+    },
+    "B": {
+      "visual_pivot_world": [
+        -3225.0,
+        -3740.0,
+        60.14
+      ],
+      "visual_outward": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "projection_from_rotor": 175.0,
+      "visual_base_radial_bounds": [
+        125.0,
+        225.0
+      ],
+      "visual_mat_top_z": 66.54,
+      "visual_sill_top_z": 70.14,
+      "visual_stop_highest_z": 106.69,
+      "physics": {
+        "BASE": {
+          "radial_bounds": [
+            111.0,
+            211.0
+          ],
+          "top_z": -9.0
+        },
+        "SILL": {
+          "radial_bounds": [
+            108.5,
+            115.5
+          ],
+          "top_z": 8.0
+        },
+        "STOP": {
+          "radial_bounds": [
+            208.0,
+            216.0
+          ],
+          "top_z": 76.0
+        },
+        "LEFT": {
+          "radial_bounds": [
+            108.0,
+            214.0
+          ],
+          "top_z": 36.0
+        },
+        "RIGHT": {
+          "radial_bounds": [
+            108.0,
+            214.0
+          ],
+          "top_z": 36.0
+        }
+      },
+      "visual_minus_physics_cm": {
+        "floor_mat_top": 75.54,
+        "sill_top": 62.14,
+        "stop_highest": 30.69,
+        "floor_radial_center": 14.0
+      },
+      "pocket_to_sweep_clearance": 3.414
+    },
+    "C": {
+      "visual_pivot_world": [
+        -3050.0,
+        -3915.0,
+        60.14
+      ],
+      "visual_outward": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "projection_from_rotor": 175.0,
+      "visual_base_radial_bounds": [
+        125.0,
+        225.0
+      ],
+      "visual_mat_top_z": 66.54,
+      "visual_sill_top_z": 70.14,
+      "visual_stop_highest_z": 106.69,
+      "physics": {
+        "BASE": {
+          "radial_bounds": [
+            111.0,
+            211.0
+          ],
+          "top_z": -9.0
+        },
+        "SILL": {
+          "radial_bounds": [
+            108.5,
+            115.5
+          ],
+          "top_z": 8.0
+        },
+        "STOP": {
+          "radial_bounds": [
+            208.0,
+            216.0
+          ],
+          "top_z": 76.0
+        },
+        "LEFT": {
+          "radial_bounds": [
+            108.0,
+            214.0
+          ],
+          "top_z": 36.0
+        },
+        "RIGHT": {
+          "radial_bounds": [
+            108.0,
+            214.0
+          ],
+          "top_z": 36.0
+        }
+      },
+      "visual_minus_physics_cm": {
+        "floor_mat_top": 75.54,
+        "sill_top": 62.14,
+        "stop_highest": 30.69,
+        "floor_radial_center": 14.0
+      },
+      "pocket_to_sweep_clearance": 3.414
+    },
+    "D": {
+      "visual_pivot_world": [
+        -2875.0,
+        -3740.0,
+        60.14
+      ],
+      "visual_outward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "projection_from_rotor": 175.0,
+      "visual_base_radial_bounds": [
+        125.0,
+        225.0
+      ],
+      "visual_mat_top_z": 66.54,
+      "visual_sill_top_z": 70.14,
+      "visual_stop_highest_z": 106.69,
+      "physics": {
+        "BASE": {
+          "radial_bounds": [
+            111.0,
+            211.0
+          ],
+          "top_z": -9.0
+        },
+        "SILL": {
+          "radial_bounds": [
+            108.5,
+            115.5
+          ],
+          "top_z": 8.0
+        },
+        "STOP": {
+          "radial_bounds": [
+            208.0,
+            216.0
+          ],
+          "top_z": 76.0
+        },
+        "LEFT": {
+          "radial_bounds": [
+            108.0,
+            214.0
+          ],
+          "top_z": 36.0
+        },
+        "RIGHT": {
+          "radial_bounds": [
+            108.0,
+            214.0
+          ],
+          "top_z": 36.0
+        }
+      },
+      "visual_minus_physics_cm": {
+        "floor_mat_top": 75.54,
+        "sill_top": 62.14,
+        "stop_highest": 30.69,
+        "floor_radial_center": 14.0
+      },
+      "pocket_to_sweep_clearance": 3.414
+    }
+  },
+  "visual_components": {
+    "ShipLightModule_0/MovingVisual": {
+      "mesh": "SM_PanelWall_Face",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_0/FixedVisual": {
+      "mesh": "SM_PanelWall_Frame",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_1/MovingVisual": {
+      "mesh": "SM_PanelWall_Face",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_1/FixedVisual": {
+      "mesh": "SM_PanelWall_Frame",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_2/MovingVisual": {
+      "mesh": "SM_PanelWall_Face",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_2/FixedVisual": {
+      "mesh": "SM_PanelWall_Frame",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_3/MovingVisual": {
+      "mesh": "SM_PanelFloor_Face",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_3/FixedVisual": {
+      "mesh": "SM_PanelFloor_Frame",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_4/MovingVisual": {
+      "mesh": "SM_Guide_Rotor",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_4/FixedVisual": {
+      "mesh": "SM_Guide_Mount",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_4/StatekPocketA": {
+      "mesh": "SM_Guide_Pocket",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_4/StatekPocketB": {
+      "mesh": "SM_Guide_Pocket",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_4/StatekPocketC": {
+      "mesh": "SM_Guide_Pocket",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipLightModule_4/StatekPocketD": {
+      "mesh": "SM_Guide_Pocket",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipFixture_9/StatekShell": {
+      "mesh": "SM_CargoCrate",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ShipFixture_10/StatekShell": {
+      "mesh": "SM_CargoCrate",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "StaticMeshActor_521/StatekShell": {
+      "mesh": "SM_ServiceBall",
+      "collision": "NO_COLLISION",
+      "visible": true,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "world": "/Game/StudentShowcase/Maps/UEDPIE_0_L_ModelsAndMechanics_Showcase.L_ModelsAndMechanics_Showcase",
+  "engine": "5.8.4-58902052+++UE5+Release-5.8",
+  "physical_roll_to_B": {
+    "ball_center": [
+      -3227.337,
+      -3740.0,
+      10.0
+    ],
+    "floor_z": -9.0,
+    "speed_cm_s": 3.596
+  },
+  "live_filter_indicator": {
+    "Red": {
+      "rgb": [
+        1.0,
+        0.06,
+        0.04
+      ],
+      "intensity": 1.0
+    },
+    "Green": {
+      "rgb": [
+        0.1,
+        1.0,
+        0.18
+      ],
+      "intensity": 1.0
+    },
+    "White": {
+      "rgb": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "intensity": 1.0
+    },
+    "UV": {
+      "rgb": [
+        0.55,
+        0.1,
+        1.0
+      ],
+      "intensity": 1.0
+    },
+    "Blue": {
+      "rgb": [
+        0.08,
+        0.35,
+        1.0
+      ],
+      "intensity": 1.0
+    },
+    "lamp_off": {
+      "rgb": [
+        0.15,
+        0.7,
+        0.74
+      ],
+      "intensity": 1.0,
+      "lamp_on": false
+    }
+  }
+}

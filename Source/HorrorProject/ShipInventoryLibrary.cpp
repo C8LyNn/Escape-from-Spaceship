@@ -370,7 +370,7 @@ double UShipInventoryLibrary::StockPickupScale(const UClass* Item)
     {
         const FName Package = Item->GetOutermost()->GetFName();
         if (Package == BandagePackage) return 1.35;
-        if (Package == BatteryPackage) return 2.7;
+        if (Package == BatteryPackage) return 0.9;
     }
     return 1.;
 }
